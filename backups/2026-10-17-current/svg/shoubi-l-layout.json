@@ -1,0 +1,8 @@
+{
+  "asset": "shoubi-l.svg",
+  "viewBox": "0 0 22 44",
+  "leftArm": { "leftPercent": 6.259, "topPercent": 28.841 },
+  "rightArm": { "leftPercent": 65.574, "topPercent": 28.841 },
+  "leftHand": { "leftPercent": 0, "topPercent": 49.784 },
+  "rightHand": { "leftPercent": 71.833, "topPercent": 49.42 }
+}
