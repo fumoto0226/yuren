@@ -60,6 +60,9 @@ const art = vm.runInContext(`(() => {
       fill:garmentPath(redTeeSource,warp),
       neck:garmentPath(redTeeNeckSource,warp),
     },
+    looseTop:{fill:looseTopPath(looseTopSource,warp),
+      sides:looseTopPath(looseTopSidesSource,warp),
+      hem:looseTopPath(looseTopHemSource,warp)},
     pants: {
       fill: garmentPath(pantsSource,warp),
       sides: garmentPath(pantsSidesSource,warp),
@@ -78,6 +81,7 @@ const art = vm.runInContext(`(() => {
       shoulders: Object.values(jumpsuitShoulderSources).map(source =>
         garmentPath(source,warp)).join(' '), legs,
     },
+    skirt:skirtPath(warp,100),
     shoes: legs[0],
     gloves: {
       fill: transformPath(hand.handFill,arms[0].handPoint),
@@ -90,6 +94,9 @@ const svg = (viewBox, content) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">\n${content}\n</svg>\n`;
 const line = (d, width=1) => `<path d="${d}" fill="none" stroke="black" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
 const wideWidths=vm.runInContext('Array.from({length:32},(_,i)=>wideLegExtraWidth(i))',context);
+const shortFlares=vm.runInContext('kneeShortFlares',context);
+const flaredShortWidths=flare=>vm.runInContext(
+  `Array.from({length:32},(_,i)=>wideShortsExtraWidth(i,${flare}))`,context);
 const looseWideWidths=vm.runInContext('Array.from({length:32},(_,i)=>wideLegExtraWidth(i,10.5))',context);
 const tube = (shape, color, sleeveEnd=0,extraWidths=[],flareAmount=2.5) => [
   ...shape.hose.map(({ d, width },index) => {
@@ -143,6 +150,19 @@ const teeThumbnail=(color,sleeveEnd,flare,id)=>svg('-2 53 104 63',[
   line(art.tee.sides),line(art.tee.top),
   line(id==='red-tee'?art.redTee.neck:art.tee.neck),line(art.tee.hem),
 ].join('\n'));
+const looseTopThumbnail=id=>{
+  const style=vm.runInContext(`teeStyles['${id}']`,context);
+  const widths=vm.runInContext(`Array.from({length:32},(_,i)=>sleeveExtraWidth(i,${style.sleeveEnd},${style.flare}))`,context);
+  return svg('-6 53 112 64',[
+    ...art.tee.arms.map((arm,index)=>clippedTube(arm,
+      limbCuff(arm,style.sleeveEnd,style.flare),style.color,
+      `${id}-sleeve-${index}`,0,true,widths)
+      +line(vm.runInContext(`cuffPath(thumbArm,${style.sleeveEnd},${style.flare})`,
+        Object.assign(context,{thumbArm:arm})))),
+    `<path d="${art.looseTop.fill}" fill="${style.color}"/>`,
+    line(art.looseTop.sides),line(art.tee.top),line(art.tee.neck),line(art.looseTop.hem),
+  ].join('\n'));
+};
 const jumpsuitThumbnail=(color,id)=>svg('11 53 79 134',[
   `<defs><mask id="${id}-chest"><rect x="-200" y="-200" width="500" height="600" fill="white"/><path d="${art.jumpsuit.chest}" fill="black"/></mask></defs>`,
   ...art.jumpsuit.legs.map((leg,index)=>clippedTube(leg,
@@ -181,7 +201,35 @@ const widePantsThumbnail=(id,flare,widths,viewBox)=>{
 ].join('\n'));
 };
 
+// Flared knee shorts: the same widening tube the editor paints, cut at the
+// knee. The skirt adds the joined middle and leaves out the crotch line.
+const flaredShortsThumbnail=(id,color,flare)=>{
+  const widths=flaredShortWidths(flare);
+  return svg('9 109 84 56',[
+    ...art.pants.legs.map((leg,index)=>clippedTube(leg,
+      limbCuff(leg,19,widths[19]),color,`${id}-leg-${index}`,0,true,widths)
+      +line(vm.runInContext(`cuffPath(thumbLeg,19,${widths[19]},.5)`,
+        Object.assign(context,{thumbLeg:leg})))),
+    `<path d="${art.pants.fill}" fill="${color}"/>`,
+    line(art.pants.sides),line(art.pants.crotch),line(art.pants.waist),
+  ].join('\n'));
+};
+
+const frogColors=vm.runInContext('milkFrogColors',context);
+const frogBelly=vm.runInContext('torsoGarmentPath(milkFrogBellySource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))',context);
+const frogPaths=[...original.matchAll(/<path\b[^>]*\/>/g)].map(m=>m[0]);
+const frogIcon=frogPaths.map((tag,index)=>{
+  if(index===0||index>=12)return '';
+  let node=tag.replace(/fill="#C5C5C5"/g,`fill="${frogColors.skin}"`);
+  if(!/\bfill=/.test(node))node=node.replace('<path ','<path fill="none" ');
+  if(index===8)node=node.replace('fill="white"',`fill="${frogColors.eye}"`);
+  if(index===2)node+=`<path d="${frogBelly}" fill="${frogColors.belly}"/>`;
+  return node;
+}).join('')+(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'');
 const thumbnails = {
+  'loose-tee':looseTopThumbnail('loose-tee'),
+  'loose-long-sleeve':looseTopThumbnail('loose-long-sleeve'),
+  'milk-frog':svg('-2 9 104 188',frogIcon),
   'yellow-hat': svg('55 6 39 62',art.yellowHat.map(d=>
     `<path d="${d}" fill="#ffe047" stroke="black" stroke-width="1" stroke-linejoin="round"/>`).join('\n')),
   scarf: svg('5 44 94 39', art.scarf.map(d =>
@@ -241,6 +289,9 @@ const thumbnails = {
     `<path d="${art.pants.fill}" fill="#ee31ac"/>`,
     line(art.pants.sides),line(art.pants.crotch),line(art.pants.waist),
   ].join('\n')),
+  'wide-shorts': flaredShortsThumbnail('wide-shorts',art.colors.wideShorts,
+    shortFlares['wide-shorts']),
+  skirt: svg('13 109 69 49',`<path d="${art.skirt}" fill="${art.colors.skirt}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`),
   'orange-shorts': svg('11 109 80 56', [
     ...art.pants.legs.map((leg,index) => clippedTube(leg,
       limbCuff(leg,19),'#eb8135',`orange-leg-${index}`)
@@ -283,8 +334,9 @@ const thumbnails = {
 
 for (const [name, content] of Object.entries(thumbnails)) {
   const filename=['blue-vest','green-vest','yellow-hat','yellow-tee',
-    'patched-tee','red-tee','coral-tee','red-triangle','red-shorts',
-    'pink-shorts','orange-shorts','black-shorts','red-thong','wide-pants',
+    'patched-tee','red-tee','coral-tee','loose-tee','loose-long-sleeve','red-triangle','red-shorts',
+    'pink-shorts','orange-shorts','black-shorts','wide-shorts','skirt','milk-frog',
+    'red-thong','wide-pants',
     'navy-jumpsuit','loose-wide-pants','brown-boots']
     .includes(name)?name:`decoration-${name}`;
   fs.writeFileSync(path.join(root, `svg/${filename}.svg`), content);

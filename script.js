@@ -16,6 +16,24 @@ const saveMotionButton = document.querySelector('[data-action="save-motion"]');
 const motionHint = document.querySelector('[data-motion-hint]');
 const decorationTabs = [...document.querySelectorAll('[data-category]')];
 const SVG_NS = 'http://www.w3.org/2000/svg';
+// The notch in the head's top-left corner is the mouth: `corner` is where
+// its two edges meet, `jaw` is the point of the lower one and `spike` the
+// point of the upper one. Opening it swings the lower jaw about the corner.
+const JAW = {corner: [40.1394, 29.4449], jaw: [32.3001, 23.0968],
+  spike: [44.2249, 11.0386]};
+// The notch as drawn spans 63.5 degrees. `mouth` runs from -1, shut, through
+// 0, the drawing untouched, to 1, wide open; the limits below are how far
+// the notch opens or closes in total, and shutting it is the bigger move.
+// MOUTH_SHUT is that 63.5 degrees exactly, so -1 brings the two jaws onto
+// each other rather than past one another.
+const MOUTH_SHUT = 1.108, MOUTH_OPEN = .5;
+// Both lips move, the top one far less: a jaw working alone looks hinged,
+// while a little counter-swing above reads as speech. The upper lip is
+// almost twice as long as the jaw, so even this small share of the angle
+// carries its point about a third as far.
+const UPPER_LIP_SHARE = .16;
+// Aqua glass dome, as in the reference art (svg/toukui.svg).
+const HELMET_GLASS = '#A3EDFF', HELMET_GLASS_OPACITY = '0.45';
 const decorationCatalog = {
   skin: [{ id: 'milk-frog', name: '奶鱼', icon: './svg/milk-frog.svg' }],
   suit: [],
@@ -267,7 +285,36 @@ function buildWarp(config) {
     return lerp(mapTorsoX(x, y), armX, leaveShoulder);
   };
 
+  // The mouth is the notch in the top-left of the head: the lower jaw runs
+  // from the corner of the notch out to its own point, and the head's top
+  // spike is the upper jaw. Talking swings the lower jaw away about that
+  // corner, which widens the notch exactly as the drawing already shows it
+  // part-open. It happens here, in the character's own coordinates, so the
+  // head fill, its outline and anything else drawn on the head all open
+  // together and the head slider scales the result like any other feature.
+  const mouth = mouthPose();
+  const swing = -mouth * (mouth >= 0 ? MOUTH_OPEN : MOUTH_SHUT);
+  // The two shares add up to the whole swing, so the limits above stay the
+  // angle the notch actually opens or closes by.
+  const lowerSwing = swing / (1 + UPPER_LIP_SHARE);
+  const upperSwing = -UPPER_LIP_SHARE * lowerSwing;
+  const openJaw = (x, y) => {
+    // The lower jaw is the prong left of the notch. Its fade has to reach
+    // well below the corner, or the jaw's outer edge stays pinned while its
+    // point swings and the prong buckles into a nub instead of swinging.
+    // The upper lip is the spike to the right, and its own fade has to die
+    // out quickly along the head's right edge, which is not part of it.
+    const lower = smooth((40 - y) / 15) * smooth((JAW.corner[0] - x) / 2.5);
+    const upper = smooth((24 - y) / 14) * smooth((54 - x) / 10);
+    const angle = lower * lowerSwing + upper * upperSwing;
+    if (!angle) return [x, y];
+    const [hx, hy] = JAW.corner, cos = Math.cos(angle), sin = Math.sin(angle);
+    return [hx + (x - hx) * cos - (y - hy) * sin,
+      hy + (x - hx) * sin + (y - hy) * cos];
+  };
+
   return (x, y, role) => {
+    if (swing && role === 'head') [x, y] = openJaw(x, y);
     // Helmet: keep the lower rim locked to the shoulders, but spread the blend
     // over most of the lower arc. The earlier short 46–56 blend produced a
     // visible kink at small sizes; this longer transition preserves curvature.
@@ -950,8 +997,11 @@ function legGeometry(side, warp) {
     -kneeAlong*kneeAlong));
   // Walking bends both knees towards travel. Dragging retains the usual
   // outward bend; the walking influence fades in/out with the motion.
-  const walking = dragPoses.find(p => p.part === side + 'Leg')?.walkBlend || 0;
-  const kneeDirection = left ? 1 - 2 * walking : 1;
+  // `walkBlend` is signed: positive walks right, negative walks left, and
+  // only the leg whose knee would otherwise bend against the travel flips.
+  const walkBlend = dragPoses.find(p => p.part === side + 'Leg')?.walkBlend || 0;
+  const walking = Math.abs(walkBlend);
+  const kneeDirection = 1 - 2 * (left ? Math.max(0, walkBlend) : Math.max(0, -walkBlend));
   const knee={x:hip.x+tangent.x*kneeAlong+normal.x*kneeHeight*kneeDirection,
     y:hip.y+tangent.y*kneeAlong+normal.y*kneeHeight*kneeDirection};
   const kneeFrame={t:tangent,n:normal};
@@ -984,6 +1034,18 @@ function legGeometry(side, warp) {
   const walkingAngle = -.16 * smooth(footLift / 8);
   const shoeFrame=frame(lerp(lifted?lerp(heelAngle,carriedAngle,lift):heelAngle,
     walkingAngle, walking));
+  // Both feet point the way the character walks. The art splays each foot
+  // outwards, so the trailing one aims backwards during a rightward walk and
+  // the two shoes pile into one blob where the legs cross. A motion can turn
+  // a foot through `toeTurn`: at 1 the shoe is mirrored about the ankle, so
+  // its toe leads instead of trailing. Turning it is a reflection, not a
+  // rotation — a real foot pivoting this way foreshortens on the way round,
+  // which is why the walk only turns a foot while it is up in the air.
+  const toeTurn = dragPoses.find(p => p.part === side + 'Leg')?.toeTurn || 0;
+  const toeDirection = 1 - 2 * toeTurn;
+  const footFrame = toeTurn
+    ? {t:shoeFrame.t,n:{x:shoeFrame.n.x*toeDirection,y:shoeFrame.n.y*toeDirection}}
+    : shoeFrame;
   const start=frame(rotation+sign*bendAngle),
     end=frame(lifted?lerp(heelAngle,shinDelta,lift):heelAngle);
   if(!lifted){
@@ -1000,8 +1062,8 @@ function legGeometry(side, warp) {
     // or the seam meets the boot at an angle and the contours fail to join.
     const corner=p=>{
       const across=p.x-restAnkle.x,along=p.y-restAnkle.y;
-      return {x:ankle.x+shoeFrame.t.x*along+shoeFrame.n.x*across*sign,
-        y:ankle.y+shoeFrame.t.y*along+shoeFrame.n.y*across*sign};
+      return {x:ankle.x+footFrame.t.x*along+footFrame.n.x*across*sign,
+        y:ankle.y+footFrame.t.y*along+footFrame.n.y*across*sign};
     };
     const outer=corner(rest[2]),inner=corner(rest[3]);
     end.n={x:(outer.x-inner.x)/(2*ankleWidth),
@@ -1138,12 +1200,12 @@ function legGeometry(side, warp) {
           -poseBlend*smooth((global-.88)/.12),smooth(i/3))});
   }
   const scale=ankleWidth/5.7;
-  const boot = (along,across) => offset(ankle,shoeFrame,along*scale,across*scale);
+  const boot = (along,across) => offset(ankle,footFrame,along*scale,across*scale);
   const w=ankleWidth/scale;
-  const innerAnkle=offset(ankle,shoeFrame,0,-ankleWidth);
+  const innerAnkle=offset(ankle,footFrame,0,-ankleWidth);
   const ankleDrop=lifted?0:2.8*smooth((restLength-length)/restLength);
-  const loweredInnerAnkle=offset(ankle,shoeFrame,ankleDrop,-ankleWidth);
-  const bootOuter=offset(ankle,shoeFrame,0,ankleWidth);
+  const loweredInnerAnkle=offset(ankle,footFrame,ankleDrop,-ankleWidth);
+  const bootOuter=offset(ankle,footFrame,0,ankleWidth);
   const dynamicBoot=[
     [boot(3,w),boot(3,w+13),boot(9,w+13)],
     [boot(12,w+13),boot(12,w+5),boot(12,-w+2)],
@@ -1186,8 +1248,8 @@ function legGeometry(side, warp) {
       ?Math.pow(Math.max(0,Math.min(1,(source.y-182.179)/8)),.6):0;
     const point=warp(source.x-rightHeelTuck*heelWeight,source.y,'legs');
     const x=point.x-restAnkle.x,y=point.y-restAnkle.y;
-    return {x:ankle.x+shoeFrame.t.x*y+shoeFrame.n.x*x*sign,
-      y:ankle.y+shoeFrame.t.y*y+shoeFrame.n.y*x*sign};
+    return {x:ankle.x+footFrame.t.x*y+footFrame.n.x*x*sign,
+      y:ankle.y+footFrame.t.y*y+footFrame.n.y*x*sign};
   };
   const morph=(reference,moving)=>({
     x:lerp(reference.x,moving.x,bootBlend),
@@ -2323,36 +2385,66 @@ function startSpring() {
 // track starts and ends at the rest pose, so playing one always hands the
 // character back exactly as it was found.
 // Two alternating steps per cycle; entry/exit are outside the repeated gait.
-function createWalkRightMotion(cycles = 2) {
-  const cycleDuration = 1.32, entry = .32, exit = .38;
-  const samplesPerCycle = 80;
+// `direction` is 1 for walking right and -1 for walking left: the leftward
+// walk is the rightward one mirrored, which swaps the two legs and the two
+// arms over as well as negating every sideways value. Everything that knows
+// about the travel direction — the knee bend, which foot turns its toe —
+// follows the sign of `walkBlend`, so nothing else needs a second copy.
+function createWalkMotion(direction = 1, cycles = 2) {
+  // Timings and amplitudes come from a recorded single step: the swing lasts
+  // about .6s and the foot then stays planted about .9s, and the foot travels
+  // some 60 units from behind the hip to well in front of it. The earlier
+  // 28-unit stride over a 1.32s cycle read as shuffling on the spot.
+  const cycleDuration = 1.15, entry = .3, exit = .36;
+  const samplesPerCycle = 90;
   const tracks = Object.fromEntries(
     ['leftLeg', 'rightLeg', 'leftHand', 'rightHand', 'head'].map(part => [part, []]));
   const ease = t => t * t * (3 - 2 * t);
+  // Measured ceiling: a leg pose beyond about 40 units starts carrying the
+  // hips along with it (48 shifts them by 7), which would turn walking in
+  // place into a slide. With the 16-unit stance offset that caps the swing
+  // at 24 either side of it, and it is the stride the recorded step reaches
+  // before the body itself begins to travel.
+  const back = 24, front = 24, lift = 15, closingLift = 9;
+  // Walking right leaves the left toe trailing; walking left it is the right
+  // one. That foot is the one mirrored for the walk, and the one given the
+  // lifted closing step so it can turn back in the air.
+  const turningLeg = direction > 0 ? 'leftLeg' : 'rightLeg';
   const foot = phase => {
     phase = ((phase % 1) + 1) % 1;
     // Swing occupies 40% of the stride. The remaining 60% is support:
     // the planted foot travels backwards relative to the walking body.
     if (phase < .4) {
       const t = phase / .4;
-      return [-14 + 28 * ease(t), -11 * Math.sin(Math.PI * t) ** 2];
+      // The recorded foot hangs high until roughly 60% through the swing and
+      // only then reaches for the ground, so the peak sits late, not mid-air.
+      return [-back + (back + front) * ease(t),
+        -lift * Math.sin(Math.PI * t ** 1.3) ** 2];
     }
-    return [14 - 28 * (phase - .4) / .6, 0];
+    return [front - (back + front) * (phase - .4) / .6, 0];
+  };
+  const mirror = poses => direction > 0 ? poses : {
+    leftLeg: [-poses.rightLeg[0], poses.rightLeg[1]],
+    rightLeg: [-poses.leftLeg[0], poses.leftLeg[1]],
+    leftHand: [-poses.rightHand[0], poses.rightHand[1]],
+    rightHand: [-poses.leftHand[0], poses.leftHand[1]],
+    head: [-poses.head[0], poses.head[1]],
   };
   const gait = phase => {
     const left = foot(phase), right = foot(phase + .5);
     const arm = Math.cos(2 * Math.PI * (phase - .2));
-    return {
+    return mirror({
       // Narrow the wide resting stance before walking. Both feet then
       // follow the same forward swing instead of opening out sideways.
       leftLeg: [16 + left[0], left[1]],
       rightLeg: [-16 + right[0], right[1]],
-      leftHand: [-9 * arm, -2 - 2 * arm],
-      rightHand: [9 * arm, -2 + 2 * arm],
+      // A longer stride carries more arm with it.
+      leftHand: [-14 * arm, -3 - 3 * arm],
+      rightHand: [14 * arm, -3 + 3 * arm],
       // Weight drops just after contact and rises over the supporting leg.
-      head: [4 + 1.5 * Math.sin(phase * 2 * Math.PI),
-        -3 + 1.5 * Math.cos(4 * Math.PI * (phase - .43))],
-    };
+      head: [4 + 2 * Math.sin(phase * 2 * Math.PI),
+        -3 + 2 * Math.cos(4 * Math.PI * (phase - .43))],
+    });
   };
   const add = (time, poses, weight = 1) => {
     for (const [part, values] of Object.entries(poses)) {
@@ -2360,26 +2452,282 @@ function createWalkRightMotion(cycles = 2) {
         ...values.map(value => Number((value * weight).toFixed(6))), 0]);
     }
   };
-  for (let i = 0; i < 16; i++) add(entry * i / 16, gait(0), ease(i / 16));
+  // Entry and exit keep the gait running while its amplitude grows and
+  // fades. Holding gait(0) instead left the right foot, which is exactly at
+  // rest on that phase, standing still for the whole .45s exit — a visible
+  // freeze on one leg. Running the phase on means both feet keep moving and
+  // the last step simply shrinks until it is the resting stance again.
+  for (let i = 0; i < 16; i++) {
+    add(entry * i / 16, gait((i / 16 - 1) * entry / cycleDuration), ease(i / 16));
+  }
   for (let i = 0; i <= cycles * samplesPerCycle; i++) {
     add(entry + i * cycleDuration / samplesPerCycle, gait(i / samplesPerCycle));
   }
+  const gaitEnd = entry + cycles * cycleDuration;
   for (let i = 1; i <= 20; i++) {
-    add(entry + cycles * cycleDuration + exit * i / 20, gait(0), 1 - ease(i / 20));
+    const u = i / 20;
+    const poses = gait(u * exit / cycleDuration);
+    const scaled = Object.fromEntries(Object.entries(poses).map(([part, values]) =>
+      [part, values.map(value => value * (1 - ease(u)))]));
+    // The closing step lifts the left foot clear of the ground, outside the
+    // fading amplitude, so it can turn back to its resting direction in the
+    // air rather than pivoting while flat on the floor.
+    scaled[turningLeg][1] -= closingLift * Math.sin(Math.PI * u) ** 2;
+    add(entry + cycles * cycleDuration + exit * u, scaled);
   }
+  // The art splays both feet outwards, so walking right leaves the left toe
+  // pointing backwards and the two shoes merge into a blob wherever the legs
+  // cross. Turn that foot to face the travel direction for the walk and give
+  // it back afterwards. Turning mirrors the shoe, which foreshortens as it
+  // goes round, so both turns are timed onto a foot that is in the air: the
+  // first swing on the way in, the lifted closing step on the way out.
+  // Within that first swing the turn waits until the foot has passed the
+  // other leg and is on its way down — turning it the moment it leaves the
+  // ground reads as the foot starting out backwards and correcting itself.
+  const swing = .4 * cycleDuration;
+  const walkToe = {
+    [turningLeg]: [[0,0], [entry + .5 * swing, 0], [entry + .82 * swing, 1],
+      [gaitEnd + .15 * exit, 1], [gaitEnd + .7 * exit, 0],
+      [gaitEnd + exit, 0]],
+  };
   return {
-    id: 'walk-right',
-    name: `向右走路（${cycles * 2}步）`,
-    duration: entry + cycles * cycleDuration + exit,
-    walkBlend: [[0,0], [entry,1], [entry + cycles * cycleDuration,1],
-      [entry + cycles * cycleDuration + exit,0]],
+    id: direction > 0 ? 'walk-right' : 'walk-left',
+    name: `${direction > 0 ? '向右' : '向左'}走路（${cycles * 2}步）`,
+    duration: gaitEnd + exit,
+    // Signed: the knees bend the way the character travels.
+    walkBlend: [[0,0], [entry,direction], [gaitEnd,direction],
+      [gaitEnd + exit,0]],
+    walkToe,
+    // Entry ramp, repeated gait, closing step. See `loops` below.
+    loops: [{start: entry, end: gaitEnd, cycle: cycleDuration}],
     eased: true,
     tracks,
   };
 }
 
+// Talking is the jaw opening and shutting on syllables, not an even flutter:
+// the beat comes from unequal openings and unequal gaps, with a longer one
+// at the end of each phrase where a speaker draws breath. The head keeps a
+// small lean for as long as the character is talking and nods along inside
+// each phrase, which has to be the same nod every phrase so the repeated
+// section joins cleanly.
+// Default speech: four syllables of unequal size, then a breath.
+// [how wide, how long it is held, how long the mouth then stays shut]
+const TALK_SYLLABLES = [[.95,.06,.05], [.5,.04,.05], [.85,.07,.05], [.45,.04,.24]];
+// Head movement inside one phrase, as offsets in seconds from its start.
+const TALK_NOD = [[0,0,0], [.21,1,-1.2], [.43,-1,.8], [.64,1,-1.2], [.86,-.8,.6]];
+
+// One builder for every talking motion. The mouth and the head work the
+// same way each time; a variant changes the rhythm of the speech, how the
+// character holds itself, and what the hands do. `hands` is sampled across
+// the phrase rather than keyframed, so a gesture only has to be written as
+// a function of where it is in the phrase — and because it is read from the
+// phrase, it repeats exactly, which is what the repeated section needs.
+function createTalkMotion({id = 'talk', name = '说话', phrases = 2,
+    syllables = TALK_SYLLABLES, nod = TALK_NOD, lean = [1.5, -1],
+    hands, handSamples = 18} = {}) {
+  const entry = .22, exit = .3, rise = .06, fall = .06;
+  const phrase = syllables.reduce((total, [, hold, gap]) =>
+    total + rise + hold + fall + gap, 0);
+  const round = value => Number(value.toFixed(6));
+  // Which syllable is being sounded at this point in the phrase and how
+  // loudly, 0 through the gaps: gestures beat on this, so a hand lands with
+  // the voice instead of on some rhythm of its own, and a gesture can take
+  // turns between the hands by looking at the syllable's number.
+  const voiceAt = phase => {
+    let at = ((phase % 1) + 1) % 1 * phrase;
+    for (let index = 0; index < syllables.length; index++) {
+      const [, hold, gap] = syllables[index];
+      const span = rise + hold + fall + gap;
+      if (at < span) {
+        const sounded = rise + hold + fall;
+        return {index,
+          level: at >= sounded ? 0 : Math.sin(Math.PI * at / sounded) ** 2};
+      }
+      at -= span;
+    }
+    return {index: syllables.length - 1, level: 0};
+  };
+  // The mouth is read linearly by the player, so these keyframes are the
+  // shape of each syllable exactly: ramp open, hold, ramp shut, wait.
+  // Between syllables it goes to -1, properly shut, rather than back to the
+  // part-open notch of the drawing: the character is only drawn that way
+  // standing idle, and shutting it is what makes the talking read.
+  const SHUT = -1;
+  const mouth = [[0,0], [entry, SHUT]];
+  const head = [[0,0,0,0]];
+  const tracks = {head};
+  if (hands) tracks.leftHand = [], tracks.rightHand = [];
+  for (let i = 0; i < phrases; i++) {
+    let at = entry + i * phrase;
+    for (const [open, hold, gap] of syllables) {
+      mouth.push([round(at + rise), open], [round(at + rise + hold), open],
+        [round(at + rise + hold + fall), SHUT]);
+      at += rise + hold + fall + gap;
+      mouth.push([round(at), SHUT]);
+    }
+    for (const [offset, x, y] of nod) {
+      head.push([round(entry + i * phrase + offset),
+        round(lean[0] + x), round(lean[1] + y), 0]);
+    }
+  }
+  const speaking = entry + phrases * phrase;
+  // Lean in before the first syllable and settle afterwards.
+  head.splice(1, 0, [entry, lean[0], lean[1], 0]);
+  head.push([round(speaking), lean[0], lean[1], 0],
+    [round(speaking + exit), 0, 0, 0]);
+  mouth.push([round(speaking + exit), 0]);
+  if (hands) {
+    // The gesture is sampled on one even grid that runs through the entry
+    // and the exit as well, with its amplitude growing and fading there —
+    // the same shape the walk uses. Ramping straight from rest to the first
+    // pose instead leaves one long steep segment at each end of the
+    // repeated section, and the spline reads its tangent from it: the last
+    // phrase then sags a couple of units early and no longer matches the
+    // first.
+    const ease = t => t * t * (3 - 2 * t);
+    const step = phrase / handSamples;
+    const lead = Math.max(1, Math.round(entry / step));
+    const tail = Math.max(1, Math.round(exit / step));
+    // Rest at the very start, in case the grid's first sample lands later:
+    // before its first keyframe a track holds that keyframe's value, which
+    // would have the hands already part way up at time zero.
+    const samples = [[0, 0, 0]];
+    for (let k = lead; k >= 1; k--) {
+      samples.push([entry - k * step, -k / handSamples, ease(1 - k / lead)]);
+    }
+    for (let i = 0; i < phrases; i++) {
+      for (let sample = 0; sample < handSamples; sample++) {
+        samples.push([entry + (i + sample / handSamples) * phrase,
+          sample / handSamples, 1]);
+      }
+    }
+    for (let k = 0; k <= tail; k++) {
+      samples.push([speaking + k * step, k / handSamples, 1 - ease(k / tail)]);
+    }
+    samples.push([speaking + exit, 0, 0]);
+    for (const [time, phase, weight] of samples) {
+      if (time < 0 || time > speaking + exit) continue;
+      const sounding = voiceAt(phase);
+      const pose = hands(((phase % 1) + 1) % 1, sounding.level, sounding.index);
+      for (const part of ['leftHand', 'rightHand']) {
+        tracks[part].push([round(time), round(pose[part][0] * weight),
+          round(pose[part][1] * weight), 0]);
+      }
+    }
+  }
+  return {
+    id,
+    name,
+    duration: round(speaking + exit),
+    eased: true,
+    mouth,
+    tracks,
+    // Lean in, repeat the phrase, settle back.
+    loops: [{start: entry, end: round(speaking), cycle: round(phrase)}],
+  };
+}
+
+// Every motion is built the same way: something to step into it, a section
+// that repeats, and something to finish on. `loops` marks each repeated
+// section as {start, end, cycle} in seconds — `cycle` is the length of one
+// repetition, and `end - start` is always a whole number of them. To make a
+// motion run longer, repeat its sections rather than stretching the whole
+// thing: `extendMotionLoops(motion, 2)` adds two more turns/steps/squats to
+// each section and leaves the entry and the ending exactly as they are.
+// A motion with a staggered handover, such as the two hands taking turns,
+// lists one section per part, in time order.
+function extendMotionLoops(motion, repeats = 1) {
+  if (repeats < 1 || !motion.loops?.length) return motion;
+  const sections = [...motion.loops].sort((a, b) => a.start - b.start);
+  const EPS = 1e-9;
+  const extendTrack = track => {
+    const out = [];
+    let shift = 0, cursor = -Infinity;
+    for (const {end, cycle} of sections) {
+      out.push(...track.filter(key => key[0] > cursor && key[0] <= end + EPS)
+        .map(key => [key[0] + shift, ...key.slice(1)]));
+      // The section repeats exactly, so its last cycle is the copy to add.
+      // A track that holds still across the section has no keyframes here
+      // and simply lasts longer, which is what holding still means.
+      const lastCycle = track.filter(key =>
+        key[0] > end - cycle + EPS && key[0] <= end + EPS);
+      for (let i = 1; i <= repeats; i++) {
+        out.push(...lastCycle.map(key =>
+          [key[0] + shift + i * cycle, ...key.slice(1)]));
+      }
+      shift += repeats * cycle;
+      cursor = end;
+    }
+    out.push(...track.filter(key => key[0] > cursor)
+      .map(key => [key[0] + shift, ...key.slice(1)]));
+    return out;
+  };
+  const added = repeats * sections.reduce((total, s) => total + s.cycle, 0);
+  const extended = {
+    ...motion,
+    duration: motion.duration + added,
+    tracks: Object.fromEntries(Object.entries(motion.tracks)
+      .map(([part, track]) => [part, extendTrack(track)])),
+    loops: sections.map(section => {
+      const grown = {...section, end: section.end + repeats * section.cycle};
+      return grown;
+    }),
+  };
+  if (motion.walkBlend) extended.walkBlend = extendTrack(motion.walkBlend);
+  if (motion.mouth) extended.mouth = extendTrack(motion.mouth);
+  if (motion.walkToe) {
+    extended.walkToe = Object.fromEntries(Object.entries(motion.walkToe)
+      .map(([part, track]) => [part, extendTrack(track)]));
+  }
+  // Later sections start after the earlier ones have grown.
+  let moved = 0;
+  for (const section of extended.loops) {
+    section.start += moved;
+    section.end += moved;
+    moved += repeats * section.cycle;
+  }
+  return extended;
+}
+
 const motionLibrary = [
-  createWalkRightMotion(2),
+  createWalkMotion(1, 2),
+  createWalkMotion(-1, 2),
+  createTalkMotion({phrases: 2}),
+  // Making a point: the left hand swings up and across in front of the
+  // chest and stays there, bobbing on each syllable, while the other hand
+  // stays down. Taken from a recording of the same gesture made with the
+  // right hand: it crossed to about 50 units past the body's middle, held
+  // around 18 up, and beat between 7 and 31 as the character spoke. The
+  // beat comes from `voice`, so the hand rises with the mouth rather than
+  // on a rhythm of its own.
+  createTalkMotion({
+    id: 'talk-gesture',
+    name: '抬左手比划',
+    lean: [1, -1.5],
+    nod: [[0,0,0], [.21,1.4,-1.6], [.43,-1.2,1], [.64,1.4,-1.6], [.86,-1,.8]],
+    hands: (phase, voice) => ({
+      // A slow drift underneath, so the hand is never simply parked
+      // between beats.
+      leftHand: [50 - 3 * Math.cos(2 * Math.PI * phase), -19 - 12 * voice],
+      rightHand: [0, 0],
+    }),
+  }),
+  // Spreading both hands: a slower, three-syllable phrase, the hands opening
+  // out and back once across it and the head tipping with them. Both hands
+  // pull on the torso, so moving them together keeps it where it is.
+  createTalkMotion({
+    id: 'talk-shrug',
+    name: '摊手说话',
+    syllables: [[.9,.09,.06], [.55,.06,.06], [.95,.1,.3]],
+    lean: [0, -2],
+    nod: [[0,0,0], [.3,.6,-1.4], [.6,-.6,.9], [.9,.4,-.6]],
+    hands: phase => {
+      const swell = .5 - .5 * Math.cos(2 * Math.PI * phase);
+      const out = 30 + 14 * swell, up = 14 + 10 * swell;
+      return {leftHand: [-out, -up], rightHand: [out, -up]};
+    },
+  }),
   {
     id: 'wave',
     name: '打招呼',
@@ -2388,13 +2736,19 @@ const motionLibrary = [
     tracks: {
       // The arm comes down along the arc it went up, but takes its time over
       // it: matching the speed of the raise read as a drop.
-      rightHand: [[0,0,0],[.08,12,-55],[.18,6,-106],[.33,-32,-104],[.5,16,-108],
-        [.66,-30,-105],[.82,16,-108],[.98,-24,-106],[1.12,4,-108],[1.26,12,-62],
+      // The loop below repeats .34–.98, so those keyframes have to be exactly
+      // one wave apart: every left extreme is the same pose, as is every
+      // right one. They used to drift a couple of units and a repeat would
+      // have shown a small jump at the seam.
+      rightHand: [[0,0,0],[.08,12,-55],[.18,6,-106],[.34,-30,-105],[.5,16,-108],
+        [.66,-30,-105],[.82,16,-108],[.98,-30,-105],[1.12,4,-108],[1.26,12,-62],
         [1.38,9,-24],[1.46,2,-6],[1.5,0,0]],
       // The wrist does the waving; a wider sweep would swing the hips and
       // drag the planted feet with them.
       head: [[0,0,0],[.2,1,-1],[1.1,1,-1],[1.4,0,0]],
     },
+    // Raise the arm, wave, bring it down. One wave is .32s.
+    loops: [{start: .34, end: .98, cycle: .32}],
   },
   {
     id: 'hand-circles',
@@ -2439,6 +2793,11 @@ const motionLibrary = [
         [3.36,-5,-3],[3.7,3,7],[4.02,-5,-3],[4.56,0,-1],
         [4.76,0,0]],
     },
+    // Each hand has its own repeated section, one turn (.66s) long: the
+    // right hand's, then the left hand's. Extending both keeps the handover
+    // between them intact.
+    loops: [{start: .45, end: 1.77, cycle: .66},
+      {start: 2.7, end: 4.02, cycle: .66}],
   },
   {
     id: 'squat-circle',
@@ -2465,6 +2824,8 @@ const motionLibrary = [
         [2.95,-20,22],[3.03,-14,39],[3.13,0,46],[3.22,14,39],
         [3.3,20,22],[3.37,14,5],[3.44,0,-2],[3.6,-8,0],[3.78,0,0]],
     },
+    // Lean in, five times round the ring, straighten up. One ring is .64s.
+    loops: [{start: .57, end: 3.13, cycle: .64}],
   },
   {
     id: 'squat-sway',
@@ -2503,6 +2864,9 @@ const motionLibrary = [
         [2.11,11,30],[2.23,32,-2],
         [2.4,26,18],[2.53,5,28],[2.7,1,6],[2.87,0,-5],[3.06,0,0]],
     },
+    // Sink into the first squat, repeat the left-right pair, stand up.
+    // One pair of squats is 1.13s.
+    loops: [{start: .54, end: 1.67, cycle: 1.13}],
   },
 ];
 let motionFrame = 0;
@@ -2566,6 +2930,9 @@ function applyMotionPose(motion, at) {
       dragPoses.push(pose);
     }
     pose.walkBlend = motion.walkBlend ? sampleTrack(motion.walkBlend, at, false)[0] : 0;
+    pose.toeTurn = motion.walkToe?.[part]
+      ? sampleTrack(motion.walkToe[part], at, false)[0] : 0;
+    pose.mouth = motion.mouth ? sampleTrack(motion.mouth, at, false)[0] : 0;
     [pose.x, pose.y, pose.angle] = sampleTrack(track, at, motion.eased);
   }
 }
@@ -2965,6 +3332,14 @@ function createDragLayer() {
   window.addEventListener('blur', () => releaseDrag());
 
   svg.appendChild(dragLayer);
+}
+
+// Where the mouth is: -1 shut, 0 exactly as drawn, 1 wide open. Motions
+// carry it; a plain drag never does, so dragging the character around
+// leaves the mouth as the artwork has it.
+function mouthPose() {
+  const posed = dragPoses.find(pose => pose.mouth);
+  return posed ? posed.mouth : 0;
 }
 
 function update() {
@@ -3707,10 +4082,12 @@ fetch('./svg/参考.svg')
     paths.filter(path=>path.index>=0 && path.role!=='arms').forEach(path=>{
       const part=[9,10].includes(path.index)?'body':'head';
       if(path.index===0) {
-        // Composite the helmet over the page grey once, so its foreground
-        // layer also masks outlines underneath while keeping the same tint.
-        path.node.setAttribute('fill','#798d92');
-        path.node.removeAttribute('fill-opacity');
+        // The shell is a tinted glass visor, not a solid cap: keep the
+        // reference's aqua and let the page show through it. It had been
+        // flattened to one opaque colour mixed with the old grey page, which
+        // read as a dark helmet and broke outright once the page turned pink.
+        path.node.setAttribute('fill',HELMET_GLASS);
+        path.node.setAttribute('fill-opacity',HELMET_GLASS_OPACITY);
       }
       if(path.index===0||path.index===1) partLayers.head.insertBefore(path.node,headFill);
       else partLayers[part].appendChild(path.node);

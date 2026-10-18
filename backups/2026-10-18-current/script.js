@@ -7,9 +7,20 @@ const randomButton = document.querySelector('[data-action="randomize"]');
 const helmetButton = document.querySelector('[data-action="helmet"]');
 const exportButton = document.querySelector('[data-action="export"]');
 const decorationOptions = document.querySelector('[data-decoration-options]');
+const motionList = document.querySelector('[data-motions]');
+const recordedList = document.querySelector('[data-recorded-motions]');
+const motionTabs = [...document.querySelectorAll('[data-motion-tab]')];
+const motionPanes = [...document.querySelectorAll('[data-motion-pane]')];
+const recordButton = document.querySelector('[data-action="record"]');
+const saveMotionButton = document.querySelector('[data-action="save-motion"]');
+const motionHint = document.querySelector('[data-motion-hint]');
 const decorationTabs = [...document.querySelectorAll('[data-category]')];
 const SVG_NS = 'http://www.w3.org/2000/svg';
+// Aqua glass dome, as in the reference art (svg/toukui.svg).
+const HELMET_GLASS = '#A3EDFF', HELMET_GLASS_OPACITY = '0.45';
 const decorationCatalog = {
+  skin: [{ id: 'milk-frog', name: '奶鱼', icon: './svg/milk-frog.svg' }],
+  suit: [],
   helmet: [
     { id: 'plain', name: '普通帽子', icon: './svg/toukui.svg' },
     { id: 'yellow-hat', name: '黄色宽檐帽', icon: './svg/yellow-hat.svg' },
@@ -25,6 +36,8 @@ const decorationCatalog = {
     { id: 'red-tee', name: '红色体恤', icon: './svg/red-tee.svg' },
     { id: 'red-triangle', name: '红色三角衣服', icon: './svg/red-triangle.svg', sleeveless: true },
     { id: 'coral-tee', name: '红色短袖', icon: './svg/coral-tee.svg' },
+    { id: 'loose-tee', name: '宽松T恤', icon: './svg/loose-tee.svg' },
+    { id: 'loose-long-sleeve', name: '宽松长袖上衣', icon: './svg/loose-long-sleeve.svg' },
   ],
   pants: [
     { id: 'plain', name: '紧身裤', icon: './svg/decoration-pants.svg' },
@@ -34,6 +47,8 @@ const decorationCatalog = {
     { id: 'pink-shorts', name: '粉色短裤', icon: './svg/pink-shorts.svg' },
     { id: 'orange-shorts', name: '橙色短裤', icon: './svg/orange-shorts.svg' },
     { id: 'black-shorts', name: '黑色短裤', icon: './svg/black-shorts.svg' },
+    { id: 'wide-shorts', name: '阔腿短裤', icon: './svg/wide-shorts.svg' },
+    { id: 'skirt', name: '灰青色裙子', icon: './svg/skirt.svg' },
     { id: 'red-thong', name: '红色丁字裤', icon: './svg/red-thong.svg' },
     { id: 'wide-pants', name: '蓝色裤子', icon: './svg/wide-pants.svg' },
     { id: 'loose-wide-pants', name: '几何拼贴阔腿裤', icon: './svg/loose-wide-pants.svg' },
@@ -56,7 +71,8 @@ const decorationColors = {
   yellowHat: '#ffe047',
   navyJumpsuit: '#303578', redTee: '#d80c0c', blackShorts: '#100b0d',
   redThong: '#c60000', redTriangle: '#c52323', coralTee: '#f26d58',
-  widePants: '#3e4a72',
+  looseTee:'#a9b89c', looseLongSleeve:'#859eb4',
+  widePants: '#3e4a72', wideShorts: '#547985', skirt: '#547985',
 };
 // Shared fabric definition for the live garment and its catalog thumbnail.
 const fabricMotifs = [
@@ -148,9 +164,13 @@ function widePantsPaint() {
   return selectedDecorations.pants==='loose-wide-pants'
     ?'url(#loose-pants-fabric)':decorationColors.widePants;
 }
-const selectedDecorations = { helmet: 'plain', neck: null, shirt: null, pants: null,
+const selectedDecorations = { skin:null, suit:null, helmet: 'plain', neck: null, shirt: null, pants: null,
   outerwear: null, shoes: null, gloves: null };
-let activeDecorationCategory = 'helmet';
+let activeDecorationCategory = 'skin';
+const milkFrogColors={skin:'#e9ab24',belly:'#f6d69e',eye:'#369b4b'};
+const milkFrogBellySource='M47 78C36 78 34 96 35.5 108C36.4 117 40 119 47 119C54 119 57.6 117 58.5 108C60 96 58 78 47 78Z';
+function skinColor(){return selectedDecorations.skin==='milk-frog'?milkFrogColors.skin:'#C5C5C5';}
+let bellyPatch,bellyClip;
 
 const clamp01 = value => Math.max(0, Math.min(1, value));
 const smooth = value => {
@@ -930,8 +950,12 @@ function legGeometry(side, warp) {
     +length*length)/(2*length);
   const kneeHeight=Math.sqrt(Math.max(0,thighLength*thighLength
     -kneeAlong*kneeAlong));
-  const knee={x:hip.x+tangent.x*kneeAlong+normal.x*kneeHeight,
-    y:hip.y+tangent.y*kneeAlong+normal.y*kneeHeight};
+  // Walking bends both knees towards travel. Dragging retains the usual
+  // outward bend; the walking influence fades in/out with the motion.
+  const walking = dragPoses.find(p => p.part === side + 'Leg')?.walkBlend || 0;
+  const kneeDirection = left ? 1 - 2 * walking : 1;
+  const knee={x:hip.x+tangent.x*kneeAlong+normal.x*kneeHeight*kneeDirection,
+    y:hip.y+tangent.y*kneeAlong+normal.y*kneeHeight*kneeDirection};
   const kneeFrame={t:tangent,n:normal};
   const bendAngle = Math.min(.25,Math.max(0,restLength-length)/restLength*.45);
   const rotation = Math.atan2(tangent.y,tangent.x)
@@ -958,7 +982,10 @@ function legGeometry(side, warp) {
   // switching between them rotated the whole boot about its ankle and moved
   // the toe even once the ankle itself had stopped jumping.
   const carriedAngle=shinDelta+sign*ANKLE_DROP*smooth(bendAngle/.22);
-  const shoeFrame=frame(lifted?lerp(heelAngle,carriedAngle,lift):heelAngle);
+  const footLift = Math.max(0, -(dragPoses.find(p => p.part === side + 'Leg')?.y || 0));
+  const walkingAngle = -.16 * smooth(footLift / 8);
+  const shoeFrame=frame(lerp(lifted?lerp(heelAngle,carriedAngle,lift):heelAngle,
+    walkingAngle, walking));
   const start=frame(rotation+sign*bendAngle),
     end=frame(lifted?lerp(heelAngle,shinDelta,lift):heelAngle);
   if(!lifted){
@@ -1613,7 +1640,29 @@ const teeSource = `M26.1046 56.4524L34.2 56.18
 const redTeeSource = teeSource.replace(
   'C39 62.2 43 65.3 47 65.3C51 65.3 55.5 61.5 59.6 55.32',
   'C39 57.5 43 58.8 47 58.8C51 58.8 55.5 57.2 59.6 55.32');
+const looseTopSidesSource=`M27.478 ${LEFT_ARMPIT_Y}
+  C26 80 25.8 101 26 112
+  M67.5459 ${RIGHT_ARMPIT_Y}C68.2 80 68.4 101 68 112`;
+const looseTopHemSource='M26 112L68 112';
+const looseTopSource=`M26.1046 56.4524L34.2 56.18
+  C39 62.2 43 65.3 47 65.3C51 65.3 55.5 61.5 59.6 55.32
+  L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}
+  C68.2 80 68.4 101 68 112L26 112
+  C25.8 101 26 80 27.478 ${LEFT_ARMPIT_Y}Z`;
+function looseTopPath(source,warp) {
+  // Side fabric lies outside the torso's original bounds, but follows the
+  // torso rather than the arm occupying those source coordinates.
+  return transformPath(source,(x,y)=>{
+    const role=y<56?'head':'body';
+    return applyDragPose(warp(x,y,role),x,y,role,warp);
+  });
+}
+function sleeveExtraWidth(index,end,flare) {
+  return index<end?flare*smooth(index/(end-1)):0;
+}
 const teeStyles = {
+  'loose-tee':{color:decorationColors.looseTee,sleeveEnd:22,flare:9,loose:true},
+  'loose-long-sleeve':{color:decorationColors.looseLongSleeve,sleeveEnd:31,flare:7,loose:true},
   'yellow-tee': {color:decorationColors.yellowTee,sleeveEnd:20,flare:2.5},
   'patched-tee': {color:decorationColors.patchedTee,sleeveEnd:20,flare:2.5},
   'red-tee': {color:decorationColors.redTee,sleeveEnd:20,flare:2.5},
@@ -1667,12 +1716,19 @@ function updateTorsoMaterial(node,warp) {
   const colors={plain:decorationColors.pants,
     'wide-pants':decorationColors.widePants,'loose-wide-pants':decorationColors.widePants,
     'pink-shorts':decorationColors.pinkShorts,'orange-shorts':decorationColors.orangeShorts,
-    'black-shorts':decorationColors.blackShorts,'red-shorts':decorationColors.redShorts,
+    'black-shorts':decorationColors.blackShorts,'wide-shorts':decorationColors.wideShorts,
+    'red-shorts':decorationColors.redShorts,
     jumpsuit:decorationColors.jumpsuit,'navy-jumpsuit':decorationColors.navyJumpsuit};
   const color=colors[selectedDecorations.pants];
   const patterned=selectedDecorations.pants==='loose-wide-pants';
-  if(torsoMaterial.upperSkin)torsoMaterial.upperSkin.style.display=patterned?'':'none';
-  if(!color){node.setAttribute('fill','#C5C5C5');return;}
+  if(torsoMaterial.upperSkin){
+    torsoMaterial.upperSkin.style.display=patterned?'':'none';
+    // The torso above the waistband is bare skin, so it follows the chosen
+    // skin color instead of the default grey.
+    torsoMaterial.upperSkin.setAttribute('fill',skinColor());
+  }
+  torsoMaterial.upper?.forEach(stop=>stop.setAttribute('stop-color',skinColor()));
+  if(!color){node.setAttribute('fill',skinColor());return;}
   const point=x=>applyDragPose(warp(x,110.5,'body'),x,110.5,'body',warp);
   const a=point(27.7),b=point(65.9),span=Math.hypot(b.x-a.x,b.y-a.y)||1;
   const normal={x:-(b.y-a.y)/span,y:(b.x-a.x)/span};
@@ -1699,11 +1755,32 @@ function torsoGarmentPath(source,warp,followHead=false) {
     return applyDragPose(warp(x,y,role),x,y,role,warp);
   });
 }
+// One continuous skirt follows the waist, never either individual leg.
+// Shorten its drop during a squat so the hem stays above the planted feet.
+function skirtPath(warp,legs=100) {
+  const at=x=>applyDragPose(warp(x,110.5,'body'),x,110.5,'body',warp);
+  const a=at(27.7),b=at(65.9);
+  const width=Math.hypot(b.x-a.x,b.y-a.y)||1;
+  const right={x:(b.x-a.x)/width,y:(b.y-a.y)/width};
+  const down={x:-right.y,y:right.x};
+  const compression=smooth(bodyCompression(warp).amount/legCompressionLimit(warp).limit);
+  const drop=(25+legs*.17)*(1-.6*compression);
+  const flare=width*.3;
+  const point=(p,x,y)=>`${clean(p.x+right.x*x+down.x*y)} ${clean(p.y+right.y*x+down.y*y)}`;
+  return `M${point(a,0,0)}L${point(b,0,0)}L${point(b,flare,drop)}`
+    +`Q${point(a,width/2,drop+4)} ${point(a,-flare,drop)}Z`;
+}
 function wearingJumpsuit() {
   return selectedDecorations.pants==='jumpsuit'
     ||selectedDecorations.pants==='navy-jumpsuit';
 }
 const widePantFlares = {'wide-pants':5.5,'loose-wide-pants':10.5};
+// Same knee-length cut as the fitted shorts, widening toward its open hem.
+// How much each flared knee cut widens towards its hem.
+const kneeShortFlares={'wide-shorts':10};
+function wideShortsExtraWidth(index,flare=10) {
+  return flare*smooth(Math.min(index,19)/19);
+}
 function wideLegExtraWidth(index,flare=5.5) {
   return flare*smooth((index/31-.04)/.9);
 }
@@ -1834,14 +1911,14 @@ function placeOuterwearOverNeckline() {
 }
 function pantsCoverThigh() {
   return wearingJumpsuit()||!!widePantFlares[selectedDecorations.pants]
-    ||['plain','pink-shorts','orange-shorts','black-shorts'].includes(selectedDecorations.pants);
+    ||['plain','pink-shorts','orange-shorts','black-shorts','wide-shorts'].includes(selectedDecorations.pants);
 }
 function buttOutlineOpacity(side) {
   // The raised trouser or shorts leg supplies this hip contour itself. The
   // body's curved outline must not run across the fabric at the seam.
   // A continuous fabric surface has no visible torso/thigh join, even
   // below the promotion threshold. Briefs retain their actual skin boundary.
-  if(pantsCoverThigh()||(selectedDecorations.pants&&legInFront[side])) return 0;
+  if(selectedDecorations.pants==='skirt'||pantsCoverThigh()||(selectedDecorations.pants&&legInFront[side])) return 0;
   const drag=dragPoses.find(pose=>pose.part===side+'Leg');
   return smooth(((drag?Math.hypot(drag.x,drag.y):0)-2)/10);
 }
@@ -1965,6 +2042,26 @@ function applyArmOcclusion(side,rootBlack,skinRoot) {
   if(sleeveless&&!armInFront[side]) skinRoot.setAttribute('mask',mask);
   else skinRoot.removeAttribute('mask');
 }
+function topCoversPants() {
+  const id=selectedDecorations.shirt;
+  return !!id&&!['plain','blue-vest','red-tee','red-triangle'].includes(id);
+}
+function updateGarmentOrder() {
+  const upper=['shirt','shirtSides','vest','vestSides','vestNeck',
+    'vestTopLeft','vestTopRight','vestShoulderLeft','vestShoulderRight',
+    'tee','teeSides','patchblue','patchred','patchstitches','redTriangle','waist'];
+  const lower=['jumpsuit','jumpsuitSides','jumpsuitCrotch','jumpsuitChestOutline',
+    'pants','pantsSides','pantsCrotch','shorts','shortsSides','shortsCrotch',
+    'pantsWaist','redThong','skirt','jumpsuitNeckLeft','jumpsuitNeckRight',
+    'jumpsuitShoulderLeft','jumpsuitShoulderRight'];
+  for(const key of (topCoversPants()?[...lower,...upper]:[...upper,...lower])) {
+    const node=garmentPaths[key];
+    if(node?.parentNode===outfitOverlay)outfitOverlay.appendChild(node);
+  }
+  // Moving calves still cover the fabric in a fold; the jacket remains in
+  // neckOverlay above both the loose shirt and trousers.
+  for(const {calfOverlay} of legParts)outfitOverlay.appendChild(calfOverlay);
+}
 function updatePartOrder() {
   if (!partLayers.body) return;
   const sleeveless=hasSleevelessOutfit();
@@ -2026,7 +2123,7 @@ function updatePartOrder() {
   // garment below a resting arm, but it still reads as covering the shoulder
   // because applyArmOcclusion masks the arm's root away there — the look never
   // depended on the garment sitting on top, only on that mask.
-  if(sleeveless) for(const part of ordered)
+  if(sleeveless||selectedDecorations.pants==='skirt') for(const part of ordered)
     if(part.endsWith('Hand')) svg.appendChild(partLayers[part]);
   // The neck accessory stays above everything the arm has not reached. Once an
   // arm swings up past the shoulder line it passes in front of the scarf, so
@@ -2035,6 +2132,11 @@ function updatePartOrder() {
   for(const part of ordered)
     if(part.endsWith('Hand')&&armRaised[part.replace('Hand','')])
       svg.appendChild(partLayers[part]);
+  // While the pointer actually holds a leg, that whole leg -- thigh, shin and
+  // foot share one group -- rides above everything, hands included, so the
+  // limb being moved is never cut by an arm.
+  if(activeDrag?.pose.part.endsWith('Leg'))
+    svg.appendChild(partLayers[activeDrag.pose.part]);
   // Invisible handles follow the same order as the visible parts.
   if(dragLayer) {
     ordered.forEach(part=>[...dragLayer.children].filter(node=>
@@ -2218,6 +2320,514 @@ function startSpring() {
   springFrame = requestAnimationFrame(springStep);
 }
 
+// Motion library. A motion is a set of per-part tracks of
+// [second, x, y, angle] samples, in the same units a drag produces. Every
+// track starts and ends at the rest pose, so playing one always hands the
+// character back exactly as it was found.
+// Two alternating steps per cycle; entry/exit are outside the repeated gait.
+function createWalkRightMotion(cycles = 2) {
+  // Timings and amplitudes come from a recorded single step: the swing lasts
+  // about .6s and the foot then stays planted about .9s, and the foot travels
+  // some 60 units from behind the hip to well in front of it. The earlier
+  // 28-unit stride over a 1.32s cycle read as shuffling on the spot.
+  const cycleDuration = 1.5, entry = .4, exit = .45;
+  const samplesPerCycle = 90;
+  const tracks = Object.fromEntries(
+    ['leftLeg', 'rightLeg', 'leftHand', 'rightHand', 'head'].map(part => [part, []]));
+  const ease = t => t * t * (3 - 2 * t);
+  // Measured ceiling: a leg pose beyond about 40 units starts carrying the
+  // hips along with it (48 shifts them by 7), which would turn walking in
+  // place into a slide. With the 16-unit stance offset that caps the swing
+  // at 24 either side of it, and it is the stride the recorded step reaches
+  // before the body itself begins to travel.
+  const back = 24, front = 24, lift = 15;
+  const foot = phase => {
+    phase = ((phase % 1) + 1) % 1;
+    // Swing occupies 40% of the stride. The remaining 60% is support:
+    // the planted foot travels backwards relative to the walking body.
+    if (phase < .4) {
+      const t = phase / .4;
+      // The recorded foot hangs high until roughly 60% through the swing and
+      // only then reaches for the ground, so the peak sits late, not mid-air.
+      return [-back + (back + front) * ease(t),
+        -lift * Math.sin(Math.PI * t ** 1.3) ** 2];
+    }
+    return [front - (back + front) * (phase - .4) / .6, 0];
+  };
+  const gait = phase => {
+    const left = foot(phase), right = foot(phase + .5);
+    const arm = Math.cos(2 * Math.PI * (phase - .2));
+    return {
+      // Narrow the wide resting stance before walking. Both feet then
+      // follow the same forward swing instead of opening out sideways.
+      leftLeg: [16 + left[0], left[1]],
+      rightLeg: [-16 + right[0], right[1]],
+      // A longer stride carries more arm with it.
+      leftHand: [-14 * arm, -3 - 3 * arm],
+      rightHand: [14 * arm, -3 + 3 * arm],
+      // Weight drops just after contact and rises over the supporting leg.
+      head: [4 + 2 * Math.sin(phase * 2 * Math.PI),
+        -3 + 2 * Math.cos(4 * Math.PI * (phase - .43))],
+    };
+  };
+  const add = (time, poses, weight = 1) => {
+    for (const [part, values] of Object.entries(poses)) {
+      tracks[part].push([Number(time.toFixed(6)),
+        ...values.map(value => Number((value * weight).toFixed(6))), 0]);
+    }
+  };
+  // Entry and exit keep the gait running while its amplitude grows and
+  // fades. Holding gait(0) instead left the right foot, which is exactly at
+  // rest on that phase, standing still for the whole .45s exit — a visible
+  // freeze on one leg. Running the phase on means both feet keep moving and
+  // the last step simply shrinks until it is the resting stance again.
+  for (let i = 0; i < 16; i++) {
+    add(entry * i / 16, gait((i / 16 - 1) * entry / cycleDuration), ease(i / 16));
+  }
+  for (let i = 0; i <= cycles * samplesPerCycle; i++) {
+    add(entry + i * cycleDuration / samplesPerCycle, gait(i / samplesPerCycle));
+  }
+  for (let i = 1; i <= 20; i++) {
+    add(entry + cycles * cycleDuration + exit * i / 20,
+      gait(i / 20 * exit / cycleDuration), 1 - ease(i / 20));
+  }
+  return {
+    id: 'walk-right',
+    name: `向右走路（${cycles * 2}步）`,
+    duration: entry + cycles * cycleDuration + exit,
+    walkBlend: [[0,0], [entry,1], [entry + cycles * cycleDuration,1],
+      [entry + cycles * cycleDuration + exit,0]],
+    eased: true,
+    tracks,
+  };
+}
+
+const motionLibrary = [
+  createWalkRightMotion(2),
+  {
+    id: 'wave',
+    name: '打招呼',
+    duration: 1.5,
+    eased: true,
+    tracks: {
+      // The arm comes down along the arc it went up, but takes its time over
+      // it: matching the speed of the raise read as a drop.
+      rightHand: [[0,0,0],[.08,12,-55],[.18,6,-106],[.33,-32,-104],[.5,16,-108],
+        [.66,-30,-105],[.82,16,-108],[.98,-24,-106],[1.12,4,-108],[1.26,12,-62],
+        [1.38,9,-24],[1.46,2,-6],[1.5,0,0]],
+      // The wrist does the waving; a wider sweep would swing the hips and
+      // drag the planted feet with them.
+      head: [[0,0,0],[.2,1,-1],[1.1,1,-1],[1.4,0,0]],
+    },
+  },
+  {
+    id: 'hand-circles',
+    name: '左右手转圈',
+    duration: 4.76,
+    eased: true,
+    // Both hands turn the same way round. The right one reaches out to its
+    // side and carries straight on up over the top; the left one picks the
+    // turn up at the bottom of the circle, where the arm already hangs, so
+    // its first move is the turn itself rather than a quarter in the other
+    // direction to get into position. How far across the body each hand
+    // may swing is set by the leg it pulls on: at the far side of its turn
+    // each hand bends the opposite knee about twelve degrees, and pushing
+    // the left hand further right than that buckled the right leg. Each carries
+    // the turn a little past the end before setting the arm down. Within a
+    // turn the hand sweeps over the top and takes its time through the
+    // bottom: that uneven rate, with the body leaning towards the raised
+    // hand and dipping as it passes low, is the beat. The rate is set by
+    // the angle the hand is passing, not by how far it is into its own
+    // turn, so both hands accent the same part of the circle however they
+    // joined it. The left hand picks
+    // up while the right is still coming down.
+    tracks: {
+      rightHand: [[0,0,0],[0.14,30,-26],[0.3,66,-57],[0.37,47,-96],
+        [0.45,0,-112],[0.52,-47,-96],[0.6,-66,-57],[0.68,-47,-18],
+        [0.78,0,-2],[0.87,47,-18],[0.96,66,-57],[1.03,47,-96],
+        [1.11,0,-112],[1.18,-47,-96],[1.26,-66,-57],
+        [1.34,-47,-18],[1.44,0,-2],[1.53,47,-18],[1.62,66,-57],
+        [1.69,47,-96],[1.77,0,-112],[1.84,-47,-96],[1.92,-66,-57],
+        [2.0,-47,-18],[2.1,0,-2],[2.19,47,-18],[2.28,66,-57],
+        [2.38,62,-76],[2.54,28,-34],[2.68,0,0]],
+      leftHand: [[0,0,0],[2.28,0,0],[2.38,-3,-1],[2.47,42,-17],[2.56,60,-57],
+        [2.63,42,-97],[2.7,-3,-113],[2.78,-48,-97],[2.86,-66,-57],
+        [2.94,-48,-17],[3.04,-3,-1],[3.13,42,-17],[3.22,60,-57],
+        [3.29,42,-97],[3.36,-3,-113],[3.44,-48,-97],
+        [3.52,-66,-57],[3.6,-48,-17],[3.7,-3,-1],[3.79,42,-17],
+        [3.88,60,-57],[3.95,42,-97],[4.02,-3,-113],[4.1,-48,-97],
+        [4.18,-66,-57],[4.26,-48,-17],[4.36,-3,-1],[4.46,29,-9],
+        [4.62,13,-4],[4.76,0,0]],
+      head: [[0,0,0],[0.45,5,-3],[0.78,-3,7],[1.11,5,-3],[1.44,-3,7],
+        [1.77,5,-3],[2.1,-3,7],[2.38,3,7],[2.7,-5,-3],[3.04,3,7],
+        [3.36,-5,-3],[3.7,3,7],[4.02,-5,-3],[4.56,0,-1],
+        [4.76,0,0]],
+    },
+  },
+  {
+    id: 'squat-circle',
+    name: '转圈下蹲',
+    duration: 3.78,
+    eased: true,
+    // The whole body traces a ring: lean left, sink through the squat, come
+    // up on the right, stand through the top, five times round. It starts
+    // and ends at the top of the ring, which is the standing pose, so there
+    // is nothing to step into or out of. The ring stays inside what the
+    // legs can render — about 24 sideways and 46 down, and less of each
+    // when both happen at once — and the hand passes the bottom slowly and
+    // the top quickly, which is where the beat sits.
+    tracks: {
+      head: [[0,0,0],[0.12,-4,0],[0.24,0,-2],[0.31,-14,5],
+        [0.39,-20,22],[0.47,-14,39],[0.57,0,46],[0.66,14,39],
+        [0.74,20,22],[0.81,14,5],[0.88,0,-2],[0.95,-14,5],
+        [1.03,-20,22],[1.11,-14,39],[1.21,0,46],[1.3,14,39],
+        [1.38,20,22],[1.45,14,5],[1.52,0,-2],[1.59,-14,5],
+        [1.67,-20,22],[1.75,-14,39],[1.85,0,46],[1.94,14,39],
+        [2.02,20,22],[2.09,14,5],[2.16,0,-2],[2.23,-14,5],
+        [2.31,-20,22],[2.39,-14,39],[2.49,0,46],[2.58,14,39],
+        [2.66,20,22],[2.73,14,5],[2.8,0,-2],[2.87,-14,5],
+        [2.95,-20,22],[3.03,-14,39],[3.13,0,46],[3.22,14,39],
+        [3.3,20,22],[3.37,14,5],[3.44,0,-2],[3.6,-8,0],[3.78,0,0]],
+    },
+  },
+  {
+    id: 'squat-sway',
+    name: '左右下蹲',
+    duration: 3.06,
+    eased: true,
+    // Dragging the head carries the whole body, so one track leans and
+    // squats at once: lean out, drop through the middle, lean the other way.
+    // The amplitudes stay inside what the legs can actually render: past
+    // about 24 sideways the hip is at full stretch and only the torso keeps
+    // leaning, at roughly half the rate, and past about 50 down nothing
+    // moves at all — less than that while leaning, since a lean spends some
+    // of the same travel. A lean may pass through the compressed range, but
+    // nothing rests there. The
+    // pose running on while the picture holds still is what read as a pause
+    // at the bottom of every squat. The squats therefore bottom out near the
+    // middle, where the legs still have room to fold, rather than far out to
+    // one side where they are already at full stretch.
+    //
+    // The two halves overlap: the body is at its lowest while still out to
+    // one side, and rises as it crosses to the other. Bottoming out exactly
+    // at the middle made the vertical travel turn around at the same moment
+    // the sideways travel passed through centre, and that read as a pause in
+    // the squat before the swing. Sinking takes .42s, crossing .26s. Each
+    // leg keeps a waypoint halfway through, or the spline overshoots the
+    // turn, and holding an extreme with a repeated keyframe stopped the body
+    // dead there and read as a stutter.
+    tracks: {
+      head: [[0,0,0],[.14,-2,24],[.27,-6,46],
+        [.43,-24,20],[.54,-32,-2],
+        [.71,-29,22],[.85,-6,46],
+        [.99,11,30],[1.11,32,-2],
+        [1.28,29,22],[1.41,6,46],
+        [1.55,-11,30],[1.67,-32,-2],
+        [1.84,-29,22],[1.97,-6,46],
+        [2.11,11,30],[2.23,32,-2],
+        [2.4,26,18],[2.53,5,28],[2.7,1,6],[2.87,0,-5],[3.06,0,0]],
+    },
+  },
+];
+let motionFrame = 0;
+let motionStart = 0;
+let playingMotion;
+
+function sampleTrack(track, time, eased) {
+  let index = 0;
+  while (index < track.length - 2 && track[index + 1][0] <= time) index++;
+  const from = track[index], to = track[index + 1] || from;
+  const span = to[0] - from[0];
+  // Tracks need not cover the whole motion: outside their own span they
+  // hold their first or last keyframe rather than extrapolating off it.
+  const amount = Math.max(0, Math.min(1, span > 0 ? (time - from[0]) / span : 1));
+  // A recording already carries the performance's own timing, so it is read
+  // straight through.
+  if (!eased) {
+    return [1, 2, 3].map(axis => lerp(from[axis] || 0, to[axis] || 0, amount));
+  }
+  // A hand-written track passes through sparse keyframes, and easing each
+  // leg on its own would stop the limb dead at every one of them. A spline
+  // keeps the speed continuous across the whole gesture, so a wave reads as
+  // one movement instead of a chain of small ones.
+  //
+  // The tangents are measured per second, not per keyframe: where a slow leg
+  // meets a quick one — a squat held on the way down and snapped out of —
+  // equal-weighted tangents change the speed abruptly at the join, and that
+  // shows up as a hitch exactly at the keyframe.
+  const at = position => track[Math.max(0, Math.min(track.length - 1, position))];
+  const before = at(index - 1), after = at(index + 2);
+  const step = to[0] - from[0] || 1;
+  const leading = (to[0] - before[0]) || step;
+  const trailing = (after[0] - from[0]) || step;
+  const t2 = amount * amount, t3 = t2 * amount;
+  const h00 = 2 * t3 - 3 * t2 + 1, h10 = t3 - 2 * t2 + amount;
+  const h01 = -2 * t3 + 3 * t2, h11 = t3 - t2;
+  return [1, 2, 3].map(axis => {
+    const p0 = before[axis] || 0, p1 = from[axis] || 0;
+    const p2 = to[axis] || 0, p3 = after[axis] || 0;
+    return h00 * p1 + h01 * p2
+      + h10 * (p2 - p0) / leading * step
+      + h11 * (p3 - p1) / trailing * step;
+  });
+}
+
+function stopMotion() {
+  if (!motionFrame) return;
+  cancelAnimationFrame(motionFrame);
+  motionFrame = 0;
+  playingMotion = undefined;
+  motionPaneButtons('[data-motion]').forEach(button => {
+    button.disabled = false;
+  });
+}
+
+function applyMotionPose(motion, at) {
+  for (const [part, track] of Object.entries(motion.tracks)) {
+    let pose = dragPoses.find(entry => entry.part === part);
+    if (!pose) {
+      pose = createDragPose(part);
+      dragPoses.push(pose);
+    }
+    pose.walkBlend = motion.walkBlend ? sampleTrack(motion.walkBlend, at, false)[0] : 0;
+    [pose.x, pose.y, pose.angle] = sampleTrack(track, at, motion.eased);
+  }
+}
+
+function stepMotion(time) {
+  const elapsed = (time - motionStart) / 1000;
+  const finished = elapsed >= playingMotion.duration;
+  const at = Math.min(elapsed, playingMotion.duration);
+  applyMotionPose(playingMotion, at);
+  if (finished) {
+    // The last keyframe is the rest pose; drop the poses so the character is
+    // back to its untouched state rather than held at a zero offset.
+    dragPoses.length = 0;
+    update();
+    stopMotion();
+    return;
+  }
+  update();
+  motionFrame = requestAnimationFrame(stepMotion);
+}
+
+function playMotion(motion) {
+  stopMotion();
+  clearDragPose();
+  playingMotion = motion;
+  motionStart = performance.now();
+  motionPaneButtons('[data-motion]').forEach(button => {
+    button.disabled = true;
+  });
+  motionFrame = requestAnimationFrame(stepMotion);
+}
+
+// Motion recorder. It samples the live drag poses every frame, so whatever
+// the pointer does becomes a track in exactly the units playback replays.
+let recordFrame = 0;
+let recordStart = 0;
+let recordSamples;
+let recordedMotion;
+
+function motionPaneButtons(selector) {
+  return [...motionList?.querySelectorAll(selector) || [],
+    ...recordedList?.querySelectorAll(selector) || []];
+}
+
+function setMotionHint(text) {
+  if (motionHint) motionHint.textContent = text || '';
+}
+
+function sampleRecording(time) {
+  recordSamples.push({
+    time: (time - recordStart) / 1000,
+    poses: Object.fromEntries(dragPoses.map(pose =>
+      [pose.part, [pose.x, pose.y, pose.angle]])),
+  });
+  recordFrame = requestAnimationFrame(sampleRecording);
+}
+
+function startRecording() {
+  stopMotion();
+  clearDragPose();
+  update();
+  recordedMotion = undefined;
+  recordSamples = [];
+  recordStart = performance.now();
+  if (saveMotionButton) saveMotionButton.disabled = true;
+  recordButton?.setAttribute('aria-pressed', 'true');
+  if (recordButton) recordButton.textContent = '停止录制';
+  setMotionHint('录制中，拖动角色摆动作');
+  recordFrame = requestAnimationFrame(sampleRecording);
+}
+
+// Drop a sample whenever a straight line between its neighbours already
+// describes it. The result keeps every turn of the gesture and little else.
+function thinTrack(track, tolerance = .25) {
+  const kept = [track[0]];
+  for (let index = 1; index < track.length - 1; index++) {
+    const previous = kept[kept.length - 1], next = track[index + 1];
+    const current = track[index];
+    const span = next[0] - previous[0];
+    const amount = span > 0 ? (current[0] - previous[0]) / span : 0;
+    const off = [1, 2, 3].some(axis =>
+      Math.abs(lerp(previous[axis], next[axis], amount) - current[axis]) > tolerance);
+    if (off) kept.push(current);
+  }
+  kept.push(track[track.length - 1]);
+  return kept.map(frame => frame.map(value => Math.round(value * 100) / 100));
+}
+
+function buildRecordedMotion() {
+  const parts = [...new Set(recordSamples.flatMap(sample => Object.keys(sample.poses)))];
+  // Every motion starts and ends at the rest pose, so the character is handed
+  // back exactly as it was found. A recording stopped mid-gesture is closed
+  // with a short return to rest.
+  const last = recordSamples[recordSamples.length - 1];
+  const settled = parts.every(part => !last.poses[part]
+    || Math.hypot(last.poses[part][0], last.poses[part][1]) < .05);
+  const duration = Math.round((last.time + (settled ? 0 : .45)) * 100) / 100;
+  const tracks = {};
+  for (const part of parts) {
+    const track = recordSamples.map(sample =>
+      [sample.time, ...(sample.poses[part] || [0, 0, 0])]);
+    track.push([duration, 0, 0, 0]);
+    tracks[part] = thinTrack(track);
+  }
+  return { id: `recorded-${Date.now()}`, name: '', duration, tracks, eased: false };
+}
+
+function stopRecording() {
+  if (!recordFrame) return;
+  cancelAnimationFrame(recordFrame);
+  recordFrame = 0;
+  recordButton?.setAttribute('aria-pressed', 'false');
+  if (recordButton) recordButton.textContent = '开始录制';
+  if (!recordSamples || recordSamples.length < 4
+    || !recordSamples.some(sample => Object.keys(sample.poses).length)) {
+    setMotionHint('没有录到动作，再试一次');
+    return;
+  }
+  recordedMotion = buildRecordedMotion();
+  const frames = Object.values(recordedMotion.tracks)
+    .reduce((sum, track) => sum + track.length, 0);
+  if (saveMotionButton) saveMotionButton.disabled = false;
+  setMotionHint(`已录 ${recordedMotion.duration.toFixed(1)} 秒 · ${frames} 个关键帧，点保存`);
+}
+
+function toggleRecording() {
+  if (recordFrame) stopRecording();
+  else startRecording();
+}
+
+function downloadMotion(motion) {
+  const source = JSON.stringify(motion, null, 2);
+  const url = URL.createObjectURL(new Blob([source], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${motion.id}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+const RECORDED_MOTIONS_KEY = 'yuren-recorded-motions';
+
+function storeRecordedMotions() {
+  try {
+    localStorage.setItem(RECORDED_MOTIONS_KEY,
+      JSON.stringify(motionLibrary.filter(motion => motion.recorded)));
+  } catch { /* private browsing: the motion still plays this session. */ }
+}
+
+function loadRecordedMotions() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(RECORDED_MOTIONS_KEY) || '[]');
+    for (const motion of stored) {
+      if (motion?.id && motion.tracks) motionLibrary.push(motion);
+    }
+  } catch { /* ignore unreadable storage */ }
+}
+
+function saveRecordedMotion() {
+  if (!recordedMotion) return;
+  const name = (prompt('动作名称', '自定义动作') || '').trim();
+  if (!name) return;
+  const motion = { ...recordedMotion, name, recorded: true };
+  motionLibrary.push(motion);
+  recordedMotion = undefined;
+  if (saveMotionButton) saveMotionButton.disabled = true;
+  storeRecordedMotions();
+  renderMotionLibrary();
+  downloadMotion(motion);
+  setMotionHint(`已保存“${name}”，JSON 也下载了一份`);
+}
+
+function renameMotion(id) {
+  const motion = motionLibrary.find(entry => entry.id === id);
+  if (!motion?.recorded) return;
+  const name = (prompt('动作名称', motion.name) || '').trim();
+  if (!name || name === motion.name) return;
+  motion.name = name;
+  storeRecordedMotions();
+  renderMotionLibrary();
+  setMotionHint(`已改名为“${name}”`);
+}
+
+function deleteMotion(id) {
+  const index = motionLibrary.findIndex(motion => motion.id === id);
+  if (index < 0 || !motionLibrary[index].recorded) return;
+  if (playingMotion?.id === id) {
+    stopMotion();
+    clearDragPose();
+    update();
+  }
+  const [removed] = motionLibrary.splice(index, 1);
+  storeRecordedMotions();
+  renderMotionLibrary();
+  setMotionHint(`已删除“${removed.name}”`);
+}
+
+function renderMotionLibrary() {
+  if (!motionList || !recordedList) return;
+  motionList.textContent = '';
+  recordedList.textContent = '';
+  for (const motion of motionLibrary) {
+    const play = document.createElement('button');
+    play.type = 'button';
+    play.dataset.motion = motion.id;
+    play.textContent = motion.name;
+    if (!motion.recorded) {
+      motionList.appendChild(play);
+      continue;
+    }
+    // A recording lives in the recorder tab, with its own row of controls.
+    // A recording keeps its own row: play it back to check it, download the
+    // file again, or throw it away.
+    const row = document.createElement('div');
+    row.className = 'motion-row';
+    play.title = `${motion.duration.toFixed(1)} 秒`;
+    const rename = document.createElement('button');
+    rename.type = 'button';
+    rename.dataset.renameMotion = motion.id;
+    rename.title = '改名';
+    rename.textContent = '✎';
+    const download = document.createElement('button');
+    download.type = 'button';
+    download.dataset.downloadMotion = motion.id;
+    download.title = '下载 JSON';
+    download.textContent = '↓';
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.dataset.deleteMotion = motion.id;
+    remove.title = '删除';
+    remove.textContent = '✕';
+    row.append(play, rename, download, remove);
+    recordedList.appendChild(row);
+  }
+}
+
 function dragPartAt(target, point) {
   const handle=target.closest?.('[data-drag-part]');
   // Resolve opaque geometry front-to-back before enlarged invisible handles.
@@ -2267,6 +2877,8 @@ function createDragLayer() {
 
   svg.addEventListener('pointerdown', event => {
     if (activeDrag) return;
+    // A pointer always wins over a playing motion.
+    stopMotion();
     const point = svgPoint(event);
     const selection = dragPartAt(event.target, point);
     if (!selection) return;
@@ -2389,7 +3001,7 @@ function update() {
   const armShapes = { left: armGeometry('left', warp), right: armGeometry('right', warp) };
   updateArmOcclusion(armShapes);
 
-  paths.forEach(({ node, original, role }) => {
+  paths.forEach(({ node, original, role, index }) => {
     const transformed = transformPath(original, (x, y) => {
       const pointRole = role.startsWith('helmet-') ? 'helmet' : classifyPoint(x, y, role);
       const point = warp(x, y, pointRole);
@@ -2397,6 +3009,9 @@ function update() {
       return applyDragPose(point, x, y, pointRole, warp);
     });
     node.setAttribute('d', transformed);
+    if(index===1||index===-1&&node.getAttribute('stroke')==='none')
+      node.setAttribute('fill',skinColor());
+    if(index===8)node.setAttribute('fill',selectedDecorations.skin==='milk-frog'?milkFrogColors.eye:'white');
   });
   scarfPaths.forEach(({node})=>{
     node.style.display=selectedDecorations.neck==='scarf'?'':'none';
@@ -2413,6 +3028,7 @@ function update() {
     'pink-shorts':decorationColors.pinkShorts,
     'orange-shorts':decorationColors.orangeShorts,
     'black-shorts':decorationColors.blackShorts,
+    'wide-shorts':decorationColors.wideShorts,
   };
   legParts.forEach(({segments,bootFill,bootOutline,
       shoeCuff,shortHem,bootTop,wideHem,shortsClip,skinClip,wideClip,ankleClip,
@@ -2420,9 +3036,17 @@ function update() {
       side,group,thighBlack,shinBlack,thighSkin,shinSkin})=>{
     const shape=legShapes[side];
     const kneeShorts=!!kneeShortColors[selectedDecorations.pants];
+    const shortsFlare=kneeShortFlares[selectedDecorations.pants]||0;
+    const wideShorts=shortsFlare>0;
     const splitCloth=pantsCoverThigh();
-    const tallBoots=selectedDecorations.shoes==='brown-boots';
+    const wearingTallBoots=selectedDecorations.shoes==='brown-boots';
+    // A wide trouser keeps its full width and fabric over the boot shaft.
+    // Other trousers tuck into the boot, which replaces the lower leg.
+    const tallBoots=wearingTallBoots&&!widePants;
     const continuousCalf=splitCloth&&!kneeShorts&&!tallBoots;
+    // A bare calf under shorts also ends at the shoe mouth. Its front-layer
+    // copy must not redraw the tube's rounded underside over the foot.
+    const ankleBound=(continuousCalf||kneeShorts||selectedDecorations.pants==='skirt')&&!tallBoots&&!widePants;
     calfEdges.setAttribute('d',trouserCalfEdges(shape,wideFlare,config.legs));
     calfEdges.style.display=continuousCalf?'':'none';
     // The flared leg passes in front of the shoe upper. In other outfits the
@@ -2443,7 +3067,7 @@ function update() {
     skinClip.setAttribute('points',limbClipPoints(shape,19,true));
     wideClip.setAttribute('points',legEndClipPoints(shape,config.legs));
     ankleClip.setAttribute('points',ankleHemClipPoints(shape));
-    if(continuousCalf&&!widePants)
+    if(ankleBound)
       calfOverlay.setAttribute('clip-path',`url(#${side}-ankle-hem-clip)`);
     else calfOverlay.removeAttribute('clip-path');
     // Side-edge samples may reach past the hem during compression. Clip
@@ -2477,7 +3101,7 @@ function update() {
       const nearHem=i>=13&&i<=26;
       const clip=widePants&&!tallBoots&&i>=24
         ?`url(#${side}-wide-hem-clip)`
-        :continuousCalf&&!widePants&&i>=24
+        :ankleBound&&i>=24
           ?`url(#${side}-ankle-hem-clip)`
         :(splitCloth||tallBoots)&&nearHem
           ?`url(#${side}-${i<19?'shorts':'skin'}-hem-clip)`:null;
@@ -2490,7 +3114,8 @@ function update() {
       // The body fill masks part of the black underside near a folded hip.
       // Restore that lost ink along the round upper-leg contour only.
       const roundedHipInk=crouch*.75*(1-smooth(i/16));
-      const wideExtra=widePants&&!tallBoots?wideLegExtraWidth(i,wideFlare):0;
+      const wideExtra=wideShorts&&i<19?wideShortsExtraWidth(i,shortsFlare)
+        :widePants&&!tallBoots?wideLegExtraWidth(i,wideFlare):0;
       back.setAttribute('stroke-width',shape.hose[i].width+2+roundedHipInk+wideExtra);
       front.setAttribute('d',segmentPath);
       front.setAttribute('stroke-width',shape.hose[i].width+wideExtra);
@@ -2501,7 +3126,7 @@ function update() {
             ? decorationColors.navyJumpsuit:decorationColors.jumpsuit
         : selectedDecorations.pants==='plain' ? decorationColors.pants
         : widePants ? widePantsPaint()
-        : kneeShorts&&i<19?kneeShortColors[selectedDecorations.pants]:'#C5C5C5';
+        : kneeShorts&&i<19?kneeShortColors[selectedDecorations.pants]:skinColor();
       const patterned=selectedDecorations.pants==='loose-wide-pants'&&!(tallBoots&&i>=19);
       front.setAttribute('stroke',patterned?'#607e79':legColor);
       // Preserve both side edges explicitly; removing a whole thigh-shaped
@@ -2534,8 +3159,8 @@ function update() {
     });
     const shoe=widePants&&!tallBoots?extendedShoe(shape):{fill:shape.bootFill,outline:shape.bootOutline};
     bootFill.setAttribute('d',shoe.fill);
-    bootFill.setAttribute('fill',tallBoots?decorationColors.brownBoots
-      :selectedDecorations.shoes?decorationColors.shoes:'#C5C5C5');
+    bootFill.setAttribute('fill',wearingTallBoots?decorationColors.brownBoots
+      :selectedDecorations.shoes?decorationColors.shoes:skinColor());
     bootOutline.setAttribute('d',shoe.outline);
     shoeCuff.style.display=!tallBoots&&!widePants&&(selectedDecorations.shoes
       ||selectedDecorations.pants==='plain'
@@ -2545,8 +3170,8 @@ function update() {
     // The calf is painted over this line and hides its lower half. Shift the
     // one-unit stroke half a unit into the shorts so a full-width black edge
     // remains visible without making the stroke itself thicker.
-    shortHem.setAttribute('d',cuffPath(shape,19,widePants&&!tallBoots
-      ?wideLegExtraWidth(19,wideFlare):0,.5));
+    shortHem.setAttribute('d',cuffPath(shape,19,wideShorts?wideShortsExtraWidth(19,shortsFlare)
+      :widePants&&!tallBoots?wideLegExtraWidth(19,wideFlare):0,.5));
     // A full-length trouser has no transverse cuff at the knee. Its visible
     // fold comes from the calf side contour after thigh/calf occlusion.
     shortHem.style.display=kneeShorts&&!tallBoots?'':'none';
@@ -2560,6 +3185,11 @@ function update() {
   });
   const torso=paths.find(p=>p.index===-1 && p.role==='mixed' && p.node.getAttribute('fill')!=='none');
   updateTorsoMaterial(torso.node,warp);
+  if(bellyPatch){
+    bellyPatch.setAttribute('d',torsoGarmentPath(milkFrogBellySource,warp));
+    bellyClip.setAttribute('d',torso.node.getAttribute('d'));
+    bellyPatch.style.display=selectedDecorations.skin==='milk-frog'?'':'none';
+  }
   garmentPaths.pants.setAttribute('d',garmentPath(pantsSource,warp));
   garmentPaths.pants.setAttribute('fill',widePants?widePantsPaint():decorationColors.pants);
   garmentPaths.pants.style.display=selectedDecorations.pants==='plain'||widePants?'':'none';
@@ -2567,10 +3197,12 @@ function update() {
   garmentPaths.pantsSides.style.display=selectedDecorations.pants==='plain'||widePants?'':'none';
   garmentPaths.pantsCrotch.setAttribute('d',garmentPath(pantsCrotchSource,warp));
   garmentPaths.pantsCrotch.style.display=selectedDecorations.pants==='plain'||widePants?'':'none';
+  const wearingSkirt=selectedDecorations.pants==='skirt';
   const shorts=selectedDecorations.pants==='red-shorts'
     ||selectedDecorations.pants==='pink-shorts'
     ||selectedDecorations.pants==='orange-shorts'
-    ||selectedDecorations.pants==='black-shorts';
+    ||selectedDecorations.pants==='black-shorts'
+    ||selectedDecorations.pants==='wide-shorts';
   garmentPaths.shorts.setAttribute('d',garmentPath(pantsSource,warp));
   garmentPaths.shorts.setAttribute('fill',selectedDecorations.pants==='red-shorts'
     ?decorationColors.redShorts:kneeShortColors[selectedDecorations.pants]
@@ -2581,6 +3213,8 @@ function update() {
   garmentPaths.shortsCrotch.setAttribute('d',garmentPath(
     selectedDecorations.pants==='red-shorts'?shortsLowerSource:pantsCrotchSource,warp));
   garmentPaths.shortsCrotch.style.display=shorts?'':'none';
+  garmentPaths.skirt.setAttribute('d',skirtPath(warp,config.legs));
+  garmentPaths.skirt.style.display=wearingSkirt?'':'none';
   garmentPaths.redThong.setAttribute('d',torsoGarmentPath(redThongSource(config.legs),warp));
   garmentPaths.redThong.style.display=selectedDecorations.pants==='red-thong'?'':'none';
   garmentPaths.redTriangle.setAttribute('d',torsoGarmentPath(redTriangleSource,warp,true));
@@ -2606,11 +3240,11 @@ function update() {
     transformPath(shirtTopSource,
       (x,y)=>applyDragPose(warp(x,y,'head'),x,y,'head',warp)));
   garmentPaths.shirtTop.style.display=selectedDecorations.shirt==='plain'?'':'none';
-  garmentPaths.tee.setAttribute('d',garmentPath(
+  garmentPaths.tee.setAttribute('d',teeStyle?.loose?looseTopPath(looseTopSource,warp):garmentPath(
     selectedDecorations.shirt==='red-tee'?redTeeSource:teeSource,warp));
   garmentPaths.tee.setAttribute('fill',teeStyle?.color||decorationColors.yellowTee);
   garmentPaths.tee.style.display=isTee?'':'none';
-  garmentPaths.teeSides.setAttribute('d',garmentPath(shirtSidesSource,warp));
+  garmentPaths.teeSides.setAttribute('d',teeStyle?.loose?looseTopPath(looseTopSidesSource,warp):garmentPath(shirtSidesSource,warp));
   garmentPaths.teeSides.style.display=isTee?'':'none';
   garmentPaths.teeNeck.setAttribute('d',garmentPath(
     selectedDecorations.shirt==='red-tee'?redTeeNeckSource:teeNeckSource,warp));
@@ -2634,7 +3268,7 @@ function update() {
     garmentPaths['patch'+key].style.display=
       selectedDecorations.shirt==='patched-tee'?'':'none';
   }
-  garmentPaths.waist.setAttribute('d',garmentPath(isVest?vestHemSource
+  garmentPaths.waist.setAttribute('d',teeStyle?.loose?looseTopPath(looseTopHemSource,warp):garmentPath(isVest?vestHemSource
     :selectedDecorations.shirt?shirtHemSource:pantsWaistSource,warp));
   // The dungarees draw their own outline, so the waistband belongs to the
   // plain pieces only.
@@ -2689,6 +3323,7 @@ function update() {
     path.setAttribute('d',torso.node.getAttribute('d'));
     rootPath.setAttribute('d',torso.node.getAttribute('d'));
   });
+  updateGarmentOrder();
   updatePartOrder();
   // Stop each waist contour exactly where the thigh's upper edge reaches it.
   // The target follows the current hip and width, rather than a fixed trim
@@ -2768,13 +3403,13 @@ function update() {
       // The fill covers the middle of the black stroke, so it needs two extra
       // units to leave a one-unit outline on each side like the SVG.
       const shortSleeve=isTee&&i<sleeveEnd;
-      const sleeveFlare=shortSleeve?flare*smooth(i/(sleeveEnd-1)):0;
+      const sleeveFlare=sleeveExtraWidth(i,sleeveEnd,flare);
       back.setAttribute('stroke-width',shape.hose[i].width+2+sleeveFlare);
       front.setAttribute('d',shape.hose[i].d);
       front.setAttribute('stroke-width',shape.hose[i].width+sleeveFlare);
       const sleeveColor=selectedDecorations.shirt==='plain'
         ? decorationColors.shirt
-        : shortSleeve?teeStyle.color:'#C5C5C5';
+        : shortSleeve?teeStyle.color:skinColor();
       front.setAttribute('stroke',sleeveColor);
     });
     cuff.style.display=selectedDecorations.shirt==='plain'||isTee?'':'none';
@@ -2783,7 +3418,7 @@ function update() {
     crease.style.display=shape.creaseOpacity>.55?'':'none';
     handFill.setAttribute('d',transformPath(handSource.handFill,shape.handPoint));
     handFill.setAttribute('fill',selectedDecorations.gloves
-      ? decorationColors.gloves : '#C5C5C5');
+      ? decorationColors.gloves : skinColor());
     handOutline.setAttribute('d',
       transformPath(handSource.handOutline,shape.handPoint));
   });
@@ -2854,6 +3489,7 @@ function update() {
 }
 
 function resetControls() {
+  stopMotion();
   clearDragPose();
   Object.values(controls).forEach(input => { input.value = 100; });
   for (const category of Object.keys(selectedDecorations)) {
@@ -2866,22 +3502,38 @@ function resetControls() {
 function renderDecorationOptions() {
   const selected=selectedDecorations[activeDecorationCategory];
   decorationOptions.innerHTML = [
-    `<button type="button" class="decoration-option" data-option="none" aria-pressed="${!selected}"><span class="empty-icon" aria-hidden="true">—</span><span>不穿戴</span></button>`,
+    `<button type="button" class="decoration-option" data-option="none" aria-pressed="${!selected}"><span class="empty-icon" aria-hidden="true">—</span><span>${activeDecorationCategory==='suit'?'不使用套装':activeDecorationCategory==='skin'?'默认肤色':'不穿戴'}</span></button>`,
     ...decorationCatalog[activeDecorationCategory].map(({id,name,icon})=>
       `<button type="button" class="decoration-option" data-option="${id}" aria-pressed="${selected===id}"><img src="${icon}" alt="" /><span>${name}</span></button>`),
   ].join('');
 }
 
-function selectDecoration(category, value) {
-  if (category === 'helmet') setHatSelection(value);
-  else {
-    selectedDecorations[category] = value;
-    update();
+function applyDecorationSelection(category,value) {
+  if(category==='skin') {
+    // Skin is only the frog's own color, so it never conflicts with clothing.
+    selectedDecorations.skin=value;
+    return;
   }
+  if(category==='suit') {
+    const skin=selectedDecorations.skin;
+    for(const key of Object.keys(selectedDecorations))selectedDecorations[key]=null;
+    selectedDecorations.skin=skin;
+    selectedDecorations.suit=value;
+    setHatSelection(null);
+  } else {
+    selectedDecorations.suit=null;
+    if(category==='helmet')setHatSelection(value);
+    else selectedDecorations[category]=value;
+  }
+}
+function selectDecoration(category, value) {
+  applyDecorationSelection(category,value);
+  update();
   renderDecorationOptions();
 }
 
 function randomizeControls() {
+  stopMotion();
   clearDragPose();
   Object.values(controls).forEach(input => {
     const min = Number(input.min);
@@ -2912,7 +3564,9 @@ function setHatSelection(value) {
 }
 
 function toggleHelmet() {
+  selectedDecorations.suit=null;
   setHatSelection(selectedDecorations.helmet ? null : lastHat);
+  update();
 }
 
 function exportSvg() {
@@ -2935,6 +3589,39 @@ function exportSvg() {
 }
 
 resetButton.addEventListener('click', resetControls);
+loadRecordedMotions();
+renderMotionLibrary();
+motionTabs.forEach(tab => tab.addEventListener('click', () => {
+  motionTabs.forEach(button => button.setAttribute('aria-selected',
+    String(button === tab)));
+  motionPanes.forEach(pane => {
+    pane.hidden = pane.dataset.motionPane !== tab.dataset.motionTab;
+  });
+}));
+const onMotionListClick = event => {
+  const target = event.target.closest(
+    '[data-motion], [data-rename-motion], [data-download-motion], [data-delete-motion]');
+  if (!target) return;
+  const { motion: play, renameMotion: rename, downloadMotion: save,
+    deleteMotion: remove } = target.dataset;
+  if (rename) {
+    renameMotion(rename);
+    return;
+  }
+  if (remove) {
+    const motion = motionLibrary.find(entry => entry.id === remove);
+    if (motion && confirm(`删除“${motion.name}”？`)) deleteMotion(remove);
+    return;
+  }
+  const motion = motionLibrary.find(entry => entry.id === (play || save));
+  if (!motion) return;
+  if (save) downloadMotion(motion);
+  else playMotion(motion);
+};
+motionList?.addEventListener('click', onMotionListClick);
+recordedList?.addEventListener('click', onMotionListClick);
+recordButton?.addEventListener('click', toggleRecording);
+saveMotionButton?.addEventListener('click', saveRecordedMotion);
 randomButton.addEventListener('click', randomizeControls);
 helmetButton.addEventListener('click', toggleHelmet);
 exportButton.addEventListener('click', exportSvg);
@@ -3021,6 +3708,12 @@ fetch('./svg/参考.svg')
     silhouette.node.remove();
     paths=paths.filter(path=>path!==silhouette);
     addPath(body,'body',true,'mixed');
+    bellyPatch=document.createElementNS(SVG_NS,'path');
+    bellyPatch.setAttribute('fill',milkFrogColors.belly);
+    bellyPatch.setAttribute('stroke','none');
+    bellyPatch.setAttribute('pointer-events','none');
+    bellyPatch.setAttribute('clip-path','url(#milk-frog-belly-clip)');
+    partLayers.body.appendChild(bellyPatch);
     torsoSideOutline=addPath(leftEdge+rightEdge,'body',false,'mixed');
     addPath(crotch,'body',false,'mixed');
     buttOutlines=[{side:'right',node:addPath(rightButt,'body',false,'mixed')},
@@ -3038,10 +3731,12 @@ fetch('./svg/参考.svg')
     paths.filter(path=>path.index>=0 && path.role!=='arms').forEach(path=>{
       const part=[9,10].includes(path.index)?'body':'head';
       if(path.index===0) {
-        // Composite the helmet over the page grey once, so its foreground
-        // layer also masks outlines underneath while keeping the same tint.
-        path.node.setAttribute('fill','#798d92');
-        path.node.removeAttribute('fill-opacity');
+        // The shell is a tinted glass visor, not a solid cap: keep the
+        // reference's aqua and let the page show through it. It had been
+        // flattened to one opaque colour mixed with the old grey page, which
+        // read as a dark helmet and broke outright once the page turned pink.
+        path.node.setAttribute('fill',HELMET_GLASS);
+        path.node.setAttribute('fill-opacity',HELMET_GLASS_OPACITY);
       }
       if(path.index===0||path.index===1) partLayers.head.insertBefore(path.node,headFill);
       else partLayers[part].appendChild(path.node);
@@ -3121,6 +3816,7 @@ fetch('./svg/参考.svg')
       shortsCrotch:makeGarment('none',true),
       pantsWaist:makeGarment('none',true),
       redThong:makeGarment(decorationColors.redThong,true),
+      skirt:makeGarment(decorationColors.skirt,true),
     };
     for(const key of ['shirtTop','teeNeck','teeTopLeft','teeTopRight'])
       neckOverlay.insertBefore(garmentPaths[key],neckOverlay.firstChild);
@@ -3145,6 +3841,11 @@ fetch('./svg/参考.svg')
     placeOuterwearOverNeckline();
     const defs=document.createElementNS(SVG_NS,'defs');
     svg.prepend(defs);
+    const bellyClipContainer=document.createElementNS(SVG_NS,'clipPath');
+    bellyClipContainer.id='milk-frog-belly-clip';
+    bellyClipContainer.setAttribute('clipPathUnits','userSpaceOnUse');
+    bellyClip=document.createElementNS(SVG_NS,'path');
+    bellyClipContainer.appendChild(bellyClip);defs.appendChild(bellyClipContainer);
     const materialGradient=document.createElementNS(SVG_NS,'linearGradient');
     materialGradient.id='torso-material';
     materialGradient.setAttribute('gradientUnits','userSpaceOnUse');
@@ -3156,7 +3857,8 @@ fetch('./svg/参考.svg')
       return stop;
     });
     defs.appendChild(materialGradient);
-    torsoMaterial={gradient:materialGradient,lower:materialStops.slice(2)};
+    torsoMaterial={gradient:materialGradient,
+      upper:materialStops.slice(0,2),lower:materialStops.slice(2)};
     const fabric=document.createElementNS(SVG_NS,'pattern');
     fabric.id='loose-pants-fabric';
     fabric.setAttribute('patternUnits','userSpaceOnUse');
