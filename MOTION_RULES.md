@@ -72,3 +72,10 @@
   验证时用：`playMotion(m); cancelAnimationFrame(motionFrame); motionStart=performance.now()-想看的毫秒数;
   stepMotion(performance.now()); update();` 手动定帧截图，再配合上面的静止时长、
   速度曲线、扇区停留时间等数值指标判断。
+
+## 向右走路
+
+- `createWalkRightMotion(cycles)` 用同一周期生成左右各一步，默认 2 次循环；起步和收步在循环外，不能把站定姿势插入每圈之间。
+- 足部前摆占周期 40%，支撑占 60%；支撑脚相对身体向后移动，构成原地向右走的步态。
+- 可选 `walkBlend` 轨道由 `applyMotionPose` 写入姿势，在走路中让双膝朝右弯、支撑脚掌放平；首尾归零。普通拖动和其他动作不使用此修正。
+- 验证运行 `node tests/walk-motion.cjs`；浏览器定帧也应调用 `applyMotionPose(motion, time)` 再 `update()`，以包含走路骨架修正。

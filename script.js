@@ -17,7 +17,8 @@ const motionHint = document.querySelector('[data-motion-hint]');
 const decorationTabs = [...document.querySelectorAll('[data-category]')];
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const decorationCatalog = {
-  suit: [{id:"milk-frog",name:"奶蛙",icon:"./svg/milk-frog.svg"}],
+  skin: [{ id: 'milk-frog', name: '奶鱼', icon: './svg/milk-frog.svg' }],
+  suit: [],
   helmet: [
     { id: 'plain', name: '普通帽子', icon: './svg/toukui.svg' },
     { id: 'yellow-hat', name: '黄色宽檐帽', icon: './svg/yellow-hat.svg' },
@@ -161,12 +162,12 @@ function widePantsPaint() {
   return selectedDecorations.pants==='loose-wide-pants'
     ?'url(#loose-pants-fabric)':decorationColors.widePants;
 }
-const selectedDecorations = { suit:null, helmet: 'plain', neck: null, shirt: null, pants: null,
+const selectedDecorations = { skin:null, suit:null, helmet: 'plain', neck: null, shirt: null, pants: null,
   outerwear: null, shoes: null, gloves: null };
-let activeDecorationCategory = 'suit';
+let activeDecorationCategory = 'skin';
 const milkFrogColors={skin:'#e9ab24',belly:'#f6d69e',eye:'#369b4b'};
 const milkFrogBellySource='M47 78C36 78 34 96 35.5 108C36.4 117 40 119 47 119C54 119 57.6 117 58.5 108C60 96 58 78 47 78Z';
-function skinColor(){return selectedDecorations.suit==='milk-frog'?milkFrogColors.skin:'#C5C5C5';}
+function skinColor(){return selectedDecorations.skin==='milk-frog'?milkFrogColors.skin:'#C5C5C5';}
 let bellyPatch,bellyClip;
 
 const clamp01 = value => Math.max(0, Math.min(1, value));
@@ -947,8 +948,12 @@ function legGeometry(side, warp) {
     +length*length)/(2*length);
   const kneeHeight=Math.sqrt(Math.max(0,thighLength*thighLength
     -kneeAlong*kneeAlong));
-  const knee={x:hip.x+tangent.x*kneeAlong+normal.x*kneeHeight,
-    y:hip.y+tangent.y*kneeAlong+normal.y*kneeHeight};
+  // Walking bends both knees towards travel. Dragging retains the usual
+  // outward bend; the walking influence fades in/out with the motion.
+  const walking = dragPoses.find(p => p.part === side + 'Leg')?.walkBlend || 0;
+  const kneeDirection = left ? 1 - 2 * walking : 1;
+  const knee={x:hip.x+tangent.x*kneeAlong+normal.x*kneeHeight*kneeDirection,
+    y:hip.y+tangent.y*kneeAlong+normal.y*kneeHeight*kneeDirection};
   const kneeFrame={t:tangent,n:normal};
   const bendAngle = Math.min(.25,Math.max(0,restLength-length)/restLength*.45);
   const rotation = Math.atan2(tangent.y,tangent.x)
@@ -975,7 +980,10 @@ function legGeometry(side, warp) {
   // switching between them rotated the whole boot about its ankle and moved
   // the toe even once the ankle itself had stopped jumping.
   const carriedAngle=shinDelta+sign*ANKLE_DROP*smooth(bendAngle/.22);
-  const shoeFrame=frame(lifted?lerp(heelAngle,carriedAngle,lift):heelAngle);
+  const footLift = Math.max(0, -(dragPoses.find(p => p.part === side + 'Leg')?.y || 0));
+  const walkingAngle = -.16 * smooth(footLift / 8);
+  const shoeFrame=frame(lerp(lifted?lerp(heelAngle,carriedAngle,lift):heelAngle,
+    walkingAngle, walking));
   const start=frame(rotation+sign*bendAngle),
     end=frame(lifted?lerp(heelAngle,shinDelta,lift):heelAngle);
   if(!lifted){
@@ -1711,7 +1719,13 @@ function updateTorsoMaterial(node,warp) {
     jumpsuit:decorationColors.jumpsuit,'navy-jumpsuit':decorationColors.navyJumpsuit};
   const color=colors[selectedDecorations.pants];
   const patterned=selectedDecorations.pants==='loose-wide-pants';
-  if(torsoMaterial.upperSkin)torsoMaterial.upperSkin.style.display=patterned?'':'none';
+  if(torsoMaterial.upperSkin){
+    torsoMaterial.upperSkin.style.display=patterned?'':'none';
+    // The torso above the waistband is bare skin, so it follows the chosen
+    // skin color instead of the default grey.
+    torsoMaterial.upperSkin.setAttribute('fill',skinColor());
+  }
+  torsoMaterial.upper?.forEach(stop=>stop.setAttribute('stop-color',skinColor()));
   if(!color){node.setAttribute('fill',skinColor());return;}
   const point=x=>applyDragPose(warp(x,110.5,'body'),x,110.5,'body',warp);
   const a=point(27.7),b=point(65.9),span=Math.hypot(b.x-a.x,b.y-a.y)||1;
@@ -2308,7 +2322,64 @@ function startSpring() {
 // [second, x, y, angle] samples, in the same units a drag produces. Every
 // track starts and ends at the rest pose, so playing one always hands the
 // character back exactly as it was found.
+// Two alternating steps per cycle; entry/exit are outside the repeated gait.
+function createWalkRightMotion(cycles = 2) {
+  const cycleDuration = 1.32, entry = .32, exit = .38;
+  const samplesPerCycle = 80;
+  const tracks = Object.fromEntries(
+    ['leftLeg', 'rightLeg', 'leftHand', 'rightHand', 'head'].map(part => [part, []]));
+  const ease = t => t * t * (3 - 2 * t);
+  const foot = phase => {
+    phase = ((phase % 1) + 1) % 1;
+    // Swing occupies 40% of the stride. The remaining 60% is support:
+    // the planted foot travels backwards relative to the walking body.
+    if (phase < .4) {
+      const t = phase / .4;
+      return [-14 + 28 * ease(t), -11 * Math.sin(Math.PI * t) ** 2];
+    }
+    return [14 - 28 * (phase - .4) / .6, 0];
+  };
+  const gait = phase => {
+    const left = foot(phase), right = foot(phase + .5);
+    const arm = Math.cos(2 * Math.PI * (phase - .2));
+    return {
+      // Narrow the wide resting stance before walking. Both feet then
+      // follow the same forward swing instead of opening out sideways.
+      leftLeg: [16 + left[0], left[1]],
+      rightLeg: [-16 + right[0], right[1]],
+      leftHand: [-9 * arm, -2 - 2 * arm],
+      rightHand: [9 * arm, -2 + 2 * arm],
+      // Weight drops just after contact and rises over the supporting leg.
+      head: [4 + 1.5 * Math.sin(phase * 2 * Math.PI),
+        -3 + 1.5 * Math.cos(4 * Math.PI * (phase - .43))],
+    };
+  };
+  const add = (time, poses, weight = 1) => {
+    for (const [part, values] of Object.entries(poses)) {
+      tracks[part].push([Number(time.toFixed(6)),
+        ...values.map(value => Number((value * weight).toFixed(6))), 0]);
+    }
+  };
+  for (let i = 0; i < 16; i++) add(entry * i / 16, gait(0), ease(i / 16));
+  for (let i = 0; i <= cycles * samplesPerCycle; i++) {
+    add(entry + i * cycleDuration / samplesPerCycle, gait(i / samplesPerCycle));
+  }
+  for (let i = 1; i <= 20; i++) {
+    add(entry + cycles * cycleDuration + exit * i / 20, gait(0), 1 - ease(i / 20));
+  }
+  return {
+    id: 'walk-right',
+    name: `向右走路（${cycles * 2}步）`,
+    duration: entry + cycles * cycleDuration + exit,
+    walkBlend: [[0,0], [entry,1], [entry + cycles * cycleDuration,1],
+      [entry + cycles * cycleDuration + exit,0]],
+    eased: true,
+    tracks,
+  };
+}
+
 const motionLibrary = [
+  createWalkRightMotion(2),
   {
     id: 'wave',
     name: '打招呼',
@@ -2487,18 +2558,23 @@ function stopMotion() {
   });
 }
 
-function stepMotion(time) {
-  const elapsed = (time - motionStart) / 1000;
-  const finished = elapsed >= playingMotion.duration;
-  const at = Math.min(elapsed, playingMotion.duration);
-  for (const [part, track] of Object.entries(playingMotion.tracks)) {
+function applyMotionPose(motion, at) {
+  for (const [part, track] of Object.entries(motion.tracks)) {
     let pose = dragPoses.find(entry => entry.part === part);
     if (!pose) {
       pose = createDragPose(part);
       dragPoses.push(pose);
     }
-    [pose.x, pose.y, pose.angle] = sampleTrack(track, at, playingMotion.eased);
+    pose.walkBlend = motion.walkBlend ? sampleTrack(motion.walkBlend, at, false)[0] : 0;
+    [pose.x, pose.y, pose.angle] = sampleTrack(track, at, motion.eased);
   }
+}
+
+function stepMotion(time) {
+  const elapsed = (time - motionStart) / 1000;
+  const finished = elapsed >= playingMotion.duration;
+  const at = Math.min(elapsed, playingMotion.duration);
+  applyMotionPose(playingMotion, at);
   if (finished) {
     // The last keyframe is the rest pose; drop the poses so the character is
     // back to its untouched state rather than held at a zero offset.
@@ -2911,7 +2987,7 @@ function update() {
     node.setAttribute('d', transformed);
     if(index===1||index===-1&&node.getAttribute('stroke')==='none')
       node.setAttribute('fill',skinColor());
-    if(index===8)node.setAttribute('fill',selectedDecorations.suit==='milk-frog'?milkFrogColors.eye:'white');
+    if(index===8)node.setAttribute('fill',selectedDecorations.skin==='milk-frog'?milkFrogColors.eye:'white');
   });
   scarfPaths.forEach(({node})=>{
     node.style.display=selectedDecorations.neck==='scarf'?'':'none';
@@ -3088,7 +3164,7 @@ function update() {
   if(bellyPatch){
     bellyPatch.setAttribute('d',torsoGarmentPath(milkFrogBellySource,warp));
     bellyClip.setAttribute('d',torso.node.getAttribute('d'));
-    bellyPatch.style.display=selectedDecorations.suit==='milk-frog'?'':'none';
+    bellyPatch.style.display=selectedDecorations.skin==='milk-frog'?'':'none';
   }
   garmentPaths.pants.setAttribute('d',garmentPath(pantsSource,warp));
   garmentPaths.pants.setAttribute('fill',widePants?widePantsPaint():decorationColors.pants);
@@ -3402,15 +3478,22 @@ function resetControls() {
 function renderDecorationOptions() {
   const selected=selectedDecorations[activeDecorationCategory];
   decorationOptions.innerHTML = [
-    `<button type="button" class="decoration-option" data-option="none" aria-pressed="${!selected}"><span class="empty-icon" aria-hidden="true">—</span><span>${activeDecorationCategory==='suit'?'不使用套装':'不穿戴'}</span></button>`,
+    `<button type="button" class="decoration-option" data-option="none" aria-pressed="${!selected}"><span class="empty-icon" aria-hidden="true">—</span><span>${activeDecorationCategory==='suit'?'不使用套装':activeDecorationCategory==='skin'?'默认肤色':'不穿戴'}</span></button>`,
     ...decorationCatalog[activeDecorationCategory].map(({id,name,icon})=>
       `<button type="button" class="decoration-option" data-option="${id}" aria-pressed="${selected===id}"><img src="${icon}" alt="" /><span>${name}</span></button>`),
   ].join('');
 }
 
 function applyDecorationSelection(category,value) {
+  if(category==='skin') {
+    // Skin is only the frog's own color, so it never conflicts with clothing.
+    selectedDecorations.skin=value;
+    return;
+  }
   if(category==='suit') {
+    const skin=selectedDecorations.skin;
     for(const key of Object.keys(selectedDecorations))selectedDecorations[key]=null;
+    selectedDecorations.skin=skin;
     selectedDecorations.suit=value;
     setHatSelection(null);
   } else {
@@ -3748,7 +3831,8 @@ fetch('./svg/参考.svg')
       return stop;
     });
     defs.appendChild(materialGradient);
-    torsoMaterial={gradient:materialGradient,lower:materialStops.slice(2)};
+    torsoMaterial={gradient:materialGradient,
+      upper:materialStops.slice(0,2),lower:materialStops.slice(2)};
     const fabric=document.createElementNS(SVG_NS,'pattern');
     fabric.id='loose-pants-fabric';
     fabric.setAttribute('patternUnits','userSpaceOnUse');
