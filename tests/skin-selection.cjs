@@ -27,5 +27,5 @@ assert.equal(result.afterShirt.skin,'milk-frog','Choosing a single item keeps th
 assert.equal(result.shirtColor,'#e9ab24');
 assert.equal(result.bare.skin,null);assert.equal(result.normalColor,'#C5C5C5');
 assert.equal(result.bare.shirt,'coral-tee','Removing the skin leaves the clothes on');
-assert.equal(result.catalog,0,'The suit category is kept but empty');
-console.log('Milk frog is a skin: it recolors the frog, conflicts with no clothing, and the suit category stays empty.');
+assert.ok(result.catalog>0,'The suit category contains wearable outfits');
+console.log('Milk frog is a skin: it recolors the frog, conflicts with no clothing, and clothing suits remain available.');

@@ -1,0 +1,40 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const path=require('node:path');
+const inputs=['body','width','arms','legs','head'].map(key=>({dataset:{control:key},value:'100'}));
+const context=vm.createContext({document:{querySelector:()=>({setAttribute(){}}),querySelectorAll:()=>inputs},requestAnimationFrame:()=>1,console});
+vm.runInContext(fs.readFileSync(path.join(__dirname,'../script.js'),'utf8').split('resetButton.addEventListener')[0],context);
+const result=JSON.parse(vm.runInContext(`JSON.stringify((()=>{
+  applyDecorationSelection('skin','milk-frog');
+  selectedDecorations.outerwear='green-vest';selectedDecorations.gloves='plain';
+  applyDecorationSelection('suit','navy-suit');
+  const full={...selectedDecorations};
+  const pieces=decorationCatalog.suit.find(s=>s.id==='navy-suit').pieces;
+  const registered=Object.entries(pieces).every(([category,id])=>decorationCatalog[category].some(p=>p.id===id));
+  const covered=pantsCoverThigh(),paint=widePantsPaint();
+  applyDecorationSelection('neck',null);
+  const noTie={...selectedDecorations};
+  applyDecorationSelection('suit',null);
+  const cleared={...selectedDecorations};
+  for(const [category,id] of Object.entries(pieces))applyDecorationSelection(category,id);
+  const individual={...selectedDecorations};
+  return {full,pieces,registered,covered,paint,noTie,cleared,individual};
+})())`,context));
+assert.equal(result.full.suit,'navy-suit');
+assert.equal(result.full.skin,'milk-frog');
+assert.equal(result.full.helmet,null);assert.equal(result.full.outerwear,null);assert.equal(result.full.gloves,null);
+assert.ok(result.registered,'Every suit item is also individually selectable');
+assert.equal(result.full.neck,null,'The suit leaves the neck slot free');
+assert.equal(vm.runInContext("decorationCatalog.neck.some(item=>item.id==='red-tie')",context),false,'The tie is part of the jacket, not a neck accessory');
+assert.ok(result.covered,'Suit trousers use continuous leg coverage and hip masking');
+assert.equal(result.paint,'#454963');
+assert.equal(result.noTie.suit,null,'An individual change exits the preset');
+assert.equal(result.noTie.neck,null);
+for(const key of ['shirt','pants','shoes'])assert.equal(result.noTie[key],result.pieces[key],'Changing neckwear keeps the suit pieces');
+for(const [key,value] of Object.entries(result.cleared))assert.equal(value,key==='skin'?'milk-frog':null);
+for(const [key,id] of Object.entries(result.pieces))assert.equal(result.individual[key],id);
+assert.equal(result.individual.suit,null);
+for(const filename of ['navy-suit','suit-jacket','suit-trousers','black-dress-shoes']){
+ const icon=fs.readFileSync(path.join(__dirname,'../svg',filename+'.svg'),'utf8');
+ assert.ok(icon.includes('<svg')&&!/NaN|Infinity/.test(icon),'Generated suit thumbnails contain finite SVG');
+}
+console.log('Navy suit: three registered pieces with the tie integrated into the jacket, preserved skin, cleared conflicts, independent selection/removal and valid thumbnails.');

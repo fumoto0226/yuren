@@ -42,8 +42,13 @@ const art = vm.runInContext(`(() => {
         garmentPath(source,warp)).join(' '),
       hem: garmentPath(vestHemSource,warp),
     },
+    suit:{front:garmentPath(suitFrontSource,warp),
+      edges:garmentPath(suitFrontEdgesSource,warp),hem:garmentPath(suitHemSource,warp),
+      collar:Object.values(suitCollarSources).map(source=>garmentPath(source,warp)),
+      tie:Object.values(tieSources).map(source=>garmentPath(source,warp)),
+      },
     greenVest: Object.values(greenVestSources).map(source=>garmentPath(source,warp)),
-    redTriangle: torsoGarmentPath(redTriangleSource,warp,true),
+    redTriangle: redTrianglePath(warp),
     redThong: torsoGarmentPath(redThongSource(100),warp),
     colors: Object.assign({},decorationColors),
     tee: {
@@ -187,7 +192,7 @@ const fabricLegThumbnail=(leg,index,id,widths)=>{
 const fabricContent=vm.runInContext('loosePantsFabricContent',context);
 const widePantsThumbnail=(id,flare,widths,viewBox)=>{
   const patterned=id==='loose-wide-pants';
-  const paint=patterned?'url(#loose-pants-fabric)':art.colors.widePants;
+  const paint=patterned?'url(#loose-pants-fabric)':id==='suit-trousers'?art.colors.suitNavy:art.colors.widePants;
   return svg(viewBox,[
   patterned?`<defs><pattern id="loose-pants-fabric" patternUnits="userSpaceOnUse" width="24" height="32" patternTransform="translate(46.8 110.5)">${fabricContent}</pattern></defs>`:'',
   ...art.pants.legs.map((leg,index)=>clippedTube(leg,
@@ -226,7 +231,27 @@ const frogIcon=frogPaths.map((tag,index)=>{
   if(index===2)node+=`<path d="${frogBelly}" fill="${frogColors.belly}"/>`;
   return node;
 }).join('')+(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'');
+const tieContent=art.suit.tie.map(d=>`<path d="${d}" fill="${art.colors.tieRed}" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" paint-order="stroke fill"/>`).join('');
+const suitJacketContent = [
+  ...art.shirt.arms.map((arm,index)=>clippedTube(arm,limbCuff(arm,31),
+    art.colors.suitNavy,`suit-sleeve-${index}`)+line(vm.runInContext(
+      'cuffPath(thumbArm,31)',Object.assign(context,{thumbArm:arm})))),
+  `<path d="${art.shirt.fill}" fill="${art.colors.suitNavy}"/>`,
+  `<path d="${art.suit.front}" fill="white"/>`,
+  ...art.suit.collar.map(d=>`<path d="${d}" fill="white"/>`),
+  line(art.suit.edges),line(art.shirt.sides),line(art.shirt.top),line(art.suit.hem),tieContent,
+].join('');
+
+const suitWidths=vm.runInContext('Array.from({length:32},(_,i)=>wideLegExtraWidth(i,3.5))',context);
+const suitPantsIcon=widePantsThumbnail('suit-trousers',3.5,suitWidths,'8 108 86 80');
+const suitPantsContent=suitPantsIcon.replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'');
+const dressShoesContent=art.pants.legs.map(leg=>
+  `<path d="${leg.bootFill}" fill="${art.colors.dressShoes}"/>`+line(leg.bootOutline)+seam(leg)).join('');
 const thumbnails = {
+  'suit-jacket':svg('-2 53 104 63',suitJacketContent),
+  'suit-trousers':svg('8 108 86 80',suitPantsContent),
+  'black-dress-shoes':svg('-2 176 104 20',dressShoesContent),
+  'navy-suit':svg('-2 53 104 144',dressShoesContent+suitPantsContent+suitJacketContent),
   'loose-tee':looseTopThumbnail('loose-tee'),
   'loose-long-sleeve':looseTopThumbnail('loose-long-sleeve'),
   'milk-frog':svg('-2 9 104 188',frogIcon),
@@ -333,7 +358,7 @@ const thumbnails = {
 };
 
 for (const [name, content] of Object.entries(thumbnails)) {
-  const filename=['blue-vest','green-vest','yellow-hat','yellow-tee',
+  const filename=['suit-jacket','suit-trousers','black-dress-shoes','navy-suit','blue-vest','green-vest','yellow-hat','yellow-tee',
     'patched-tee','red-tee','coral-tee','loose-tee','loose-long-sleeve','red-triangle','red-shorts',
     'pink-shorts','orange-shorts','black-shorts','wide-shorts','skirt','milk-frog',
     'red-thong','wide-pants',
