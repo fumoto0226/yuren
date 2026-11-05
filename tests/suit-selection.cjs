@@ -38,3 +38,40 @@ for(const filename of ['navy-suit','suit-jacket','suit-trousers','black-dress-sh
  assert.ok(icon.includes('<svg')&&!/NaN|Infinity/.test(icon),'Generated suit thumbnails contain finite SVG');
 }
 console.log('Navy suit: three registered pieces with the tie integrated into the jacket, preserved skin, cleared conflicts, independent selection/removal and valid thumbnails.');
+// All current and future presets must only combine catalog items that can
+// also be selected independently. A preset may not hide exclusive pieces.
+const presets=JSON.parse(vm.runInContext(`JSON.stringify(decorationCatalog.suit.map(suit=>{
+ // Each preset starts from the same skin, so that "the suit kept my skin"
+ // is checked against a known one — a preset that brings its own skin
+ // (Pochita) would otherwise leave it set for the next one in the list.
+ selectedDecorations.skin='milk-frog';
+ applyDecorationSelection('suit',suit.id);
+ const applied={...selectedDecorations};
+ const pieces=Object.entries(suit.pieces).map(([category,id])=>{
+  const entry=decorationCatalog[category]?.find(item=>item.id===id);
+  applyDecorationSelection(category,id);
+  return {category,id,icon:entry?.icon,selected:selectedDecorations[category],preset:selectedDecorations.suit};
+ });
+ return {id:suit.id,applied,pieces};
+}))`,context));
+for(const preset of presets){
+ assert.ok(preset.pieces.length>0,'Each preset declares its pieces');
+ for(const piece of preset.pieces){
+  assert.ok(piece.icon,`${preset.id}: ${piece.id} is an individual catalog item`);
+  assert.equal(preset.applied[piece.category],piece.id,'Preset applies the same individual item');
+  assert.equal(piece.selected,piece.id,'The item can be selected alone');
+  // Clothing is exclusive with a preset, so picking a piece leaves it.
+  // A skin is not clothing — it never conflicts with anything — so a
+  // preset that includes one keeps the preset when that skin is picked.
+  if(piece.category!=='skin')assert.equal(piece.preset,null);
+  assert.ok(fs.existsSync(path.join(__dirname,'..',piece.icon)),'Each piece has a thumbnail');
+ }
+}
+const king=presets.find(preset=>preset.id==='royal-suit');
+assert.equal(king.applied.helmet,'crown');assert.equal(king.applied.neck,'royal-collar');
+assert.equal(king.applied.skin,'milk-frog');
+// A preset may also bring a skin of its own, and then it replaces it.
+const pochita=presets.find(preset=>preset.id==='pochita-suit');
+assert.equal(pochita.applied.skin,'pochita');
+assert.equal(pochita.applied.helmet,'chainsaw');
+console.log('Every suit is a combination of independently selectable catalog items; royal suit includes five pieces and preserves skin.');

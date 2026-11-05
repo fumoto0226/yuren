@@ -26,7 +26,17 @@ const JAW = {corner: [40.1394, 29.4449], jaw: [32.3001, 23.0968],
 // the notch opens or closes in total, and shutting it is the bigger move.
 // MOUTH_SHUT is that 63.5 degrees exactly, so -1 brings the two jaws onto
 // each other rather than past one another.
+// The drawing's own mouth shuts flush: `MOUTH_SHUT` is exactly the 63.5
+// degrees its notch spans. A skin whose lip shape cannot take that — a
+// curve reaching past its corner, whose stroked edges then read as two
+// crossed lines — overrides it with `mouthShut` in `skinTraits`.
 const MOUTH_SHUT = 1.108, MOUTH_OPEN = .5;
+// The bat cowl's own notch is 45.9 degrees wide where the head's is 63.5,
+// so it takes that share of the jaw's swing — measured, a little under the
+// ratio itself, so that shut leaves the two points a few degrees apart
+// instead of grazing each other. Re-measure it after any change to how the
+// jaw's weights are split.
+const COWL_JAW_SHARE = .57;
 // Both lips move, the top one far less: a jaw working alone looks hinged,
 // while a little counter-swing above reads as speech. The upper lip is
 // almost twice as long as the jaw, so even this small share of the angle
@@ -35,17 +45,35 @@ const UPPER_LIP_SHARE = .16;
 // Aqua glass dome, as in the reference art (svg/toukui.svg).
 const HELMET_GLASS = '#A3EDFF', HELMET_GLASS_OPACITY = '0.45';
 const decorationCatalog = {
-  skin: [{ id: 'milk-frog', name: '奶鱼', icon: './svg/milk-frog.svg' }],
-  suit: [{id:'navy-suit', name:'藏蓝西装套装', icon:'./svg/navy-suit.svg',
-    pieces:{shirt:'suit-jacket', pants:'suit-trousers', shoes:'black-dress-shoes'}}],
-  helmet: [
+  skin: [{ id: 'milk-frog', name: '奶鱼', icon: './svg/milk-frog.svg' },
+    { id: 'pochita', name: '波吉塔皮肤', icon: './svg/pochita.svg' },
+    { id: 'flesh', name: '肉色皮肤', icon: './svg/flesh-skin.svg' },
+    { id: 'clown', name: '小丑皮肤', icon: './svg/clown-skin.svg' },
+    { id: 'alien', name: '外星皮肤', icon: './svg/alien-skin.svg' }],
+  suit: [{id:'clown-suit',name:'小丑鱼人套装',icon:'./svg/clown-suit.svg',
+    pieces:{skin:'clown',helmet:'party-hat'}},
+    {id:'shark-suit',name:'鲨鱼人套装',icon:'./svg/shark-suit.svg',
+    pieces:{skin:'flesh',helmet:'shark-hood',pants:'black-shorts'}},
+    {id:'pochita-suit',name:'波吉塔套装',icon:'./svg/pochita-suit.svg',
+    pieces:{skin:'pochita',helmet:'chainsaw'}},
+    {id:'batfish-suit',name:'蝙蝠侠鱼人套装',icon:'./svg/batfish-suit.svg',pieces:{helmet:'batfish-cowl',shirt:'batfish-armor',pants:'batfish-trousers',shoes:'batfish-boots',gloves:'batfish-gloves',cape:'charcoal-cape'}},{id:'ivory-suit',name:'白金国王套装',icon:'./svg/ivory-suit.svg',pieces:{helmet:'crown',shirt:'ivory-tunic',pants:'ivory-trousers',shoes:'dark-boots',neck:'silver-collar',cape:'crimson-cape'}},{id:'navy-suit', name:'藏蓝西装套装', icon:'./svg/navy-suit.svg',
+    pieces:{shirt:'suit-jacket', pants:'suit-trousers', shoes:'black-dress-shoes'}},
+    {id:'royal-suit',name:'红白国王套装',icon:'./svg/royal-suit.svg',
+      pieces:{helmet:'crown',shirt:'royal-coat',pants:'royal-trousers',shoes:'royal-shoes',neck:'royal-collar',cape:'crimson-cape'}}],
+  helmet: [{id:'party-hat',name:'派对帽',icon:'./svg/party-hat.svg'},
+    {id:'shark-hood',name:'鲨鱼头套',icon:'./svg/shark-hood.svg'},
+    {id:'chainsaw',name:'电锯头盔',icon:'./svg/chainsaw.svg'},
+    {id:'batfish-cowl',name:'尖耳头罩',icon:'./svg/batfish-cowl.svg'},
     { id: 'plain', name: '普通帽子', icon: './svg/toukui.svg' },
     { id: 'yellow-hat', name: '黄色宽檐帽', icon: './svg/yellow-hat.svg' },
+    { id: 'crown', name: '皇冠', icon: './svg/crown.svg' },
   ],
-  neck: [
+  neck: [{id:'silver-collar',name:'简约金色项圈',icon:'./svg/silver-collar.svg'},
+    {id:'royal-collar',name:'国王白毛领',icon:'./svg/royal-collar.svg'},
     { id: 'scarf', name: '红围巾', icon: './svg/decoration-scarf.svg' },
   ],
-  shirt: [
+  shirt: [{id:'batfish-armor',name:'鱼徽战衣',icon:'./svg/batfish-armor.svg'},{id:'ivory-tunic',name:'白金束腰阔袖上衣',icon:'./svg/ivory-tunic.svg'},
+    {id:'royal-coat',name:'国王礼服',icon:'./svg/royal-coat.svg'},
     {id:'suit-jacket', name:'藏蓝西装上衣', icon:'./svg/suit-jacket.svg'},
     { id: 'plain', name: '普通长袖上衣', icon: './svg/decoration-shirt.svg' },
     { id: 'blue-vest', name: '蓝色 V 领背心', icon: './svg/blue-vest.svg', sleeveless: true },
@@ -57,7 +85,8 @@ const decorationCatalog = {
     { id: 'loose-tee', name: '宽松T恤', icon: './svg/loose-tee.svg' },
     { id: 'loose-long-sleeve', name: '宽松长袖上衣', icon: './svg/loose-long-sleeve.svg' },
   ],
-  pants: [
+  pants: [{id:'batfish-trousers',name:'深灰战裤',icon:'./svg/batfish-trousers.svg'},{id:'ivory-trousers',name:'象牙白阔腿裤',icon:'./svg/ivory-trousers.svg'},
+    {id:'royal-trousers',name:'国王白长裤',icon:'./svg/royal-trousers.svg'},
     {id:'suit-trousers', name:'藏蓝西装长裤', icon:'./svg/suit-trousers.svg'},
     { id: 'plain', name: '紧身裤', icon: './svg/decoration-pants.svg' },
     { id: 'jumpsuit', name: '蓝色连体裤', icon: './svg/decoration-jumpsuit.svg', sleeveless: true },
@@ -73,25 +102,42 @@ const decorationCatalog = {
     { id: 'loose-wide-pants', name: '几何拼贴阔腿裤', icon: './svg/loose-wide-pants.svg' },
   ],
   outerwear: [
+    {id:'aloha-jacket',name:'藏蓝短袖外套',icon:'./svg/aloha-jacket.svg'},
+    {id:'aloha-long-jacket',name:'藏蓝长袖外套',icon:'./svg/aloha-long-jacket.svg'},
     { id: 'green-vest', name: '绿色开襟外套', icon: './svg/green-vest.svg', sleeveless: true },
   ],
-  shoes: [
+  shoes: [{id:'batfish-boots',name:'黑色战靴',icon:'./svg/batfish-boots.svg'},{id:'royal-shoes',name:'金扣礼鞋',icon:'./svg/royal-shoes.svg'},
     {id:'black-dress-shoes', name:'黑皮鞋', icon:'./svg/black-dress-shoes.svg'},
     { id: 'plain', name: '普通鞋子', icon: './svg/decoration-shoes.svg' },
     { id: 'brown-boots', name: '棕色长靴', icon: './svg/brown-boots.svg' },
+    { id: 'dark-boots', name: '深棕色长靴', icon: './svg/dark-boots.svg' },
   ],
-  gloves: [{ id: 'plain', name: '普通手套', icon: './svg/decoration-gloves.svg' }],
+  cape: [{id:'crimson-cape',name:'绯红披风',icon:'./svg/crimson-cape.svg'},
+    {id:'charcoal-cape',name:'漆黑披风',icon:'./svg/charcoal-cape.svg'},
+    {id:'azure-cape',name:'湛蓝披风',icon:'./svg/azure-cape.svg'},
+    {id:'solid-red-cape',name:'纯色红披风',icon:'./svg/solid-red-cape.svg'},
+    {id:'solid-blue-cape',name:'纯色蓝披风',icon:'./svg/solid-blue-cape.svg'},
+    {id:'solid-black-cape',name:'纯色黑披风',icon:'./svg/solid-black-cape.svg'}],
+  gloves: [{id:'batfish-gloves',name:'黑色手套',icon:'./svg/batfish-gloves.svg'},{ id: 'plain', name: '普通手套', icon: './svg/decoration-gloves.svg' }],
 };
 const decorationColors = {
+  batArmor:'#535963',batBlack:'#292d35',batGold:'#FDE400',
+  sharkHood:'#1b3a5c', fleshSkin:'#EDD6D6',
+  clownWhite:'#ffffff', clownRed:'#e8342b', partyHat:'#ffd84d',
+  alienGreen:'#4BCD74',
   shirt: '#7d9ea2', pants: '#526a78', shoes: '#4e6069', gloves: '#c8a27d',
   jumpsuit: '#2425d9', scarf: '#d84f50',
   blueVest: '#2e5bd5', yellowTee: '#ffe144', patchedTee: '#756e6c',
   redShorts: '#d44a49', pinkShorts: '#ee31ac',
   greenVest: '#278b20', orangeShorts: '#eb8135', brownBoots: '#603d26',
-  yellowHat: '#ffe047',
+  // The same tall boot in the court boot's near-black brown, which is what
+  // the kings wear.
+  darkBoots: '#413039',
+  yellowHat: '#ffe047', crown: '#ffd400',
   navyJumpsuit: '#303578', redTee: '#d80c0c', blackShorts: '#100b0d',
   redThong: '#c60000', redTriangle: '#c52323', coralTee: '#f26d58',
   looseTee:'#a9b89c', looseLongSleeve:'#859eb4',
+  royalRed:'#b72c3b',royalWhite:'#fff5e4',royalGold:'#dfb553',royalShoe:'#29212a',
   suitNavy:'#454963', dressShoes:'#101011', tieRed:'#f51b20',
   widePants: '#3e4a72', wideShorts: '#547985', skirt: '#547985',
 };
@@ -184,14 +230,63 @@ function legFabricPaths(shape,side,legs=100) {
 function widePantsPaint() {
   return selectedDecorations.pants==='loose-wide-pants'
     ?'url(#loose-pants-fabric)':selectedDecorations.pants==='suit-trousers'
-      ?decorationColors.suitNavy:decorationColors.widePants;
+      ?decorationColors.suitNavy:['royal-trousers','ivory-trousers'].includes(selectedDecorations.pants)
+        ?decorationColors.royalWhite:decorationColors.widePants;
 }
 const selectedDecorations = { skin:null, suit:null, helmet: 'plain', neck: null, shirt: null, pants: null,
-  outerwear: null, shoes: null, gloves: null };
+  cape:null, outerwear: null, shoes: null, gloves: null };
 let activeDecorationCategory = 'skin';
 const milkFrogColors={skin:'#e9ab24',belly:'#f6d69e',eye:'#369b4b'};
 const milkFrogBellySource='M47 78C36 78 34 96 35.5 108C36.4 117 40 119 47 119C54 119 57.6 117 58.5 108C60 96 58 78 47 78Z';
-function skinColor(){return selectedDecorations.skin==='milk-frog'?milkFrogColors.skin:'#C5C5C5';}
+// The fish's horn comes off for anything worn in its place: the crown and
+// the cowl cover it, and the chainsaw's grey housing sits exactly where it
+// used to be. A skin never removes it — Pochita keeps the horn, in his own
+// colour, whenever the chainsaw is off.
+// Hats that sit over the horn and leave nothing of it showing.
+const hornCovered = (helmet = selectedDecorations.helmet) =>
+  helmet === 'crown' || helmet === 'batfish-cowl' || helmet === 'chainsaw';
+// Hats that are the horn, repainted: the party hat and the shark hood.
+const hornWorn = (helmet = selectedDecorations.helmet) =>
+  helmet === 'party-hat' || helmet === 'shark-hood';
+// The alien's antenna stands in for the horn, so every hat treats the two
+// the same: one that covers the horn covers the antenna, and one that is
+// the horn takes the antenna's place and brings the horn itself back.
+const antennaShown = (helmet = selectedDecorations.helmet) =>
+  !!skinTrait('antenna') && !hornCovered(helmet) && !hornWorn(helmet);
+function hornHidden(helmet = selectedDecorations.helmet) {
+  return hornCovered(helmet) || antennaShown(helmet);
+}
+// Everything a skin changes, in one place, so adding one is a single entry
+// rather than a condition sprinkled through the renderer. `mouthShut` is
+// how far that skin's jaw closes: the drawing's own mouth shuts flush,
+// while Pochita's curved lip has to stop short or its two stroked edges
+// read as crossed lines. There is still only one talking motion — it asks
+// for "shut" and the skin decides what shut means.
+// Built on first use: the drawings it names are defined further down.
+let skinTraits;
+function skinTrait(name) {
+  skinTraits ||= {
+    'milk-frog': {color: milkFrogColors.skin, eye: milkFrogColors.eye, belly: true},
+    pochita: {color: pochitaColors.skin, eyeWhite: pochitaEyeWhite,
+      pupil: pochitaPupil, lip: POCHITA_LIP, tail: true, mouthShut: .76},
+    flesh: {color: decorationColors.fleshSkin},
+    clown: {color: decorationColors.clownWhite, marks: true},
+    alien: {color: decorationColors.alienGreen, eye: 'black', pupil: {rx: 1.31738,
+      ry: 1.18774, dy: 0, color: 'white'}, antenna: true},
+  };
+  // A hood that encloses the whole head leaves none of the face showing, so
+  // the skin's facial features stop applying: the clown's nose and cheek
+  // under the cowl, Pochita's eye and curved lip, the alien's antenna. What
+  // the body still shows — its colour, belly and tail — is untouched.
+  if (FACE_TRAITS.includes(name) && fullHood()) return undefined;
+  return skinTraits[selectedDecorations.skin]?.[name];
+}
+// Hoods that are a head of their own rather than something worn on one.
+const FACE_TRAITS = ['eye', 'eyeWhite', 'pupil', 'lip', 'marks', 'mouthShut',
+  'antenna'];
+const fullHood = (helmet = selectedDecorations.helmet) =>
+  helmet === 'batfish-cowl' || helmet === 'shark-hood';
+function skinColor(){ return skinTrait('color') || '#C5C5C5'; }
 let bellyPatch,bellyClip;
 
 const clamp01 = value => Math.max(0, Math.min(1, value));
@@ -299,20 +394,37 @@ function buildWarp(config) {
   // head fill, its outline and anything else drawn on the head all open
   // together and the head slider scales the result like any other feature.
   const mouth = mouthPose();
-  const swing = -mouth * (mouth >= 0 ? MOUTH_OPEN : MOUTH_SHUT);
+  const swing = -mouth * (mouth >= 0 ? MOUTH_OPEN : (skinTrait('mouthShut') || MOUTH_SHUT));
   // The two shares add up to the whole swing, so the limits above stay the
   // angle the notch actually opens or closes by.
   const lowerSwing = swing / (1 + UPPER_LIP_SHARE);
   const upperSwing = -UPPER_LIP_SHARE * lowerSwing;
-  const openJaw = (x, y) => {
-    // The lower jaw is the prong left of the notch. Its fade has to reach
-    // well below the corner, or the jaw's outer edge stays pinned while its
-    // point swings and the prong buckles into a nub instead of swinging.
-    // The upper lip is the spike to the right, and its own fade has to die
-    // out quickly along the head's right edge, which is not part of it.
-    const lower = smooth((40 - y) / 15) * smooth((JAW.corner[0] - x) / 2.5);
-    const upper = smooth((24 - y) / 14) * smooth((54 - x) / 10);
-    const angle = lower * lowerSwing + upper * upperSwing;
+  // Which side of the notch a point is on, measured against the line that
+  // bisects it: negative on the lower jaw, positive on the upper lip. A
+  // plain vertical split through the corner put Pochita's curved upper lip
+  // on the wrong side — its control points sit left of the corner even
+  // though the lip itself runs up to the right — and the jaw curled the
+  // lip into a hook every time he spoke.
+  const unit = (x, y) => {
+    const length = Math.hypot(x, y) || 1;
+    return [x / length, y / length];
+  };
+  const [lowerX, lowerY] = unit(JAW.jaw[0] - JAW.corner[0], JAW.jaw[1] - JAW.corner[1]);
+  const [upperX, upperY] = unit(JAW.spike[0] - JAW.corner[0], JAW.spike[1] - JAW.corner[1]);
+  const [bisectX, bisectY] = unit(lowerX + upperX, lowerY + upperY);
+  const notchSide = (x, y) =>
+    bisectX * (y - JAW.corner[1]) - bisectY * (x - JAW.corner[0]);
+  const openJaw = (x, y, scale = 1) => {
+    // The lower jaw is the prong on the near side of the notch. Its fade
+    // has to reach well below the corner, or the jaw's outer edge stays
+    // pinned while its point swings and the prong buckles into a nub.
+    // The upper lip is the spike on the far side, and its own fade has to
+    // die out quickly along the head's right edge, which is not part of it.
+    const side = notchSide(x, y);
+    const lower = smooth((40 - y) / 15) * smooth(-side / 2.5);
+    const upper = smooth((24 - y) / 14) * smooth((54 - x) / 10)
+      * smooth(side / 2.5);
+    const angle = (lower * lowerSwing + upper * upperSwing) * scale;
     if (!angle) return [x, y];
     const [hx, hy] = JAW.corner, cos = Math.cos(angle), sin = Math.sin(angle);
     return [hx + (x - hx) * cos - (y - hy) * sin,
@@ -321,6 +433,19 @@ function buildWarp(config) {
 
   return (x, y, role) => {
     if (swing && role === 'head') [x, y] = openJaw(x, y);
+    // A cowl opens with the jaw too, but by less: its own notch spans about
+    // 46 degrees against the head's 63.5, so turning it by the head's full
+    // swing drives its two points straight through each other. Scaled to
+    // its own notch they shut level and never cross.
+    if (role === 'headShell') {
+      if (swing) [x, y] = openJaw(x, y, COWL_JAW_SHARE);
+      role = 'head';
+    }
+    // Worn on top of the head rather than over its face: it scales and
+    // moves with the head but the jaw never touches it. The chainsaw
+    // reaches down either side of the mouth, so on a jaw-following role
+    // its teeth would swing with every syllable.
+    if (role === 'headRigid') role = 'head';
     // Helmet: keep the lower rim locked to the shoulders, but spread the blend
     // over most of the lower arc. The earlier short 46–56 blend produced a
     // visible kink at small sizes; this longer transition preserves curvature.
@@ -476,6 +601,7 @@ let lastHat = 'plain';
 let scarfPaths = [];
 let outfitOverlay;
 let neckOverlay;
+let capeOverlay;
 let dragLayer;
 let activeDrag;
 let springFrame = 0;
@@ -1263,11 +1389,18 @@ function legGeometry(side, warp) {
   });
   const footStart=morph(referenceFootPoint(referenceBoot.start),bootOuter);
   const footEnd=morph(referenceFootPoint(referenceBoot.segments[3][2]),loweredInnerAnkle);
-  const foot=`M${pair(footStart)}`+dynamicBoot.map((segment,i)=>{
-    const points=segment.map((point,j)=>morph(
-      referenceFootPoint(referenceBoot.segments[i][j]),point));
-    return `C${points.map(pair).join(' ')}`;
-  }).join('');
+  const shoeCurves=dynamicBoot.map((segment,i)=>segment.map((point,j)=>morph(
+    referenceFootPoint(referenceBoot.segments[i][j]),point)));
+  const foot=`M${pair(footStart)}`+shoeCurves.map(points=>`C${points.map(pair).join(' ')}`).join('');
+  // Attach decorations to the same morphed vamp that is actually drawn.
+  const vamp=[footStart,...shoeCurves[0]];
+  const instep=bezier(vamp,.3),beforeInstep=bezier(vamp,.29),afterInstep=bezier(vamp,.31);
+  const vampTangent={x:afterInstep.x-beforeInstep.x,y:afterInstep.y-beforeInstep.y};
+  const vampTangentLength=Math.hypot(vampTangent.x,vampTangent.y)||1;
+  const instepToe={x:vampTangent.x/vampTangentLength,y:vampTangent.y/vampTangentLength};
+  const instepUp={x:-instepToe.y,y:instepToe.x};
+  if(instepUp.x*(-shoeFrame.t.x)+instepUp.y*(-shoeFrame.t.y)<0){instepUp.x*=-1;instepUp.y*=-1;}
+
   const bootFill=`${foot}Z`;
   const bootOutline=foot;
   const bootToe=referenceFootPoint(referenceBoot.segments[0][2]);
@@ -1312,12 +1445,14 @@ function legGeometry(side, warp) {
     crease+=`C${pair(first)} ${pair(second)} ${pair(p2)}`;
   }
   const creaseOpacity=smooth((1-length/restLength-.25)/.3);
-  return {hose,bootFill,bootOutline,shoeUp:{x:-shoeFrame.t.x,y:-shoeFrame.t.y},
+  return {hose,bootFill,bootOutline,shoeOut:{x:footFrame.n.x*sign,y:footFrame.n.y*sign},shoeUp:{x:-shoeFrame.t.x,y:-shoeFrame.t.y},
     bootOuter:footStart,bootInner:footEnd,bootToe,bootHeel,
     ankleOuterEdge,ankleInnerEdge,
     crease,creaseOpacity,centerline,hip,ankle,knee,
     thighLength,shinLength,boneLength,restLength,hipWidth,lifted,heelAngle,toe,
-    sole:[boot(12,-w+2),boot(12,w+5)],foot:boot(8,w+2),middle:knee};
+    sole:[boot(12,-w+2),boot(12,w+5)],foot:boot(8,w+2),
+    instep,instepAxes:{toe:instepToe,up:instepUp},
+    middle:knee};
 }
 
 function legContour(side,warp) { return legGeometry(side,warp); }
@@ -1628,6 +1763,18 @@ let shoulderMasks = [];
 let torsoSideOutline;
 let helmetBase;
 let hatPaths=[];
+let batCowlPaths=[];
+let sharkToothPaths=[];
+let clownMarkPaths=[];
+let alienAntennaPath;
+let partyHatPaths=[];
+let batCowlClipPath;
+let sharkEyeClipPath;
+let pupilClipGroup;
+let headFillNode;
+let chainsawPaths=[];
+let pochitaCordPaths=[];
+let crownPaths=[];
 let buttOutlines = [];
 let garmentPaths;
 let jumpsuitChestCutout;
@@ -1701,6 +1848,53 @@ const greenVestSources = {
   right:`M55.5 50L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}
     C66.9913 84.8335 66.1 103 65.9 112L51.7 112L47 75Z`,
 };
+// Shared cloth artwork for the live outerwear and its catalog thumbnail.
+const alohaColor='#303b50';
+// Anchor both lapels to the actual neck edge; build the right one by
+// reflection so its fold and attachment cannot drift from the left.
+const alohaNeckY=x=>56.4524+(55.0466-56.4524)*(x-26.1046)/(67.7274-26.1046);
+const alohaSources={
+  left:`M26.1046 56.4524L40 ${alohaNeckY(40)}L45 66L44 112L25 112
+    C25 101 26 80 27.478 ${LEFT_ARMPIT_Y}Z`,
+  right:`M54 ${alohaNeckY(54)}L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}
+    C68.2 80 69 101 69 112L49 112L49 66Z`,
+};
+const alohaLeftCollar=`M33 ${alohaNeckY(33)}L40 ${alohaNeckY(40)}L45 66L39 72Z`;
+const alohaCollar=alohaLeftCollar+' '+transformPath(alohaLeftCollar,(x,y)=>({
+  x:94-x,y:y<60?y+alohaNeckY(94-x)-alohaNeckY(x):y,
+}));
+const alohaSleeveStyles={
+  'aloha-jacket':{end:22,flare:7},
+  'aloha-long-jacket':{end:31,flare:4},
+};
+const alohaSleeveStyle=alohaSleeveStyles['aloha-jacket'];
+// Leave the armhole open, just like looseTopSidesSource: closing each panel
+// with a stroke would draw a seam separating the shoulder from the sleeve.
+const alohaEdges=`M27.478 ${LEFT_ARMPIT_Y}C26 80 25 101 25 112L44 112L45 66L40 ${alohaNeckY(40)}L26.1046 56.4524
+  M67.5459 ${RIGHT_ARMPIT_Y}C68.2 80 69 101 69 112L49 112L49 66L54 ${alohaNeckY(54)}L67.7274 55.0466`;
+function alohaBodyMarkup(warp){
+  const d=Object.values(alohaSources).map(source=>torsoGarmentPath(source,warp,true)).join('');
+  const collar=torsoGarmentPath(alohaCollar,warp,true);
+  return `<path d="${d}" fill="${alohaColor}"/>`
+    +`<path d="${torsoGarmentPath(alohaEdges,warp,true)}" fill="none" stroke="black" stroke-width="1" stroke-linejoin="round"/>`
+    +`<path d="${collar}" fill="${alohaColor}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`;
+}
+function alohaSleeveMarkup(shape,id,style=alohaSleeveStyle){
+  // Use the loose tee's overlapping hose segments, smooth flare, and cuff.
+  // No closed polygon or transverse stroke at the shoulder attachment.
+  const {end,flare}=style;
+  const strokes=(color,extra)=>shape.hose.slice(0,end).map(({d,width},i)=>{
+    // Earlier round segments can also cross the cuff when the elbow folds.
+    // Clip the entire cloth, including every black and colored stroke.
+    const clip=` clip-path="url(#${id})"`;
+    const shoulder=color==='black'&&i<6&&/^(left|right)-/.test(id)
+      ?` mask="url(#${id.split('-')[0]}-shoulder-mask)"`:'';
+    return `<path d="${d}" fill="none" stroke="${color}" stroke-width="${width+extra+sleeveExtraWidth(i,end,flare)}" stroke-linecap="${i===0||i>=end-4?'butt':'round'}" stroke-linejoin="round"${clip}${shoulder}/>`;
+  }).join('');
+  return `<defs><clipPath id="${id}"><polygon points="${limbClipPoints(shape,end,false)}"/></clipPath></defs>`
+    +strokes('black',2)+strokes(alohaColor,0)
+    +`<path d="${cuffPath(shape,end,flare)}" fill="none" stroke="black" stroke-width="1"/>`;
+}
 // Brim first, then the round crown. Both follow the head's deformation.
 const yellowHatSources = {
   brim:`M60 8C66 6 79 22 83 33C88 44 91 59 85 62
@@ -1708,6 +1902,414 @@ const yellowHatSources = {
   crown:`M79 20C86 20 91 25 91 33C91 40.5 86 45 79 45
     C72 45 67 40.5 67 33C67 25 72 20 79 20Z`,
 };
+// A crown worn on the side of the head, with its band tucked behind it so
+// the head's own outline crosses in front: only the three points and their
+// balls show. It replaces the fish's horn, which is hidden while it is on.
+const circleSource = (cx, cy, r) => {
+  const k = .5523 * r;
+  return `M${cx + r} ${cy}C${cx + r} ${cy + k} ${cx + k} ${cy + r} ${cx} ${cy + r}`
+    + `C${cx - k} ${cy + r} ${cx - r} ${cy + k} ${cx - r} ${cy}`
+    + `C${cx - r} ${cy - k} ${cx - k} ${cy - r} ${cx} ${cy - r}`
+    + `C${cx + k} ${cy - r} ${cx + r} ${cy - k} ${cx + r} ${cy}Z`;
+};
+// Crown geometry from fish2-4.svg. Match the fish's notch landmarks to
+// this character with one uniform scale: preserve angles, bead proportions
+// and the reference's outline weight instead of redrawing the silhouette.
+const crownScale = (44.2249 - 40.1394) / (9.91741 - 8.33944);
+const crownReferencePoint = (x,y) => ({
+  x:44.2249 + (x - 9.91741) * crownScale,
+  y:11.0386 + (y - 2.61328) * crownScale,
+});
+const crownPoints = [[22.1481,11.3745],[24.0358,14.5483],[23.3981,18.2236]]
+  .map(([x,y])=>Object.values(crownReferencePoint(x,y)));
+const crownBeadRadius = .715332 * crownScale;
+const crownStrokeWidth = .4 * crownScale;
+const crownSources = {
+  band:transformPath('M18.8662 18.9204C18.7748 17.2284 18.5207 13.447 18.2338 11.8578'
+    +'L21.9258 11.4614L20.7792 13.7871L23.9679 14.6338L20.8963 16.315'
+    +'L23.5017 18.3045L18.8662 18.9204Z',crownReferencePoint),
+  ...Object.fromEntries(crownPoints.map(([x,y],index)=>
+    [`ball${index}`,circleSource(x,y,crownBeadRadius)])),
+};
+// Royal clothing decorations share their definitions with the thumbnails.
+// All garment edges follow the torso; the separate ermine collar uses neck layering.
+const royalGarmentSpecs = {
+  royalPlacket:{category:'shirt',fill:'royalGold',source:'M44.5 59L49.5 59L49.5 106L44.5 106Z'},
+  royalHem:{category:'shirt',fill:'royalWhite',source:'M27.7 105L65.9 105L65.9 112L27.7 112Z',outline:true},
+  royalHemSpots:{category:'shirt',fill:'ink',source:[32,42,52,62].map(x=>`M${x} 107L${x-1} 109L${x+1} 109Z`).join('')},
+  royalButtons:{category:'shirt',fill:'royalRed',source:[80,89,98].map(y=>circleSource(47,y,1.1)).join('')},
+  royalStandCollar:{category:'shirt',fill:'#791d30',outline:true,
+    source:'M36 56.1183L43 55.8819L47 60L41 64L36 56.1183Z M51 55.6117L58 55.3753L53 64L47 60L51 55.6117Z'},
+  royalCollar:{category:'neck',fill:'royalWhite',outline:true,
+    source:'M26.1046 56.4524L35 56L47 63L59 55.5L67.7274 55.0466L66.5 65C61 67 55 71 47 75C39 72 32 68 27.5 66Z'},
+  royalCollarSpots:{category:'neck',fill:'ink',source:[[31,61],[37,65],[43,69],[51,69],[57,65],[63,60]].map(([x,y])=>`M${x} ${y-1}L${x-1} ${y+1}L${x+1} ${y+1}Z`).join('')},
+  royalBrooch:{category:'neck',fill:'royalGold',outline:true,source:circleSource(47,66,2.5)},
+  royalJewel:{category:'neck',fill:'royalRed',source:'M47 64.3L48.3 66L47 67.7L45.7 66Z'},
+};
+// Shared source geometry for the second king outfit and its thumbnails.
+const ivoryBodySource=shirtSource;
+const ivorySidesSource=shirtSidesSource;
+// The alien, from the user's fish1-8.svg: green hide, a black eye with a
+// white pupil, and a curled antenna with a bead on the end where the fish
+// keeps its horn.
+// Lifted 3 units and turned 10 degrees anticlockwise about its own root, so
+// it leans back off the brow the way the reference does.
+const alienAntennaSource='M66.013 42.961C70.444 41.414 75.246 43.792 76.561 45.004'
+  +'C77.758 44.58 79.088 45.167 79.574 46.355C80.072 47.578 79.485 48.974 '
+  +'78.263 49.474C77.039 49.973 75.642 49.387 75.142 48.164'
+  +'C74.935 47.656 74.914 47.118 75.05 46.626C72.141 46.221 68.04 44.901 '
+  +'67.173 45.803C66.189 46.829 65.99 44.336 66.013 42.961Z';
+
+// The clown: a white fish with a red ball on the point of its nose — the
+// head's own spike — and a red spot on its cheek. Both ride on the head,
+// so the nose ball moves with the upper lip when it talks.
+const clownMarkSources = [
+  {source: circleSource(44.2249, 11.0386, 3.4), outline: true},
+  {source: circleSource(43.6, 41.6, 3), outline: false},
+];
+// The party hat is the fish's own horn in yellow with spots on it and a
+// bobble on the point, so it warps with the head like the horn does.
+const partyHatTrim = [
+  {source: circleSource(70.4, 39.4, .95), fill: '#2ec4f1'},
+  {source: circleSource(72.6, 43.1, .95), fill: '#2ecc40'},
+  {source: circleSource(69.6, 45.6, .95), fill: '#e040fb'},
+  {source: circleSource(78.6, 41.3, 1.9), fill: '#e040fb', outline: true},
+];
+
+// The shark hood, from the user's fish2-5.svg. Scaled onto the project's
+// coordinates it turns out to be the character's own head and horn, so the
+// hood is those paths repainted rather than a second copy of them — they
+// then open and close with the jaw exactly as the head does. All the file
+// really adds is the row of teeth, which are drawn behind the head so the
+// jaws close over them.
+// The hood's eye is the character's own, with its upper arc replaced by a
+// straight cut: the lid comes down across the top of the eye, which is
+// what gives the shark its glare.
+const sharkEyeWhite='M54.848 29.936C57.19 32.83 59.239 35.204 60.652 36.789'
+  +'C59.661 38.434 57.805 39.519 56.991 39.843C55.632 40.383 52.381 40.458 '
+  +'50.565 38.468C48.749 36.477 49.071 33.382 52.009 31.136'
+  +'C52.764 30.565 53.771 30.133 54.848 29.936Z';
+const sharkToothSources = [
+  'M37.971 11.797C39.933 11.935 44.865 12.2 45.232 12.159L44.316 15.209L37.971 11.797Z',
+  'M37.354 14.753C39.316 14.891 44.248 15.157 44.614 15.115L43.699 18.166L37.354 14.753Z',
+  'M36.368 18.165C38.33 18.303 43.262 18.568 43.628 18.527L42.713 21.577L36.368 18.165Z',
+  'M35.817 21.578C37.779 21.716 42.711 21.981 43.077 21.94L42.162 24.99L35.817 21.578Z',
+];
+
+// Pochita, from the user's Group 497.svg, brought into the project's
+// coordinates: their export sits 25.962 lower, and its `V`/`H` commands are
+// written out as `L`, since transformPath reads only M/L/C/Z.
+// The chainsaw on the head is worn as a helmet; the orange hide, the big
+// eye and the starter cord are the skin.
+const pochitaColors = {skin:'#EB733E', casing:'#303232', blade:'#AAB3B8',
+  motor:'#3B3D40', teeth:'#D9D9D9'};
+const chainsawSources = {
+  casing:'M65.4 -7.962L65.4 30.538L41.4 36.038L36.9 28.538L36.9 -7.962'
+    +'C36.9 -24.462 66.4 -21.462 65.4 -7.962Z',
+  blade:'M61.9 -5.962L62.88 30.063L43.529 35.038L39.9 28.254L39.9 -4.761'
+    +'C39.9 -19.685 62.707 -18.173 61.9 -5.962Z',
+  motor:'M71.4 39.038C68.375 37.127 61.04 33.919 57.9 32.038L64.9 30.538'
+    +'L78.4 37.538L68.4 50.038L60.826 52.538L71.4 39.038Z',
+  // The middle tooth each side was half as long again as its neighbours,
+  // and the lowest three rows sat too far down the bar.
+  teeth:'M70.008 18.492L65.604 20.814L65.418 16.564L70.008 18.492Z'
+    +'M69.968 11.567L65.599 14.69L65.342 8.838L69.968 11.567Z'
+    +'M68.77 4.064L65.271 6.798L65.045 1.647L68.77 4.064Z'
+    +'M68.64 -1.943L65.253 1.039L64.803 -4.609L68.64 -1.943Z'
+    +'M69.52 -12.63L65.229 -7.542L62.899 -13.313L69.52 -12.63Z'
+    +'M64.223 -21.131L62.565 -13.999L58.151 -17.039L64.223 -21.131Z'
+    +'M31.796 18.416L36.402 20.738L36.596 16.488L31.796 18.416Z'
+    +'M31.839 11.491L36.407 14.614L36.676 8.762L31.839 11.491Z'
+    +'M33.091 3.988L36.75 6.722L36.986 1.571L33.091 3.988Z'
+    +'M33.226 -2.019L36.768 .964L37.239 -4.685L33.226 -2.019Z'
+    +'M32.307 -12.706L36.794 -7.618L39.23 -13.389L32.307 -12.706Z'
+    +'M37.845 -21.207L39.58 -14.075L44.195 -17.115L37.845 -21.207Z'
+    +'M45.928 -24.954L45.764 -17.616L51.007 -19.362L45.928 -24.954Z'
+    +'M55.184 -25.213L51.537 -18.843L56.978 -17.875L55.184 -25.213Z',};
+// The skin's own extras: a rounder, much larger eye, and the starter cord
+// hanging from the chest.
+const pochitaEyeWhite='M50.389 37.812C48.433 35.299 48.586 31.572 51.442 29.019'
+  +'C53.731 26.997 58.572 26.732 60.559 31.513C62.546 36.294 58.342 39.262 '
+  +'56.992 39.84C55.643 40.418 52.344 40.325 50.389 37.812Z';
+// A touch smaller than the drawing's, and lifted a little: at full size it
+// all but touched the bottom of the eye white.
+// Pochita's upper lip curves where the fish's runs straight up to its
+// spike. Only his skin wears it, so it is a swap on the way through the
+// warp rather than a change to the shared drawing: the two paths that
+// carry this stretch — the head's outline and the head fill cut from the
+// same silhouette — both match on the same text.
+const POCHITA_LIP = {
+  from:'C34.6926 25.4067 37.416 27.9423 40.1394 29.4449L44.2249 11.0386'
+    +'C50.6575 11.6957',
+  to:'C34.6926 25.4062 36.1614 27.6318 39.4004 29.0381'
+    +'C37.9585 23.6654 36.9048 12.5436 44.2249 11.038C51.4004 11.0379',
+};
+const pochitaPupil={rx:4.1, ry:4.35, dy:-.55};
+const pochitaCordSource='M47.514 130.242C45.901 134.005 44.288 149.797 46.707 153.089'
+  +'C49.127 156.382 49.53 156.449 49.731 157.726';
+const pochitaGripSource='M49.2 158.836C49.523 158.17 49.734 157.727 49.734 157.727'
+  +'C50.916 158.327 52.02 158.855 52.603 159.151C53.185 159.447 53.245 159.511 53.07 159.662'
+  +'C52.895 159.813 52.499 160.046 51.529 160.49C50.559 160.934 49.062 161.571 48.646 161.203'
+  +'C48.23 160.835 48.876 159.503 49.2 158.836Z';
+
+// The cowl the user drew (Group 98.svg), brought into the project's
+// coordinates: their export sits 1.0403 higher, and its one `H` command is
+// written out as an `L`, since transformPath reads only M/L/C/Z.
+// Everything below the cowl's own lower edge. With the cowl on, the head
+// is clipped to this, so no part of it — whatever shape a skin gives it —
+// can appear around or through the cowl: the mouth used to poke an orange
+// sliver into the notch between its two points.
+const batCowlFaceClip='M-60 47.6825L25.0987 48.4807L37.2318 47.6825'
+  +'L39.4667 51.035L54.9523 51.035L56.7084 47.6825L68.8365 48.5555'
+  +'L140 47.6825L140 320L-60 320Z';
+const batCowlSource='M37.2318 47.6825'
+  +'C35.6354 47.6825 30.9735 47.8421 25.0987 48.4807'
+  +'C24.9067 46.0085 24.5024 42.2059 25.0987 37.1092'
+  +'C25.4825 33.8284 25.8769 32.8972 27.6829 27.6832'
+  +'C28.3758 23.959 29.1718 18.5325 29.8619 13.7534'
+  +'L39.4667 26.1775L42.9122 2.2288'
+  +'C47.3183 7.5556 49.4249 10.5511 55.0525 17.1151'
+  +'C61.515 20.7999 64.6783 24.463 66.8665 29.1295'
+  +'C69.0547 33.7959 68.8365 39.6194 68.8365 48.5555'
+  +'C68.1178 48.4357 60.7496 48.0823 56.7084 47.6825'
+  +'L54.9523 51.035L39.4667 51.035L37.2318 47.6825Z';
+const ivorySpecs={
+ batBadge:{category:'shirt',id:'batfish-armor',fill:'#FDE400',outline:true,source:'M32 75C32 65 62 65 62 75C62 85 32 85 32 75Z'},
+ batFish:{category:'shirt',id:'batfish-armor',fill:'#080909',outline:true,stroke:'#626262',strokeWidth:.65,source:'M37 75C41 69 48 69 53 74C55 71.5 57 71 57 71L55.5 75L57 79C55 78.8 54 77 53 76C48 81 41 81 37 75Z'},
+ batFishMarks:{category:'shirt',id:'batfish-armor',fill:'#626262',source:'M42 73L42.6 72.7L44.5 76.8L43.9 77.1Z M44 72.7L44.6 73L42.7 77.1L42.1 76.8Z M45.2 73L45.8 72.7L47.7 76.8L47.1 77.1Z M47.2 72.7L47.8 73L45.9 77.1L45.3 76.8Z M48.4 73L49 72.7L50.9 76.8L50.3 77.1Z M50.4 72.7L51 73L49.1 77.1L48.5 76.8Z'},
+ // The belt rides at the waist, not down on the hips.
+ batBelt:{category:'shirt',id:'batfish-armor',fill:'#FDE400',outline:true,source:'M27.9 99L66.2 99L66.1 105L27.9 105Z'},
+ batBeltClasp:{category:'shirt',id:'batfish-armor',fill:'#FDE400',outline:true,source:'M43 98.5L51 98.5L51 105.5L43 105.5Z'},
+ ivoryEmbroidery:{category:'shirt',id:'ivory-tunic',fill:'#c7a45b',source:'M33 60L35 60L39 105L37 105Z M59 59L61 59L57 105L55 105Z'},
+ ivoryPleats:{category:'shirt',id:'ivory-tunic',fill:'#dfd7c6',source:'M30 79L34 105L32 103Z M42 78L44 105L42 104Z M62 78L60 105L58 104Z'},
+ ivoryBelt:{category:'shirt',id:'ivory-tunic',fill:'#9e7c42',outline:true,source:'M27.65 105L66.1 105L65.9 112L27.7 112Z'},
+ ivoryBuckle:{category:'shirt',id:'ivory-tunic',fill:'#e2c578',outline:true,source:'M43 105L51 105L51 112L43 112Z'},
+ ivoryBuckleInset:{category:'shirt',id:'ivory-tunic',fill:'#9e7c42',source:'M45 107L49 107L49 110L45 110Z'},
+ silverCollar:{category:'neck',id:'silver-collar',fill:decorationColors.crown,outline:true,source:'M26.1046 56.4524C39 61 54 61 67.7274 55.0466L66 61C54 68 40 68 28 62Z'},
+ silverInner:{category:'neck',id:'silver-collar',fill:'#ffe974',source:'M28 57C40 62 54 62 65.5 56L64.5 59C53 65 41 65 29.5 61Z'},
+ silverOutline:{category:'neck',id:'silver-collar',fill:'none',outline:true,source:'M26.1046 56.4524C39 61 54 61 67.7274 55.0466L66 61C54 68 40 68 28 62Z'},
+ capeCloth:{category:'cape',id:'crimson-cape',fill:'#a91e32',outline:true,source:'M27 57C37 53 57 53 68 56C76 83 79 129 90 174C67 184 28 184 6 174C16 132 17 85 27 57Z'},
+ capeLining:{category:'cape',id:'crimson-cape',fill:'#d4494a',source:'M27 59C23 101 18 143 10 172L19 174C24 132 28 95 31 61Z M64 60C68 100 75 145 85 173L77 175C67 131 64 94 61 61Z'},
+ capeFolds:{category:'cape',id:'crimson-cape',fill:'#801729',source:'M30 72L25 177L29 178Z M63 72L66 178L71 177Z'},
+};
+const capeStyles={
+  'crimson-cape':{capeCloth:'#a91e32',capeLining:'#d4494a',capeFolds:'#801729'},
+  'charcoal-cape':{capeCloth:'#35383e',capeLining:'#50545c',capeFolds:'#272a30'},
+  'azure-cape':{capeCloth:'#1769bd',capeLining:'#3896df',capeFolds:'#114986'},
+  'solid-red-cape':{capeCloth:'#b52b39'},
+  'solid-blue-cape':{capeCloth:'#1769bd'},
+  'solid-black-cape':{capeCloth:'#35383e'},
+};
+function capePath(source,warp){
+  const resting=warp(47,56,'body');
+  const shoulder=applyDragPose(resting,47,56,'body',warp);
+  const hem=warp(47,180,'legs');
+  // Pose-driven sway stays periodic for looped walks and settles with drag springs.
+  const pull=dragPoses.reduce((sum,pose)=>sum+(
+    pose.part==='leftLeg'?pose.x*.12:pose.part==='rightLeg'?-pose.x*.12:
+    pose.part==='head'||pose.part==='body'?pose.x*.22:
+    /Hand$/.test(pose.part)?pose.x*.035:0),0);
+  hem.x+=(shoulder.x-resting.x)*.35+7*Math.tanh(pull/7);
+  return transformPath(source,(x,y)=>{
+    const t=(y-56)/124;
+    const side=warp(x,56,'body').x-resting.x;
+    return {x:lerp(shoulder.x,hem.x,t)+side,y:lerp(shoulder.y,hem.y,t)};
+  });
+}
+function ivorySleeveWidth(i){
+  if(i>=28)return 0;
+  // Hold the puff until the wrist, then turn inward along a rounded lobe.
+  const turn=Math.max(0,(i-23)/5);
+  return 11*smooth((i-7)/15)*Math.sqrt(Math.max(0,1-turn*turn));
+}
+function ivorySleeveEdges(shape,filled=false){
+ const edges=[[],[]];
+ // Match the last original upper-arm segment's actual tangent and width.
+ const join=shape.hose[5].d.match(/-?\d+(?:\.\d+)?/g).map(Number);
+ const dx=join[6]-join[4],dy=join[7]-join[5],length0=Math.hypot(dx,dy)||1;
+ const joinRadius=(shape.hose[5].width+1)/2;
+ const joinOffset={x:dy/length0*joinRadius,y:-dx/length0*joinRadius};
+ // Each sample's own measurements first: where it sits, which way its two
+ // edges point, how far out they would like to be, and how tightly the arm
+ // turns there. The bend is read across a couple of samples either side —
+ // one apart the centre line is too short a chord to measure a turn from
+ // without the answer jumping about.
+ const samples=[];
+ for(let i=6;i<=28;i++){
+   const a=shape.centerline[Math.max(0,i-1)],b=shape.centerline[i+1],p=shape.centerline[i];
+   const length=Math.hypot(b.x-a.x,b.y-a.y)||1;
+   const width=i===28?shape.hose[28].width:shape.hose[i].width;
+   const before=shape.centerline[Math.max(0,i-2)];
+   const after=shape.centerline[Math.min(shape.centerline.length-1,i+2)];
+   const into={x:p.x-before.x,y:p.y-before.y},outOf={x:after.x-p.x,y:after.y-p.y};
+   const intoLength=Math.hypot(into.x,into.y)||1;
+   const outLength=Math.hypot(outOf.x,outOf.y)||1;
+   const unitIn={x:into.x/intoLength,y:into.y/intoLength};
+   const unitOut={x:outOf.x/outLength,y:outOf.y/outLength};
+   const turn=Math.acos(Math.max(-1,Math.min(1,unitIn.x*unitOut.x+unitIn.y*unitOut.y)));
+   // The normal comes off the bisector of the two directions, not the
+   // chord from one neighbour to the other: where the arm folds right back
+   // the two neighbours nearly meet, that chord is noise, and the edge
+   // swung through half a turn between one sample and the next.
+   const bisector={x:unitIn.x+unitOut.x,y:unitIn.y+unitOut.y};
+   const bisectorLength=Math.hypot(bisector.x,bisector.y);
+   const tangent=bisectorLength>.2
+     ?{x:bisector.x/bisectorLength,y:bisector.y/bisectorLength}:unitIn;
+   samples.push({p,
+     radius:(width+ivorySleeveWidth(i)+1)/2,
+     normal:{x:tangent.y,y:-tangent.x},
+     bend:{x:unitOut.x-unitIn.x,y:unitOut.y-unitIn.y},
+     turnRadius:turn>1e-4?(intoLength+outLength)/2/(2*Math.tan(turn/2)):Infinity,
+   });
+ }
+ // Offsetting this far from a bend makes an edge pass back through
+ // itself, which drew a hook of outline floating inside the elbow. Rather
+ // than trying to stop it happening — holding the offset in by the bend's
+ // own radius moves single samples much further than their neighbours and
+ // leaves the outline spiky — let it happen and then take the loop out.
+ // The span between the two crossing segments is dropped altogether and
+ // the outline carries straight across the fold: splicing in the crossing
+ // point instead left a notch bitten out of the inside of the sleeve,
+ // since that point lies inside the line joining the two ends. Cloth
+ // bridges a fold on the outside, it does not dent inwards.
+ const meeting=(a,b,c,d)=>{
+   const r={x:b.x-a.x,y:b.y-a.y},s2={x:d.x-c.x,y:d.y-c.y};
+   const denominator=r.x*s2.y-r.y*s2.x;
+   if(Math.abs(denominator)<1e-9)return null;
+   const t=((c.x-a.x)*s2.y-(c.y-a.y)*s2.x)/denominator;
+   const u=((c.x-a.x)*r.y-(c.y-a.y)*r.x)/denominator;
+   if(t<=0||t>=1||u<=0||u>=1)return null;
+   return {x:a.x+r.x*t,y:a.y+r.y*t};
+ };
+ const unloop=points=>{
+   for(let pass=0;pass<8;pass++){
+     let cut=false;
+     for(let i=0;i<points.length-2&&!cut;i++){
+       // Take the longest loop first, so a tangle of several comes out in
+       // one go rather than leaving smaller ones behind.
+       for(let j=points.length-2;j>i+1;j--){
+         const hit=meeting(points[i],points[i+1],points[j],points[j+1]);
+         if(hit){points.splice(i+1,j-i);cut=true;break;}
+       }
+     }
+     if(!cut)break;
+   }
+   return points;
+ };
+ // Cloth bridges a bend, it does not tuck into it. Offsetting every sample
+ // sideways makes the inside edge follow the arm's own concave curve, which
+ // bit a dent out of the sleeve wherever the elbow bent. Drop the points
+ // that turn back towards the arm sharply enough to read as a dent and the
+ // outline pulls taut across the fold instead; the gentle turn where the
+ // sleeve tapers into the cuff is well under the threshold and stays.
+ const DENT=Math.sin(7*Math.PI/180);
+ const pullTaut=(points,sign)=>{
+   for(let pass=0;pass<12;pass++){
+     let dropped=false;
+     for(let i=1;i<points.length-1;i++){
+       const a=points[i-1],p=points[i],b=points[i+1];
+       const into={x:p.x-a.x,y:p.y-a.y},outOf={x:b.x-p.x,y:b.y-p.y};
+       const scale=Math.hypot(into.x,into.y)*Math.hypot(outOf.x,outOf.y);
+       if(scale<1e-9)continue;
+       const turn=-sign*(into.x*outOf.y-into.y*outOf.x)/scale;
+       if(turn>DENT){points.splice(i,1);dropped=true;i--;}
+     }
+     if(!dropped)break;
+   }
+   return points;
+ };
+ for(let side=0;side<2;side++){
+   const sign=side?1:-1;
+   samples.forEach((sample,index)=>{
+     const blend=smooth(index/4);
+     edges[side].push({
+       x:sample.p.x+lerp(sign*joinOffset.x,sign*sample.normal.x*sample.radius,blend),
+       y:sample.p.y+lerp(sign*joinOffset.y,sign*sample.normal.y*sample.radius,blend)});
+   });
+   // Cutting a loop out can leave a corner that dents inwards in its
+   // place, so the two run until neither has anything left to do.
+   for(let pass=0;pass<4;pass++){
+     const before=edges[side].length;
+     pullTaut(edges[side],sign);
+     unloop(edges[side]);
+     if(edges[side].length===before)break;
+   }
+ }
+ const pair=p=>`${clean(p.x)} ${clean(p.y)}`;
+ const curve=points=>`M${pair(points[0])}`+points.slice(1).map((p,j)=>{
+   const a=points[j],before=points[Math.max(0,j-1)],after=points[Math.min(points.length-1,j+2)];
+   return `C${pair({x:a.x+(p.x-before.x)/6,y:a.y+(p.y-before.y)/6})} ${pair({x:p.x-(after.x-a.x)/6,y:p.y-(after.y-a.y)/6})} ${pair(p)}`;
+ }).join('');
+ if(filled)return curve(edges[0])+curve([...edges[1]].reverse()).replace(/^M/,'L')+'Z';
+ return edges.map(curve).join('');
+}
+// A spec's fill is either a palette name, the shared outline ink, or a
+// colour written out in full.
+const royalPaint = key => key==='ink'?'#27232b':(decorationColors[key]??key);
+function royalBucklePath(shape) {
+  // On the instep, where a buckle actually sits, rather than low on the
+  // side of the shoe. It is placed across the top edge of the shoe and
+  // clipped to it, so only the half lying on the vamp is drawn, and it is
+  // tilted to follow the slope of the foot instead of sitting square to
+  // the ground. It is laid out in the shoe's own axes, so the two feet get
+  // mirrored buckles: built off a plain rotation of `shoeUp` instead, the
+  // tilt leaned towards the toe on one foot and the heel on the other.
+  const {toe:across,up}=shape.instepAxes;
+  // Shift towards the heel and into the vamp in shoe-local coordinates.
+  const center={x:shape.instep.x-across.x*1.2-up.x*1.5,
+    y:shape.instep.y-across.y*1.2-up.y*1.5};
+  const tilt=.95+20*Math.PI/180,cos=Math.cos(tilt),sin=Math.sin(tilt);
+  const ring=(w,h)=>[[-w,-h],[w,-h],[w,h],[-w,h]].map(([x,y],i)=>{
+    const tx=x*cos-y*sin,ty=x*sin+y*cos;
+    return `${i?'L':'M'}${clean(center.x+across.x*tx+up.x*ty)} `
+      +`${clean(center.y+across.y*tx+up.y*ty)}`;
+  }).join('')+'Z';
+  return ring(2.8,1.9)+ring(1.5,.8);
+}
+// Pochita's cord hangs from the body rather than being part of it: it
+// keeps its own length whatever the legs do, swings a little as he
+// crouches, and only shortens once its tip is on the floor.
+const POCHITA_TAIL_ANCHOR = [47.514, 130.242];
+// The distance from the anchor to the cord's own end. Measuring the bend
+// against this exactly, rather than a round number, means the last point
+// of the cord and the grip hanging off it turn by the same angle — with a
+// longer figure here the cord bent less than its grip and the little
+// triangle drifted off the end of the line.
+const POCHITA_TAIL_LENGTH = Math.hypot(49.731 - 47.514, 157.726 - 130.242);
+function pochitaTailPaths(warp, sway, ground) {
+  const [ax, ay] = POCHITA_TAIL_ANCHOR;
+  const anchor = applyDragPose(warp(ax, ay, 'legs'), ax, ay, 'legs', warp);
+  // The cord bends along its length rather than swinging as one stiff
+  // piece: each point turns by a share of the sway that grows towards the
+  // tip, so the root stays where it is attached and the end trails. The
+  // grip at the very end keeps its shape, turning as a whole.
+  const bend = (x, y, rigid) => {
+    const dx = x - ax, dy = y - ay;
+    const along = rigid ? 1
+      : Math.min(1, Math.hypot(dx, dy) / POCHITA_TAIL_LENGTH);
+    return sway * along ** 1.4;
+  };
+  const place = (scale, rigid) => (x, y) => {
+    const angle = bend(x, y, rigid);
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const dx = (x - ax) * scale, dy = (y - ay) * scale;
+    return {x: anchor.x + dx * cos - dy * sin, y: anchor.y + dx * sin + dy * cos};
+  };
+  const sources = [[pochitaCordSource, false], [pochitaGripSource, true]];
+  let lowest = -Infinity;
+  for (const [source, rigid] of sources) {
+    transformPath(source, (x, y) => {
+      const point = place(1, rigid)(x, y);
+      lowest = Math.max(lowest, point.y);
+      return point;
+    });
+  }
+  // Hanging free it keeps its length; resting on the floor it gives.
+  const squash = lowest > ground && lowest > anchor.y
+    ? Math.max(.35, (ground - anchor.y) / (lowest - anchor.y)) : 1;
+  return sources.map(([source, rigid]) =>
+    transformPath(source, place(squash, rigid)));
+}
 const shirtTopSource = 'M26.1046 56.4524L67.7274 55.0466';
 const teeNeckSource = 'M34.2 56.18C39 62.2 43 65.3 47 65.3C51 65.3 55.5 61.5 59.6 55.32';
 const redTeeNeckSource = 'M34.2 56.18C39 57.5 43 58.8 47 58.8C51 58.8 55.5 57.2 59.6 55.32';
@@ -1740,7 +2342,7 @@ function sleeveExtraWidth(index,end,flare) {
   return index<end?flare*smooth(index/(end-1)):0;
 }
 const teeStyles = {
-  'loose-tee':{color:decorationColors.looseTee,sleeveEnd:22,flare:9,loose:true},
+  'loose-tee':{color:decorationColors.looseTee,sleeveEnd:20,flare:5,loose:true},
   'loose-long-sleeve':{color:decorationColors.looseLongSleeve,sleeveEnd:31,flare:7,loose:true},
   'yellow-tee': {color:decorationColors.yellowTee,sleeveEnd:20,flare:2.5},
   'patched-tee': {color:decorationColors.patchedTee,sleeveEnd:20,flare:2.5},
@@ -1792,7 +2394,7 @@ function garmentPath(source, warp) {
 // Color the lower torso itself, rather than stacking fabric on a grey
 // copy of the same edge: antialiased grey pixels otherwise survive at hips.
 function updateTorsoMaterial(node,warp) {
-  const colors={plain:decorationColors.pants,'suit-trousers':decorationColors.suitNavy,
+  const colors={'batfish-trousers':decorationColors.batArmor,'ivory-trousers':decorationColors.royalWhite,'royal-trousers':decorationColors.royalWhite,plain:decorationColors.pants,'suit-trousers':decorationColors.suitNavy,
     'wide-pants':decorationColors.widePants,'loose-wide-pants':decorationColors.widePants,
     'pink-shorts':decorationColors.pinkShorts,'orange-shorts':decorationColors.orangeShorts,
     'black-shorts':decorationColors.blackShorts,'wide-shorts':decorationColors.wideShorts,
@@ -1826,6 +2428,11 @@ function updateTorsoMaterial(node,warp) {
     torsoMaterial.upperClip.setAttribute('points',
       [corner(-1,0),corner(1,0),corner(1,2000),corner(-1,2000)].join(' '));
     torsoMaterial.upperSkin.setAttribute('d',node.getAttribute('d'));
+    // Sit immediately on top of the torso itself. Anything inserted at the
+    // front of the body layer since — Pochita's tail, for one — shifts the
+    // torso down the list, and a patch left behind it covers nothing.
+    if(torsoMaterial.upperSkin.previousSibling!==node)
+      node.parentNode.insertBefore(torsoMaterial.upperSkin,node.nextSibling);
   }
 }
 function redTrianglePath(warp) {
@@ -1861,7 +2468,7 @@ function wearingJumpsuit() {
   return selectedDecorations.pants==='jumpsuit'
     ||selectedDecorations.pants==='navy-jumpsuit';
 }
-const widePantFlares = {'suit-trousers':3.5,'wide-pants':5.5,'loose-wide-pants':10.5};
+const widePantFlares = {'ivory-trousers':8,'royal-trousers':3,'suit-trousers':3.5,'wide-pants':5.5,'loose-wide-pants':10.5};
 // Same knee-length cut as the fitted shorts, widening toward its open hem.
 // How much each flared knee cut widens towards its hem.
 const kneeShortFlares={'wide-shorts':10};
@@ -1899,15 +2506,27 @@ function wideLegHemPath(shape,flare=5.5,legs=100) {
 }
 // A short ankle continues the foot's own upright direction. Its width and
 // direction never depend on the flared trouser opening.
-function extendedShoe(shape) {
+function extendedShoe(shape,extension=3) {
   const point=p=>`${clean(p.x)} ${clean(p.y)}`;
-  const extension=3;
   const outer={x:shape.bootOuter.x+shape.shoeUp.x*extension,
     y:shape.bootOuter.y+shape.shoeUp.y*extension};
   const inner={x:shape.bootInner.x+shape.shoeUp.x*extension,
     y:shape.bootInner.y+shape.shoeUp.y*extension};
   const outline=shape.bootOutline.replace(/^M[^C]+/,
     `M${point(outer)}L${point(shape.bootOuter)}`)+`L${point(inner)}`;
+  return {fill:outline+'Z',outline};
+}
+
+function batGlovePaths(shape) {
+  const edges=[-1,1].map(sign=>Array.from({length:8},(_,j)=>{
+    const i=j+25,p=shape.centerline[i];
+    const a=shape.centerline[i-1],b=shape.centerline[Math.min(32,i+1)];
+    const len=Math.hypot(b.x-a.x,b.y-a.y)||1;
+    const radius=(shape.hose[Math.min(i,31)].width+1)/2+(32-i)/7*.8;
+    return {x:p.x+sign*(b.y-a.y)/len*radius,y:p.y-sign*(b.x-a.x)/len*radius};
+  }));
+  const points=[...edges[0].slice().reverse(),...edges[1]];
+  const outline=points.map((p,i)=>`${i?'L':'M'}${clean(p.x)} ${clean(p.y)}`).join('');
   return {fill:outline+'Z',outline};
 }
 
@@ -1924,7 +2543,12 @@ function cuffPath(shape, index, extraWidth=0, inset=0) {
 }
 // Open side edges only: a stroked tube also has a proximal round cap,
 // which is not a seam in continuous trouser fabric.
-function trouserCalfEdges(shape,flare=0,legs=100) {
+// `toMouth` finishes each edge on the shoe's own mouth corner instead of
+// on the leg tube's end. A boot's shaft and its shoe are one piece of
+// leather, so their outlines have to meet: ending on the tube left the two
+// black lines a fraction apart and a nick of background showed between
+// them on the outer side when the leg was pulled long.
+function trouserCalfEdges(shape,flare=0,legs=100,toMouth=false) {
   return [-1,1].map(side=>{
     const points=[];
     for(let i=19;i<=32;i++) {
@@ -1935,8 +2559,14 @@ function trouserCalfEdges(shape,flare=0,legs=100) {
       const length=Math.hypot(after.x-before.x,after.y-before.y)||1;
       const radius=(shape.hose[Math.min(i,31)].width+1
         +(flare?wideLegExtraWidth(Math.min(i,31),flare):0))/2;
-      points.push({x:point.x+side*(after.y-before.y)/length*radius,
-        y:point.y-side*(after.x-before.x)/length*radius});
+      const edge={x:point.x+side*(after.y-before.y)/length*radius,
+        y:point.y-side*(after.x-before.x)/length*radius};
+      if(toMouth&&i===32) {
+        const corner=[shape.bootOuter,shape.bootInner].reduce((near,candidate)=>
+          Math.hypot(candidate.x-edge.x,candidate.y-edge.y)
+            <Math.hypot(near.x-edge.x,near.y-edge.y)?candidate:near);
+        points.push({x:corner.x,y:corner.y});
+      } else points.push(edge);
     }
     return points.map((p,i)=>`${i?'L':'M'}${clean(p.x)} ${clean(p.y)}`).join('');
   }).join('');
@@ -1993,12 +2623,12 @@ function placeOuterwearOverNeckline() {
   // Shirt neckline strokes live in neckOverlay so the head cannot erase
   // them. Keep the jacket panels after those strokes, but below the scarf.
   const scarf=scarfPaths[0]?.node||null;
-  for(const key of ['greenVestLeft','greenVestRight'])
+  for(const key of ['greenVestLeft','greenVestRight','alohaBody'])
     neckOverlay.insertBefore(garmentPaths[key],scarf);
 }
 function pantsCoverThigh() {
   return wearingJumpsuit()||!!widePantFlares[selectedDecorations.pants]
-    ||['plain','pink-shorts','orange-shorts','black-shorts','wide-shorts'].includes(selectedDecorations.pants);
+    ||['plain','batfish-trousers','pink-shorts','orange-shorts','black-shorts','wide-shorts'].includes(selectedDecorations.pants);
 }
 function buttOutlineOpacity(side) {
   // The raised trouser or shorts leg supplies this hip contour itself. The
@@ -2151,9 +2781,9 @@ function topCoversPants() {
   return !!id&&!['plain','blue-vest','red-tee','red-triangle'].includes(id);
 }
 function updateGarmentOrder() {
-  const upper=['shirt','suitFront','suitFrontEdges','suitCollarLeft','suitCollarRight','shirtSides','vest','vestSides','vestNeck',
+  const upper=['shirt',...Object.keys(royalGarmentSpecs).filter(key=>royalGarmentSpecs[key].category==='shirt'),'suitFront','suitFrontEdges','suitCollarLeft','suitCollarRight','shirtSides','vest','vestSides','vestNeck',
     'vestTopLeft','vestTopRight','vestShoulderLeft','vestShoulderRight',
-    'tee','teeSides','patchblue','patchred','patchstitches','redTriangle','waist'];
+    ...Object.keys(ivorySpecs).filter(key=>ivorySpecs[key].category==='shirt'),'tee','teeSides','patchblue','patchred','patchstitches','redTriangle','waist'];
   const lower=['jumpsuit','jumpsuitSides','jumpsuitCrotch','jumpsuitChestOutline',
     'pants','pantsSides','pantsCrotch','shorts','shortsSides','shortsCrotch',
     'pantsWaist','redThong','skirt','jumpsuitNeckLeft','jumpsuitNeckRight',
@@ -2437,119 +3067,30 @@ function startSpring() {
 // arms over as well as negating every sideways value. Everything that knows
 // about the travel direction — the knee bend, which foot turns its toe —
 // follows the sign of `walkBlend`, so nothing else needs a second copy.
-function createWalkMotion(direction = 1, cycles = 2) {
-  // Timings and amplitudes come from a recorded single step: the swing lasts
-  // about .6s and the foot then stays planted about .9s, and the foot travels
-  // some 60 units from behind the hip to well in front of it. The earlier
-  // 28-unit stride over a 1.32s cycle read as shuffling on the spot.
-  const cycleDuration = 1.15, entry = .3, exit = .36;
-  const samplesPerCycle = 90;
-  const tracks = Object.fromEntries(
-    ['leftLeg', 'rightLeg', 'leftHand', 'rightHand', 'head'].map(part => [part, []]));
-  const ease = t => t * t * (3 - 2 * t);
-  // Measured ceiling: a leg pose beyond about 40 units starts carrying the
-  // hips along with it (48 shifts them by 7), which would turn walking in
-  // place into a slide. With the 16-unit stance offset that caps the swing
-  // at 24 either side of it, and it is the stride the recorded step reaches
-  // before the body itself begins to travel.
-  const back = 24, front = 24, lift = 15, closingLift = 9;
-  // Walking right leaves the left toe trailing; walking left it is the right
-  // one. That foot is the one mirrored for the walk, and the one given the
-  // lifted closing step so it can turn back in the air.
-  const turningLeg = direction > 0 ? 'leftLeg' : 'rightLeg';
-  const foot = phase => {
-    phase = ((phase % 1) + 1) % 1;
-    // Swing occupies 40% of the stride. The remaining 60% is support:
-    // the planted foot travels backwards relative to the walking body.
-    if (phase < .4) {
-      const t = phase / .4;
-      // The recorded foot hangs high until roughly 60% through the swing and
-      // only then reaches for the ground, so the peak sits late, not mid-air.
-      return [-back + (back + front) * ease(t),
-        -lift * Math.sin(Math.PI * t ** 1.3) ** 2];
-    }
-    return [front - (back + front) * (phase - .4) / .6, 0];
-  };
-  const mirror = poses => direction > 0 ? poses : {
-    leftLeg: [-poses.rightLeg[0], poses.rightLeg[1]],
-    rightLeg: [-poses.leftLeg[0], poses.leftLeg[1]],
-    leftHand: [-poses.rightHand[0], poses.rightHand[1]],
-    rightHand: [-poses.leftHand[0], poses.leftHand[1]],
-    head: [-poses.head[0], poses.head[1]],
-  };
-  const gait = phase => {
-    const left = foot(phase), right = foot(phase + .5);
-    const arm = Math.cos(2 * Math.PI * (phase - .2));
-    return mirror({
-      // Narrow the wide resting stance before walking. Both feet then
-      // follow the same forward swing instead of opening out sideways.
-      leftLeg: [16 + left[0], left[1]],
-      rightLeg: [-16 + right[0], right[1]],
-      // A longer stride carries more arm with it.
-      leftHand: [-14 * arm, -3 - 3 * arm],
-      rightHand: [14 * arm, -3 + 3 * arm],
-      // Weight drops just after contact and rises over the supporting leg.
-      head: [4 + 2 * Math.sin(phase * 2 * Math.PI),
-        -3 + 2 * Math.cos(4 * Math.PI * (phase - .43))],
-    });
-  };
-  const add = (time, poses, weight = 1) => {
-    for (const [part, values] of Object.entries(poses)) {
-      tracks[part].push([Number(time.toFixed(6)),
-        ...values.map(value => Number((value * weight).toFixed(6))), 0]);
-    }
-  };
-  // Entry and exit keep the gait running while its amplitude grows and
-  // fades. Holding gait(0) instead left the right foot, which is exactly at
-  // rest on that phase, standing still for the whole .45s exit — a visible
-  // freeze on one leg. Running the phase on means both feet keep moving and
-  // the last step simply shrinks until it is the resting stance again.
-  for (let i = 0; i < 16; i++) {
-    add(entry * i / 16, gait((i / 16 - 1) * entry / cycleDuration), ease(i / 16));
-  }
-  for (let i = 0; i <= cycles * samplesPerCycle; i++) {
-    add(entry + i * cycleDuration / samplesPerCycle, gait(i / samplesPerCycle));
-  }
-  const gaitEnd = entry + cycles * cycleDuration;
-  for (let i = 1; i <= 20; i++) {
-    const u = i / 20;
-    const poses = gait(u * exit / cycleDuration);
-    const scaled = Object.fromEntries(Object.entries(poses).map(([part, values]) =>
-      [part, values.map(value => value * (1 - ease(u)))]));
-    // The closing step lifts the left foot clear of the ground, outside the
-    // fading amplitude, so it can turn back to its resting direction in the
-    // air rather than pivoting while flat on the floor.
-    scaled[turningLeg][1] -= closingLift * Math.sin(Math.PI * u) ** 2;
-    add(entry + cycles * cycleDuration + exit * u, scaled);
-  }
-  // The art splays both feet outwards, so walking right leaves the left toe
-  // pointing backwards and the two shoes merge into a blob wherever the legs
-  // cross. Turn that foot to face the travel direction for the walk and give
-  // it back afterwards. Turning mirrors the shoe, which foreshortens as it
-  // goes round, so both turns are timed onto a foot that is in the air: the
-  // first swing on the way in, the lifted closing step on the way out.
-  // Within that first swing the turn waits until the foot has passed the
-  // other leg and is on its way down — turning it the moment it leaves the
-  // ground reads as the foot starting out backwards and correcting itself.
-  const swing = .4 * cycleDuration;
-  const walkToe = {
-    [turningLeg]: [[0,0], [entry + .5 * swing, 0], [entry + .82 * swing, 1],
-      [gaitEnd + .15 * exit, 1], [gaitEnd + .7 * exit, 0],
-      [gaitEnd + exit, 0]],
-  };
-  return {
-    id: direction > 0 ? 'walk-right' : 'walk-left',
-    name: `${direction > 0 ? '向右' : '向左'}走路（${cycles * 2}步）`,
-    duration: gaitEnd + exit,
-    // Signed: the knees bend the way the character travels.
-    walkBlend: [[0,0], [entry,direction], [gaitEnd,direction],
-      [gaitEnd + exit,0]],
-    walkToe,
-    // Entry ramp, repeated gait, closing step. See `loops` below.
-    loops: [{start: entry, end: gaitEnd, cycle: cycleDuration}],
-    eased: true,
-    tracks,
-  };
+// Captured from sea-game/character/embed-bundle.js workerWalkCycle.
+// The game uses the same .9-second gait for arrival and departure.
+const seaGameWalkCycle={duration:.9,tracks:{
+ leftLeg:[[0,14,0],[.225,0,-9],[.45,-14,0],[.675,0,-2],[.9,14,0]],
+ rightLeg:[[0,-14,0],[.225,0,-2],[.45,14,0],[.675,0,-9],[.9,-14,0]],
+ head:[[0,2,0],[.225,0,-4],[.45,-2,0],[.675,0,-4],[.9,2,0]],
+ rightHand:[[0,-9,-4],[.45,9,-6],[.9,-9,-4]],
+ leftHand:[[0,9,-6],[.45,-9,-4],[.9,9,-6]],
+}};
+function createWalkMotion(direction=1,cycles=2){
+ const cycle=.9,entry=.3,exit=.3,end=entry+cycles*cycle,duration=end+exit;
+ const tracks=Object.fromEntries(Object.keys(seaGameWalkCycle.tracks).map(part=>[part,[]]));
+ const count=Math.round(duration*120);
+ for(let i=0;i<=count;i++){
+   const t=i/120,phase=((t-entry)%cycle+cycle)%cycle;
+   const at=direction<0?phase:cycle-phase;
+   const blend=smooth(t/entry)*smooth((duration-t)/exit);
+   for(const [part,source] of Object.entries(seaGameWalkCycle.tracks)){
+     const pose=sampleTrack(source,at,true);
+     tracks[part].push([t,...pose.map(v=>v*blend)]);
+   }
+ }
+ return {id:direction>0?'walk-right':'walk-left',name:`${direction>0?'向右':'向左'}走路（${cycles*2}步）`,
+  duration,eased:false,tracks,loops:[{start:entry,end,cycle}],source:'sea-game-worker'};
 }
 
 // Talking is the jaw opening and shutting on syllables, not an even flutter:
@@ -3425,7 +3966,17 @@ function update() {
   const armShapes = { left: armGeometry('left', warp), right: armGeometry('right', warp) };
   updateArmOcclusion(armShapes);
 
+  const pochita = !!skinTrait('tail');
   paths.forEach(({ node, original, role, index }) => {
+    // Pochita's eye is a rounder, much larger one, so that skin swaps the
+    // white's own outline as well as the colours.
+    // A hood worn over the head has the last word on the eye.
+    const eyeWhite = selectedDecorations.helmet === 'shark-hood'
+      ? sharkEyeWhite : skinTrait('eyeWhite');
+    const lip = skinTrait('lip');
+    if (index === 8 && eyeWhite) original = eyeWhite;
+    else if (lip && original.includes(lip.from))
+      original = original.replace(lip.from, lip.to);
     const transformed = transformPath(original, (x, y) => {
       const pointRole = role.startsWith('helmet-') ? 'helmet' : classifyPoint(x, y, role);
       const point = warp(x, y, pointRole);
@@ -3435,8 +3986,57 @@ function update() {
     node.setAttribute('d', transformed);
     if(index===1||index===-1&&node.getAttribute('stroke')==='none')
       node.setAttribute('fill',skinColor());
-    if(index===8)node.setAttribute('fill',selectedDecorations.skin==='milk-frog'?milkFrogColors.eye:'white');
+    if(index===8){
+      node.setAttribute('fill',skinTrait('eye')||'white');
+      // Keep the cut edge for the pupil to be clipped against.
+      if(sharkEyeClipPath&&selectedDecorations.helmet==='shark-hood')
+        sharkEyeClipPath.setAttribute('d',transformed);
+    }
   });
+  // The pupil belongs to the skin, the cut belongs to the hood: clipping it
+  // to the eye white means any future skin's pupil is cut the same way.
+  if(pupilClipGroup){
+    if(selectedDecorations.helmet==='shark-hood')
+      pupilClipGroup.setAttribute('clip-path','url(#shark-eye-clip)');
+    else pupilClipGroup.removeAttribute('clip-path');
+  }
+  pochitaCordPaths.forEach(node=>{node.style.display=pochita?'':'none';});
+  paths.filter(path=>path.index===1||path.index===11).forEach(({node})=>{
+    node.style.display=hornHidden()?'none':'';
+  });
+  clownMarkPaths.forEach(node=>{node.style.display=skinTrait('marks')?'':'none';});
+  if(alienAntennaPath){
+    alienAntennaPath.style.display=antennaShown()?'':'none';
+    alienAntennaPath.setAttribute('fill',skinColor());
+  }
+  // The party hat is the horn in yellow; its spots and bobble are drawn on
+  // top of it, and they warp with the head because the horn does.
+  if(selectedDecorations.helmet==='party-hat'){
+    paths.filter(path=>path.index===1).forEach(({node})=>
+      node.setAttribute('fill',decorationColors.partyHat));
+  }
+  // The hood is the head itself, repainted: its own outline and the jaw
+  // already behave correctly, so only the colour changes.
+  if(selectedDecorations.helmet==='shark-hood'){
+    headFillNode?.setAttribute('fill',decorationColors.sharkHood);
+    paths.filter(path=>path.index===1).forEach(({node})=>
+      node.setAttribute('fill',decorationColors.sharkHood));
+  }
+  // With the cowl on, the head is cut off at the cowl's own brow line, so
+  // only the cowl shows above it whatever shape the head underneath has.
+  if(batCowlClipPath){
+    const cowled=selectedDecorations.helmet==='batfish-cowl';
+    if(cowled){
+      batCowlClipPath.setAttribute('d',transformPath(batCowlFaceClip,
+        (x,y)=>applyDragPose(warp(x,y,'headShell'),x,y,'headShell',warp)));
+    }
+    const headOutline=paths.find(path=>path.index===5)?.node;
+    for(const node of [headFillNode,headOutline]){
+      if(!node)continue;
+      if(cowled)node.setAttribute('clip-path','url(#bat-cowl-face-clip)');
+      else node.removeAttribute('clip-path');
+    }
+  }
   scarfPaths.forEach(({node})=>{
     node.style.display=selectedDecorations.neck==='scarf'?'':'none';
   });
@@ -3444,8 +4044,21 @@ function update() {
   const legShapes = {left:legGeometry('left',warp),right:legGeometry('right',warp)};
   updateLegOcclusion(legShapes,warp);
   const crouch=smooth(bodyCompression(warp).amount/legCompressionLimit(warp).limit);
+  if(pochita&&pochitaCordPaths.length){
+    // It swings out to his right as he folds up, and trails behind
+    // whichever way the body is being pulled. Positive turns it to his
+    // left, so the crouch term is negative.
+    const lean=dragPoses.reduce((sum,pose)=>
+      pose.part==='head'||pose.part==='body'?sum+pose.x:sum,0);
+    const sway=Math.max(-.7,Math.min(.7,-.5*crouch+.01*lean));
+    const tail=pochitaTailPaths(warp,sway,warp(47,193,'legs').y);
+    pochitaCordPaths.forEach((node,i)=>node.setAttribute('d',tail[i]));
+  }
   const suitJacket=selectedDecorations.shirt==='suit-jacket';
-  const longSleeve=selectedDecorations.shirt==='plain'||suitJacket;
+  const ivoryTunic=selectedDecorations.shirt==='ivory-tunic';
+  const royalCoat=selectedDecorations.shirt==='royal-coat';
+  const batArmor=selectedDecorations.shirt==='batfish-armor';
+  const longSleeve=selectedDecorations.shirt==='plain'||suitJacket||royalCoat||ivoryTunic||batArmor;
   const teeStyle=teeStyles[selectedDecorations.shirt];
   const isTee=!!teeStyle;
   const wideFlare=widePantFlares[selectedDecorations.pants]||0;
@@ -3456,7 +4069,7 @@ function update() {
     'black-shorts':decorationColors.blackShorts,
     'wide-shorts':decorationColors.wideShorts,
   };
-  legParts.forEach(({segments,bootFill,bootOutline,
+  legParts.forEach(({segments,bootFill,bootOutline,shoeClip,
       shoeCuff,shortHem,bootTop,wideHem,shortsClip,skinClip,wideClip,ankleClip,
       calfEdges,calfOverlay,fabricLayers,fabricMasks,crease,
       side,group,thighBlack,shinBlack,thighSkin,shinSkin})=>{
@@ -3465,21 +4078,31 @@ function update() {
     const shortsFlare=kneeShortFlares[selectedDecorations.pants]||0;
     const wideShorts=shortsFlare>0;
     const splitCloth=pantsCoverThigh();
-    const wearingTallBoots=selectedDecorations.shoes==='brown-boots';
+    const darkBoots=['dark-boots','batfish-boots'].includes(selectedDecorations.shoes);
+    const bootColor=selectedDecorations.shoes==='batfish-boots'?decorationColors.batBlack:darkBoots?decorationColors.darkBoots:decorationColors.brownBoots;
+    const wearingTallBoots=selectedDecorations.shoes==='brown-boots'||darkBoots;
     // A wide trouser keeps its full width and fabric over the boot shaft.
     // Other trousers tuck into the boot, which replaces the lower leg.
     const tallBoots=wearingTallBoots&&!widePants;
-    const continuousCalf=splitCloth&&!kneeShorts&&!tallBoots;
+    // A boot shaft is continuous material from the knee into the foot, the
+    // same as a trouser leg, so it is drawn the same way: the calf's own
+    // black strokes are hidden and two open side edges drawn instead.
+    // Leaving the strokes on put a round cap across the boot wherever the
+    // knee folded, and it showed with or without trousers underneath.
+    const continuousCalf=(splitCloth&&!kneeShorts||tallBoots)&&!widePants;
     // A bare calf under shorts also ends at the shoe mouth. Its front-layer
-    // copy must not redraw the tube's rounded underside over the foot.
-    const ankleBound=(continuousCalf||kneeShorts||selectedDecorations.pants==='skirt')&&!tallBoots&&!widePants;
-    calfEdges.setAttribute('d',trouserCalfEdges(shape,wideFlare,config.legs));
+    // copy must not redraw the tube's rounded underside over the foot — on
+    // a boot that was the line that appeared at the ankle in a squat.
+    const ankleBound=(continuousCalf||kneeShorts||selectedDecorations.pants==='skirt')&&!widePants;
+    // Continuous cloth over a shoe finishes on the shoe's own mouth
+    // corners, so the trouser's side edge and the shoe's outline join
+    // instead of leaving a nick between them.
+    calfEdges.setAttribute('d',trouserCalfEdges(shape,wideFlare,config.legs,
+      tallBoots||(continuousCalf&&!widePants)));
     calfEdges.style.display=continuousCalf?'':'none';
     // The flared leg passes in front of the shoe upper. In other outfits the
     // shoe sits on top of the limb instead.
     const shoeAnchor=widePants&&!tallBoots?shinBlack:shoeCuff;
-    group.insertBefore(bootFill,shoeAnchor);
-    group.insertBefore(bootOutline,shoeAnchor);
     // A folded calf covers the hidden part of the shorts cuff. Paint the
     // colored thigh and its hem first, then the calf, so the hem cannot
     // continue across the visible skin as a second diagonal.
@@ -3489,6 +4112,9 @@ function update() {
       :[thighBlack,shinBlack,thighSkin,shinSkin,shortHem,
         ...fabricLayers.map(layer=>layer.group)];
     layers.forEach(layer=>group.insertBefore(layer,crease));
+    group.insertBefore(bootFill,shoeAnchor);
+    group.insertBefore(bootOutline,shoeAnchor);
+    for(const node of calfOverlay.querySelectorAll('[data-calf-shoe]'))node.style.display=widePants?'':'none';
     shortsClip.setAttribute('points',limbClipPoints(shape,19,false));
     skinClip.setAttribute('points',limbClipPoints(shape,19,true));
     wideClip.setAttribute('points',legEndClipPoints(shape,config.legs));
@@ -3500,7 +4126,11 @@ function update() {
     // the whole open contour, including its stroke, at the fabric endpoint.
     if(widePants&&!tallBoots)
       calfEdges.setAttribute('clip-path',`url(#${side}-wide-hem-clip)`);
-    else if(continuousCalf)calfEdges.setAttribute('clip-path',`url(#${side}-ankle-hem-clip)`);
+    // A boot's side edges run on under its own shoe, which is painted over
+    // them, so they are not cut at the shoe mouth: cutting them there left
+    // a nick of background between the end of the edge and the start of
+    // the shoe's outline whenever the leg was pulled long.
+    else if(continuousCalf&&!tallBoots)calfEdges.setAttribute('clip-path',`url(#${side}-ankle-hem-clip)`);
     else calfEdges.removeAttribute('clip-path');
     // Clip the complete calf, including later round caps that can reach back
     // across the knee. The individual hem clips still trim the distal end.
@@ -3511,7 +4141,7 @@ function update() {
     // The folded calf is in front of the pelvis. Reuse the actual rendered
     // calf (including its fabric) above the waist fill, rather than repainting
     // isolated lines that the pelvis can cut into rectangular fragments.
-    calfOverlay.style.display=splitCloth&&shape.creaseOpacity>.55?'':'none';
+    calfOverlay.style.display=(splitCloth||tallBoots)&&shape.creaseOpacity>.55?'':'none';
     segments.forEach(({back,front},i)=>{
       const segmentPath=widePants&&!tallBoots&&i===31
         ?wideLegLastPath(shape,config.legs):shape.hose[i].d;
@@ -3527,7 +4157,11 @@ function update() {
       const nearHem=i>=13&&i<=26;
       const clip=widePants&&!tallBoots&&i>=24
         ?`url(#${side}-wide-hem-clip)`
-        :ankleBound&&i>=24
+        // A boot's own shoe is drawn over the end of its shaft, so the
+        // shaft keeps the wider shin clip and runs on under the shoe. Cut
+        // at the shoe mouth instead and a hair of background shows through
+        // on the outer side whenever the leg is pulled long.
+        :ankleBound&&!tallBoots&&i>=24
           ?`url(#${side}-ankle-hem-clip)`
         :(splitCloth||tallBoots)&&nearHem
           ?`url(#${side}-${i<19?'shorts':'skin'}-hem-clip)`:null;
@@ -3544,13 +4178,25 @@ function update() {
         :widePants&&!tallBoots?wideLegExtraWidth(i,wideFlare):0;
       back.setAttribute('stroke-width',shape.hose[i].width+2+roundedHipInk+wideExtra);
       front.setAttribute('d',segmentPath);
-      front.setAttribute('stroke-width',shape.hose[i].width+wideExtra);
+      // The shoe's mouth is a shade wider than the leg tube it stands on,
+      // and the difference grows as the leg is pulled long: a wedge of
+      // background then shows between the trouser's end and the side of
+      // the shoe. The last samples are widened to the mouth's own width so
+      // the two meet. This is not just a boot's problem — any trouser,
+      // short or bare leg above any shoe shows it — but a flared leg hem
+      // is wider than the shoe already and has its own ending.
+      const bootMouth=!widePants&&i>=26
+        ?Math.max(0,Math.hypot(shape.bootOuter.x-shape.bootInner.x,
+          shape.bootOuter.y-shape.bootInner.y)-shape.hose[i].width)
+          *smooth((i-26)/4)
+        :0;
+      front.setAttribute('stroke-width',shape.hose[i].width+wideExtra+bootMouth);
       const legColor=tallBoots&&i>=19
-        ? decorationColors.brownBoots
+        ? bootColor
         : wearingJumpsuit()
           ? selectedDecorations.pants==='navy-jumpsuit'
             ? decorationColors.navyJumpsuit:decorationColors.jumpsuit
-        : selectedDecorations.pants==='plain' ? decorationColors.pants
+        : ['plain','batfish-trousers'].includes(selectedDecorations.pants) ? selectedDecorations.pants==='batfish-trousers'?decorationColors.batArmor:decorationColors.pants
         : widePants ? widePantsPaint()
         : kneeShorts&&i<19?kneeShortColors[selectedDecorations.pants]:skinColor();
       const patterned=selectedDecorations.pants==='loose-wide-pants'&&!(tallBoots&&i>=19);
@@ -3583,14 +4229,30 @@ function update() {
         });
       }
     });
-    const shoe=widePants&&!tallBoots?extendedShoe(shape):{fill:shape.bootFill,outline:shape.bootOutline};
+    // A flared trouser ends above the shoe, and the further the leg is
+    // stretched the higher that hem sits: a fixed three-unit ankle stopped
+    // short of it and left a wedge of background between the two. The
+    // ankle still keeps the shoe's own width and direction — it is only
+    // made long enough to stay tucked behind the hem.
+    const shoe=widePants&&!tallBoots
+      ?extendedShoe(shape,Math.max(3,wideLegHemPoints(shape,wideFlare||5.5,config.legs)
+        .reduce((most,point)=>Math.max(most,
+          (point.x-shape.bootOuter.x)*shape.shoeUp.x
+          +(point.y-shape.bootOuter.y)*shape.shoeUp.y),0)+1.5))
+      :{fill:shape.bootFill,outline:shape.bootOutline};
     bootFill.setAttribute('d',shoe.fill);
-    bootFill.setAttribute('fill',wearingTallBoots?decorationColors.brownBoots
+    bootFill.setAttribute('fill',wearingTallBoots?bootColor
+      :selectedDecorations.shoes==='royal-shoes'?decorationColors.royalShoe
       :selectedDecorations.shoes==='black-dress-shoes'?decorationColors.dressShoes
       :selectedDecorations.shoes?decorationColors.shoes:skinColor());
     bootOutline.setAttribute('d',shoe.outline);
+    shoeClip.setAttribute('d',shoe.fill);
+    const buckle=garmentPaths['royalBuckle'+side];
+    buckle.setAttribute('d',royalBucklePath(shape));
+    buckle.style.display=selectedDecorations.shoes==='royal-shoes'?'':'none';
+    group.insertBefore(buckle,bootOutline);
     shoeCuff.style.display=!tallBoots&&!widePants&&(selectedDecorations.shoes
-      ||selectedDecorations.pants==='plain'
+      ||['plain','batfish-trousers'].includes(selectedDecorations.pants)
       ||wearingJumpsuit())?'':'none';
     shoeCuff.setAttribute('d',`M${clean(shape.bootOuter.x)} ${clean(shape.bootOuter.y)}`
       +`L${clean(shape.bootInner.x)} ${clean(shape.bootInner.y)}`);
@@ -3608,22 +4270,25 @@ function update() {
     wideHem.style.display=widePants&&!tallBoots?'':'none';
     crease.setAttribute('d',shape.crease);
     crease.style.opacity='1';
-    crease.style.display=!splitCloth&&shape.creaseOpacity>.55?'':'none';
+    // The fold crease belongs to a bare leg. Over a boot shaft — material
+    // that runs on past the knee, like a trouser leg — it drew a diagonal
+    // across the boot whenever the character crouched.
+    crease.style.display=!splitCloth&&!tallBoots&&shape.creaseOpacity>.55?'':'none';
   });
   const torso=paths.find(p=>p.index===-1 && p.role==='mixed' && p.node.getAttribute('fill')!=='none');
   updateTorsoMaterial(torso.node,warp);
   if(bellyPatch){
     bellyPatch.setAttribute('d',torsoGarmentPath(milkFrogBellySource,warp));
     bellyClip.setAttribute('d',torso.node.getAttribute('d'));
-    bellyPatch.style.display=selectedDecorations.skin==='milk-frog'?'':'none';
+    bellyPatch.style.display=skinTrait('belly')?'':'none';
   }
   garmentPaths.pants.setAttribute('d',garmentPath(pantsSource,warp));
-  garmentPaths.pants.setAttribute('fill',widePants?widePantsPaint():decorationColors.pants);
-  garmentPaths.pants.style.display=selectedDecorations.pants==='plain'||widePants?'':'none';
+  garmentPaths.pants.setAttribute('fill',widePants?widePantsPaint():selectedDecorations.pants==='batfish-trousers'?decorationColors.batArmor:decorationColors.pants);
+  garmentPaths.pants.style.display=['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePants?'':'none';
   garmentPaths.pantsSides.setAttribute('d',garmentPath(pantsSidesSource,warp));
-  garmentPaths.pantsSides.style.display=selectedDecorations.pants==='plain'||widePants?'':'none';
+  garmentPaths.pantsSides.style.display=['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePants?'':'none';
   garmentPaths.pantsCrotch.setAttribute('d',garmentPath(pantsCrotchSource,warp));
-  garmentPaths.pantsCrotch.style.display=selectedDecorations.pants==='plain'||widePants?'':'none';
+  garmentPaths.pantsCrotch.style.display=['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePants?'':'none';
   const wearingSkirt=selectedDecorations.pants==='skirt';
   const shorts=selectedDecorations.pants==='red-shorts'
     ||selectedDecorations.pants==='pink-shorts'
@@ -3646,8 +4311,8 @@ function update() {
   garmentPaths.redThong.style.display=selectedDecorations.pants==='red-thong'?'':'none';
   garmentPaths.redTriangle.setAttribute('d',redTrianglePath(warp));
   garmentPaths.redTriangle.style.display=selectedDecorations.shirt==='red-triangle'?'':'none';
-  garmentPaths.shirt.setAttribute('d',garmentPath(shirtSource,warp));
-  garmentPaths.shirt.setAttribute('fill',suitJacket?decorationColors.suitNavy:decorationColors.shirt);
+  garmentPaths.shirt.setAttribute('d',ivoryTunic?torsoGarmentPath(ivoryBodySource,warp):garmentPath(shirtSource,warp));
+  garmentPaths.shirt.setAttribute('fill',batArmor?decorationColors.batArmor:ivoryTunic?decorationColors.royalWhite:suitJacket?decorationColors.suitNavy:royalCoat?decorationColors.royalRed:decorationColors.shirt);
   for(const [key,source] of Object.entries({suitFront:suitFrontSource,suitFrontEdges:suitFrontEdgesSource,
       suitCollarLeft:suitCollarSources.left,suitCollarRight:suitCollarSources.right})) {
     garmentPaths[key].setAttribute('d',garmentPath(source,warp));
@@ -3657,10 +4322,24 @@ function update() {
     garmentPaths['tie'+key].setAttribute('d',garmentPath(source,warp));
     garmentPaths['tie'+key].style.display=suitJacket?'':'none';
   }
+  for(const [key,spec] of Object.entries(royalGarmentSpecs)) {
+    garmentPaths[key].setAttribute('d',garmentPath(spec.source,warp));
+    garmentPaths[key].style.display=(spec.category==='shirt'?royalCoat:selectedDecorations.neck==='royal-collar')?'':'none';
+  }
+  for(const [key,spec] of Object.entries(ivorySpecs)){
+    garmentPaths[key].setAttribute('d',spec.category==='cape'?capePath(spec.source,warp):torsoGarmentPath(spec.source,warp,spec.category==='neck'));
+    if(spec.category==='cape'){
+      const paint=capeStyles[selectedDecorations.cape]?.[key];
+      garmentPaths[key].style.display=paint?'':'none';
+      garmentPaths[key].setAttribute('fill',paint||spec.fill);
+    }else garmentPaths[key].style.display=selectedDecorations[spec.category]===spec.id?'':'none';
+  }
   garmentPaths.shirt.style.display=longSleeve?'':'none';
-  garmentPaths.shirtSides.setAttribute('d',garmentPath(shirtSidesSource,warp));
+  garmentPaths.shirtSides.setAttribute('d',ivoryTunic?torsoGarmentPath(ivorySidesSource,warp):garmentPath(shirtSidesSource,warp));
   garmentPaths.shirtSides.style.display=longSleeve?'':'none';
   const isVest=selectedDecorations.shirt==='blue-vest';
+  garmentPaths.alohaBody.style.display=alohaSleeveStyles[selectedDecorations.outerwear]?'':'none';
+  if(alohaSleeveStyles[selectedDecorations.outerwear])garmentPaths.alohaBody.innerHTML=alohaBodyMarkup(warp);
   const isGreenVest=selectedDecorations.outerwear==='green-vest';
   garmentPaths.vest.setAttribute('d',garmentPath(vestSource,warp));
   garmentPaths.vest.style.display=isVest?'':'none';
@@ -3712,7 +4391,7 @@ function update() {
   garmentPaths.waist.style.display=longSleeve
     ||isVest||isTee?'':'none';
   garmentPaths.pantsWaist.setAttribute('d',garmentPath(pantsWaistSource,warp));
-  garmentPaths.pantsWaist.style.display=selectedDecorations.pants==='plain'||widePants||shorts?'':'none';
+  garmentPaths.pantsWaist.style.display=['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePants||shorts?'':'none';
   garmentPaths.jumpsuit.setAttribute('d',garmentPath(jumpsuitSource,warp));
   garmentPaths.jumpsuit.setAttribute('fill',selectedDecorations.pants==='navy-jumpsuit'
     ?decorationColors.navyJumpsuit:decorationColors.jumpsuit);
@@ -3817,45 +4496,58 @@ function update() {
     node.style.opacity=String(buttOutlineOpacity(side));
   });
 
-  armParts.forEach(({side,segments,rootBlack,skinRoot,sleeveClip,skinClip,crease,cuff,handFill,handOutline,
+  armParts.forEach(({alohaSleeve,side,segments,rootBlack,skinRoot,sleeveClip,skinClip,crease,cuff,sleevePanel,sleeveEdges,glovePanel,gloveEdges,handFill,handOutline,
       handSource})=>{
     const shape=armShapes[side];
-    const sleeveEnd=teeStyle?.sleeveEnd||31;
+    const outerSleeveStyle=alohaSleeveStyles[selectedDecorations.outerwear];
+    const aloha=!!outerSleeveStyle;
+    alohaSleeve.style.display=aloha?'':'none';
+    if(aloha)alohaSleeve.innerHTML=alohaSleeveMarkup(shape,side+'-aloha',outerSleeveStyle);
+    const sleeveEnd=aloha?outerSleeveStyle.end:ivoryTunic?28:royalCoat?25:teeStyle?.sleeveEnd||31;
     const flare=teeStyle?.flare||0;
     applyArmOcclusion(side,rootBlack,skinRoot);
     sleeveClip.setAttribute('points',limbClipPoints(shape,sleeveEnd,false));
     skinClip.setAttribute('points',limbClipPoints(shape,sleeveEnd,true));
     segments.forEach(({back,front},i)=>{
+      back.style.display=front.style.display=(aloha&&i<outerSleeveStyle.end||ivoryTunic&&i>=6&&i<28)?'none':'';
       back.setAttribute('d',shape.hose[i].d);
-      const sleeveBoundary=isTee&&i>=sleeveEnd-4&&i<=sleeveEnd+6;
-      back.setAttribute('stroke-linecap',sleeveBoundary?'butt':i===0||i===31?'butt':'round');
-      front.setAttribute('stroke-linecap',sleeveBoundary?'butt':i===0||i===31?'butt':'round');
+      const sleeveBoundary=(isTee||royalCoat||ivoryTunic||aloha)&&i>=sleeveEnd-4&&i<=sleeveEnd+6;
+      back.setAttribute('stroke-linecap',ivoryTunic&&i===5?'butt':ivoryTunic&&i>0&&i<28?'round':sleeveBoundary?'butt':i===0||i===31?'butt':'round');
+      front.setAttribute('stroke-linecap',ivoryTunic&&i===5?'butt':ivoryTunic&&i>0&&i<28?'round':sleeveBoundary?'butt':i===0||i===31?'butt':'round');
       // Clip only the spans whose round ends can reach the seam. A curled
       // forearm may cross back over the shoulder side and must stay visible.
       const nearCuff=i>=sleeveEnd-7&&i<=sleeveEnd+6;
-      const clip=isTee&&nearCuff
+      const clip=(isTee||royalCoat||ivoryTunic||aloha)&&nearCuff
         ?`url(#${side}-${i<sleeveEnd?'sleeve':'skin'}-clip)`:null;
       if(clip) { back.setAttribute('clip-path',clip);front.setAttribute('clip-path',clip); }
       else { back.removeAttribute('clip-path');front.removeAttribute('clip-path'); }
       // The fill covers the middle of the black stroke, so it needs two extra
       // units to leave a one-unit outline on each side like the SVG.
       const shortSleeve=isTee&&i<sleeveEnd;
-      const sleeveFlare=sleeveExtraWidth(i,sleeveEnd,flare);
+      const sleeveFlare=ivoryTunic?ivorySleeveWidth(i):sleeveExtraWidth(i,sleeveEnd,flare);
       back.setAttribute('stroke-width',shape.hose[i].width+2+sleeveFlare);
       front.setAttribute('d',shape.hose[i].d);
       front.setAttribute('stroke-width',shape.hose[i].width+sleeveFlare);
       const sleeveColor=longSleeve
-        ? suitJacket?decorationColors.suitNavy:decorationColors.shirt
+        ? batArmor?decorationColors.batArmor:ivoryTunic?(i>=28?decorationColors.crown:decorationColors.royalWhite):suitJacket?decorationColors.suitNavy:royalCoat
+          ?i>=25?decorationColors.royalWhite:decorationColors.royalRed:decorationColors.shirt
         : shortSleeve?teeStyle.color:skinColor();
       front.setAttribute('stroke',sleeveColor);
     });
-    cuff.style.display=longSleeve||isTee?'':'none';
-    cuff.setAttribute('d',cuffPath(shape,sleeveEnd,flare));
+    sleevePanel.setAttribute('d',ivoryTunic?ivorySleeveEdges(shape,true):'');
+    sleevePanel.style.display=ivoryTunic?'':'none';
+    sleeveEdges.setAttribute('d',ivoryTunic?ivorySleeveEdges(shape):'');
+    sleeveEdges.style.display=ivoryTunic?'':'none';
+    cuff.style.display=!aloha&&(longSleeve||isTee)&&!(selectedDecorations.gloves==='batfish-gloves'&&sleeveEnd>=25)?'':'none';
+    cuff.setAttribute('d',cuffPath(shape,sleeveEnd,ivoryTunic?ivorySleeveWidth(28):flare)+((royalCoat||ivoryTunic)?cuffPath(shape,31):''));
     crease.setAttribute('d',shape.crease);
-    crease.style.display=shape.creaseOpacity>.55?'':'none';
+    crease.style.display=!aloha&&shape.creaseOpacity>.55?'':'none';
+    const glove=batGlovePaths(shape);
+    glovePanel.setAttribute('d',glove.fill);gloveEdges.setAttribute('d',glove.outline);
+    glovePanel.style.display=gloveEdges.style.display=selectedDecorations.gloves==='batfish-gloves'?'':'none';
     handFill.setAttribute('d',transformPath(handSource.handFill,shape.handPoint));
     handFill.setAttribute('fill',selectedDecorations.gloves
-      ? decorationColors.gloves : skinColor());
+      ? selectedDecorations.gloves==='batfish-gloves'?decorationColors.batBlack:decorationColors.gloves : skinColor());
     handOutline.setAttribute('d',
       transformPath(handSource.handOutline,shape.handPoint));
   });
@@ -3877,10 +4569,15 @@ function update() {
       warp
     );
     const scale = config.head / 100;
+    // Pochita's pupil fills most of the eye, so the skin gives its own
+    // radii and its own small lift rather than scaling the reference one.
+    const pupil = skinTrait('pupil')
+      || {rx: ellipse.originalRx, ry: ellipse.originalRy, dy: 0};
     ellipse.node.setAttribute('cx', clean(center.x));
-    ellipse.node.setAttribute('cy', clean(center.y));
-    ellipse.node.setAttribute('rx', clean(ellipse.originalRx * scale));
-    ellipse.node.setAttribute('ry', clean(ellipse.originalRy * scale));
+    ellipse.node.setAttribute('cy', clean(center.y + (pupil.dy || 0) * scale));
+    ellipse.node.setAttribute('fill', pupil.color || 'black');
+    ellipse.node.setAttribute('rx', clean(pupil.rx * scale));
+    ellipse.node.setAttribute('ry', clean(pupil.ry * scale));
     const bodyTurn=dragPoses.reduce((sum,pose)=>{
       if(pose.part!=='head'&&pose.part!=='body')return sum;
       return sum+upperBodyTurn(pose,warp);
@@ -3935,7 +4632,9 @@ function resetControls() {
 function renderDecorationOptions() {
   const selected=selectedDecorations[activeDecorationCategory];
   decorationOptions.innerHTML = [
-    `<button type="button" class="decoration-option" data-option="none" aria-pressed="${!selected}"><span class="empty-icon" aria-hidden="true">—</span><span>${activeDecorationCategory==='suit'?'不使用套装':activeDecorationCategory==='skin'?'默认肤色':'不穿戴'}</span></button>`,
+    // "No skin" is still a fish, so it gets a picture of one rather than a
+    // dash; the other categories really are empty.
+    `<button type="button" class="decoration-option" data-option="none" aria-pressed="${!selected}">${activeDecorationCategory==='skin'?'<img src="./svg/default-skin.svg" alt="" />':'<span class="empty-icon" aria-hidden="true">—</span>'}<span>${activeDecorationCategory==='suit'?'不使用套装':activeDecorationCategory==='skin'?'默认肤色':'不穿戴'}</span></button>`,
     ...decorationCatalog[activeDecorationCategory].map(({id,name,icon})=>
       `<button type="button" class="decoration-option" data-option="${id}" aria-pressed="${selected===id}"><img src="${icon}" alt="" /><span>${name}</span></button>`),
   ].join('');
@@ -3988,11 +4687,25 @@ function setHatSelection(value) {
   });
   // This rim is generated separately from the imported helmet paths.
   // Without toggling it, hiding the shell leaves a line across the neck.
+  // The hood needs it too: its colour stops at the neck, and without the
+  // rim the dark hide runs into the body with no line to close it off.
   if (helmetBase) {
-    if (helmetVisible) helmetBase.removeAttribute('display');
+    if (helmetVisible || value === 'shark-hood') helmetBase.removeAttribute('display');
     else helmetBase.setAttribute('display', 'none');
   }
   hatPaths.forEach(node=>{ node.style.display=value==='yellow-hat'?'':'none'; });
+  batCowlPaths.forEach(node=>{node.style.display=value==='batfish-cowl'?'':'none';});
+  chainsawPaths.forEach(node=>{node.style.display=value==='chainsaw'?'':'none';});
+  sharkToothPaths.forEach(node=>{node.style.display=value==='shark-hood'?'':'none';});
+  partyHatPaths.forEach(node=>{node.style.display=value==='party-hat'?'':'none';});
+  const crowned = value === 'crown';
+  crownPaths.forEach(node=>{ node.style.display=crowned?'':'none'; });
+  // The crown takes the horn's place on that side of the head, so the horn
+  // comes off with it on. Its fill is path 1 and its outline path 11.
+  paths.filter(path=>path.index===1||path.index===11).forEach(({node})=>{
+    node.style.display=hornHidden(value)?'none':'';
+  });
+  if(alienAntennaPath)alienAntennaPath.style.display=antennaShown(value)?'':'none';
   helmetButton.textContent = value ? '隐藏帽子' : '显示帽子';
   helmetButton.setAttribute('aria-pressed', String(!value));
   if (activeDecorationCategory === 'helmet') renderDecorationOptions();
@@ -4112,6 +4825,9 @@ fetch('./svg/参考.svg')
     outfitOverlay.setAttribute('pointer-events','none');
     neckOverlay=document.createElementNS(SVG_NS,'g');
     neckOverlay.setAttribute('pointer-events','none');
+    capeOverlay=document.createElementNS(SVG_NS,'g');
+    capeOverlay.setAttribute('pointer-events','none');
+    svg.insertBefore(capeOverlay,svg.firstChild);
     svg.append(outfitOverlay,neckOverlay);
     const silhouette=paths.find(path=>path.index===2);
     const original=silhouette.original;
@@ -4176,7 +4892,132 @@ fetch('./svg/参考.svg')
       if(path.index===0||path.index===1) partLayers.head.insertBefore(path.node,headFill);
       else partLayers[part].appendChild(path.node);
     });
-    if(ellipse) partLayers.head.appendChild(ellipse.node);
+    // The pupil carries its own rotate(), and a clip-path on an element is
+    // cut in that element's own space — the eye's cut would come out turned.
+    // Hanging the clip on a wrapper keeps it in the head's space, so it is
+    // literally the same line as the eye white's.
+    if(ellipse){
+      pupilClipGroup=document.createElementNS(SVG_NS,'g');
+      pupilClipGroup.appendChild(ellipse.node);
+      partLayers.head.appendChild(pupilClipGroup);
+    }
+    // Behind the head fill, so the head's outline crosses the crown's band
+    // and only the points stand out past it.
+    // The chainsaw goes behind the head, the way the drawing has it: only
+    // the part standing above the head shows, and the face is not covered.
+    chainsawPaths=Object.entries(chainsawSources).map(([part,original])=>{
+      const node=document.createElementNS(SVG_NS,'path');
+      node.setAttribute('fill',pochitaColors[part==='teeth'?'teeth':part]);
+      node.setAttribute('stroke','black');
+      node.setAttribute('stroke-width',part==='teeth'?'.8':'1');
+      node.setAttribute('stroke-linejoin','round');
+      node.setAttribute('stroke-linecap','round');
+      node.setAttribute('pointer-events','none');
+      node.style.display='none';
+      partLayers.head.insertBefore(node,headFill);
+      paths.push({node,original,role:'headRigid',index:-2});
+      return node;
+    });
+    // The starter cord belongs to the skin, and hangs over the body.
+    pochitaCordPaths=[[pochitaCordSource,false],[pochitaGripSource,true]]
+      .map(([,filled])=>{
+        const node=document.createElementNS(SVG_NS,'path');
+        node.setAttribute('fill',filled?pochitaColors.motor:'none');
+        node.setAttribute('stroke','black');
+        node.setAttribute('stroke-width','1');
+        node.setAttribute('stroke-linejoin','round');
+        node.setAttribute('stroke-linecap','round');
+        node.setAttribute('pointer-events','none');
+        node.style.display='none';
+        // Behind the body, the way a tail hangs.
+        partLayers.body.insertBefore(node,partLayers.body.firstChild);
+        return node;
+      });
+    const cowlDefs=document.createElementNS(SVG_NS,'defs');
+    const cowlClip=document.createElementNS(SVG_NS,'clipPath');
+    cowlClip.id='bat-cowl-face-clip';
+    cowlClip.setAttribute('clipPathUnits','userSpaceOnUse');
+    batCowlClipPath=document.createElementNS(SVG_NS,'path');
+    cowlClip.appendChild(batCowlClipPath);
+    cowlDefs.appendChild(cowlClip);
+    // The hood's lid cuts the top off the eye. Whatever a skin draws inside
+    // that eye — Pochita's big pupil, say — gets cut by the same line, so
+    // the clip is the eye white's own outline rather than a second shape.
+    const eyeClip=document.createElementNS(SVG_NS,'clipPath');
+    eyeClip.id='shark-eye-clip';
+    eyeClip.setAttribute('clipPathUnits','userSpaceOnUse');
+    sharkEyeClipPath=document.createElementNS(SVG_NS,'path');
+    eyeClip.appendChild(sharkEyeClipPath);
+    cowlDefs.appendChild(eyeClip);
+    svg.appendChild(cowlDefs);
+    headFillNode=headFill;
+    // On top of the head: the clown's marks and the party hat's spots sit
+    // over the face and the horn.
+    const headTopPath=(fill,outline)=>{
+      const node=document.createElementNS(SVG_NS,'path');
+      node.setAttribute('fill',fill);
+      node.setAttribute('stroke',outline?'black':'none');
+      if(outline)node.setAttribute('stroke-width','1');
+      node.setAttribute('stroke-linejoin','round');
+      node.setAttribute('pointer-events','none');
+      node.style.display='none';
+      partLayers.head.appendChild(node);
+      return node;
+    };
+    // The antenna sits under the head: where it meets the brow the head's
+    // own fill covers its root, so no seam shows.
+    alienAntennaPath=headTopPath(decorationColors.alienGreen,true);
+    partLayers.head.insertBefore(alienAntennaPath,headFill);
+    paths.push({node:alienAntennaPath,original:alienAntennaSource,
+      role:'head',index:-2});
+    clownMarkPaths=clownMarkSources.map(({source,outline})=>{
+      const node=headTopPath(decorationColors.clownRed,outline);
+      paths.push({node,original:source,role:'head',index:-2});
+      return node;
+    });
+    partyHatPaths=partyHatTrim.map(({source,fill,outline})=>{
+      const node=headTopPath(fill,!!outline);
+      paths.push({node,original:source,role:'head',index:-2});
+      return node;
+    });
+    // Behind the head fill, so the jaws close over them: the shark's teeth
+    // stay where they are while the mouth opens and shuts.
+    sharkToothPaths=sharkToothSources.map(original=>{
+      const node=document.createElementNS(SVG_NS,'path');
+      node.setAttribute('fill','white');
+      node.setAttribute('stroke','black');
+      node.setAttribute('stroke-width','1');
+      node.setAttribute('stroke-linejoin','round');
+      node.setAttribute('pointer-events','none');
+      node.style.display='none';
+      partLayers.head.insertBefore(node,headFill);
+      paths.push({node,original,role:'headRigid',index:-2});
+      return node;
+    });
+    batCowlPaths=[batCowlSource].map(original=>{
+      const node=document.createElementNS(SVG_NS,'path');
+      node.setAttribute('fill',decorationColors.batBlack);node.setAttribute('stroke','black');
+      node.setAttribute('stroke-width','1');node.setAttribute('stroke-linejoin','round');
+      node.setAttribute('pointer-events','none');node.style.display='none';
+      partLayers.head.insertBefore(node,paths.find(path=>path.index===8).node);
+      // `headShell`, not `head`: the cowl scales and moves with the head but
+      // is not opened by the jaw. On `head` its lower edge sat inside the
+      // mouth notch, so talking pulled the cowl's ears about with it.
+      paths.push({node,original,role:'headShell',index:-2});return node;
+    });
+    crownPaths=Object.values(crownSources).map(original=>{
+      const node=document.createElementNS(SVG_NS,'path');
+      node.setAttribute('fill',decorationColors.crown);
+      node.setAttribute('stroke','black');
+      node.setAttribute('stroke-width',String(crownStrokeWidth));
+      node.setAttribute('stroke-linecap','round');
+      node.setAttribute('stroke-linejoin','round');
+      node.setAttribute('pointer-events','none');
+      node.style.display='none';
+      partLayers.head.insertBefore(node,headFill);
+      paths.push({node,original,role:'head',index:-2});
+      return node;
+    });
     hatPaths=Object.values(yellowHatSources).map(original=>{
       const node=document.createElementNS(SVG_NS,'path');
       node.setAttribute('fill',decorationColors.yellowHat);
@@ -4275,6 +5116,9 @@ fetch('./svg/参考.svg')
       outfitOverlay.appendChild(node);
       garmentPaths[key]=node;
     }
+    garmentPaths.alohaBody=document.createElementNS(SVG_NS,'g');
+    garmentPaths.alohaBody.setAttribute('pointer-events','none');
+    outfitOverlay.appendChild(garmentPaths.alohaBody);
     garmentPaths.greenVestLeft=makeGarment(decorationColors.greenVest,true);
     garmentPaths.greenVestRight=makeGarment(decorationColors.greenVest,true);
     placeOuterwearOverNeckline();
@@ -4285,6 +5129,26 @@ fetch('./svg/参考.svg')
       node.setAttribute('paint-order','stroke fill');
       neckOverlay.appendChild(node);
       garmentPaths['tie'+key]=node;
+    }
+    for(const [key,spec] of Object.entries(ivorySpecs)){
+      garmentPaths[key]=makeGarment(spec.fill,!!spec.outline);
+      if(spec.stroke)garmentPaths[key].setAttribute('stroke',spec.stroke);
+      if(spec.strokeWidth)garmentPaths[key].setAttribute('stroke-width',spec.strokeWidth);
+      if(spec.category==='neck')neckOverlay.appendChild(garmentPaths[key]);
+      if(spec.category==='cape')capeOverlay.appendChild(garmentPaths[key]);
+    }
+    for(const [key,spec] of Object.entries(royalGarmentSpecs)) {
+      garmentPaths[key]=makeGarment(royalPaint(spec.fill),!!spec.outline);
+      if(spec.category==='neck')neckOverlay.appendChild(garmentPaths[key]);
+    }
+    for(const side of ['left','right']) {
+      const node=makeGarment(decorationColors.royalGold);
+      node.setAttribute('fill-rule','evenodd');
+      // The buckle straddles the top edge of the shoe, so it is cut to the
+      // shoe's own outline: half of it sits on the instep and the rest
+      // disappears under the trouser, the way the sketch has it.
+      node.setAttribute('clip-path',`url(#${side}-shoe-clip)`);
+      garmentPaths['royalBuckle'+side]=node;
     }
     const defs=document.createElementNS(SVG_NS,'defs');
     svg.prepend(defs);
@@ -4403,6 +5267,14 @@ fetch('./svg/参考.svg')
       const skinClip=makeHemClip('skin');
       const wideClip=makeHemClip('wide');
       const ankleClip=makeHemClip('ankle');
+      // The shoe's own outline, used to cut the royal buckle so only the
+      // half sitting on the instep shows.
+      const shoeClipContainer=document.createElementNS(SVG_NS,'clipPath');
+      shoeClipContainer.id=`${side}-shoe-clip`;
+      shoeClipContainer.setAttribute('clipPathUnits','userSpaceOnUse');
+      const shoeClip=document.createElementNS(SVG_NS,'path');
+      shoeClipContainer.appendChild(shoeClip);
+      defs.appendChild(shoeClipContainer);
       const thighBlack=document.createElementNS(SVG_NS,'g');
       const shinBlack=document.createElementNS(SVG_NS,'g');
       const rootBlack=document.createElementNS(SVG_NS,'g');
@@ -4485,6 +5357,13 @@ fetch('./svg/参考.svg')
       const calfOverlay=document.createElementNS(SVG_NS,'g');
       calfOverlay.setAttribute('pointer-events','none');
       calfOverlay.setAttribute('data-calf-overlay',side);
+      for(const [index,node] of [bootFill,garmentPaths['royalBuckle'+side],bootOutline].entries()){
+        node.id=`${side}-calf-shoe-${index}`;
+        const copy=document.createElementNS(SVG_NS,'use');
+        copy.setAttribute('href',`#${node.id}`);
+        copy.setAttribute('data-calf-shoe','');
+        calfOverlay.appendChild(copy);
+      }
       for(const [index,node] of [shinBlack,shinSkin,fabricLayers[1].group,calfEdges,shoeCuff,bootTop,wideHem].entries()) {
         node.id=`${side}-calf-render-${index}`;
         const copy=document.createElementNS(SVG_NS,'use');
@@ -4492,7 +5371,7 @@ fetch('./svg/参考.svg')
         calfOverlay.appendChild(copy);
       }
       outfitOverlay.appendChild(calfOverlay);
-      legParts.push({segments,bootFill,bootOutline,
+      legParts.push({segments,bootFill,bootOutline,shoeClip,
         shoeCuff,shortHem,bootTop,wideHem,shortsClip,skinClip,wideClip,ankleClip,
         calfEdges,calfOverlay,fabricLayers,fabricMasks,crease,
         side,group,thighBlack,shinBlack,thighSkin,shinSkin});
@@ -4555,13 +5434,21 @@ fetch('./svg/参考.svg')
       };
       const crease=makePath(false);
       crease.setAttribute('stroke-width','1');
+      const sleevePanel=makePath(true);
+      sleevePanel.setAttribute('fill',decorationColors.royalWhite);
+      const sleeveEdges=makePath(false);
+      sleeveEdges.setAttribute('stroke-width','1');
       const cuff=makePath(false);
       cuff.setAttribute('stroke-width','1');
+      const alohaSleeve=document.createElementNS(SVG_NS,'g');
+      alohaSleeve.setAttribute('pointer-events','none');
+      const glovePanel=makePath(true);glovePanel.setAttribute('fill',decorationColors.batBlack);
+      const gloveEdges=makePath(false);gloveEdges.setAttribute('stroke-width','1');
       const handFill=makePath(true);
       const handOutline=makePath(false);
-      group.append(rootBlack,black,skinRoot,skin,crease,cuff,handFill,handOutline);
-      armParts.push({side,segments,rootBlack,skinRoot,sleeveClip,skinClip,
-        crease,cuff,handFill,handOutline,
+      group.append(rootBlack,black,skinRoot,skin,crease,sleevePanel,sleeveEdges,cuff,alohaSleeve,glovePanel,gloveEdges,handFill,handOutline);
+      armParts.push({alohaSleeve,side,segments,rootBlack,skinRoot,sleeveClip,skinClip,
+        crease,cuff,sleevePanel,sleeveEdges,glovePanel,gloveEdges,handFill,handOutline,
         handSource:handSources[side]});
     });
 

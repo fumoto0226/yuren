@@ -210,7 +210,7 @@ const neckLayers=vm.runInContext(`(()=>{
     children.splice(index,0,node);
   }};
   scarfPaths=[{node:children[2]}];
-  garmentPaths={greenVestLeft:{name:'coat-left'},greenVestRight:{name:'coat-right'}};
+  garmentPaths={greenVestLeft:{name:'coat-left'},greenVestRight:{name:'coat-right'},alohaBody:{name:'aloha-coat'}};
   placeOuterwearOverNeckline();
   return children.map(node=>node.name);
 })()`,context);
@@ -289,7 +289,7 @@ for(const [order,leg] of [[result.triangleRightLeg,'rightLeg'],
   assert.ok(position(order,'rightHand')>position(order,leg));
 }
 assert.deepEqual([...neckLayers],
-  ['tee-neck','tee-top','coat-left','coat-right','scarf'],
+  ['tee-neck','tee-top','coat-left','coat-right','aloha-coat','scarf'],
   'The jacket must cover shirt neckline strokes while the scarf stays above it');
 for(let side=0;side<2;side++)
   assert.ok(crouchedSides.crouching[side]<crouchedSides.standing[side]*.6,
