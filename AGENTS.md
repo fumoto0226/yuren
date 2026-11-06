@@ -4,6 +4,8 @@
 
 仅当任务涉及动作库、录制动作、关键帧动画或动作节奏时，阅读 `MOTION_RULES.md`。其他任务无需阅读该文件。
 
+涉及导出、提取、统计或复用本网站的服装款式、配色、花纹、装饰目录及相关素材数据时，先阅读 `EXPORT_RULES.md`。
+
 ## 本机 SVG 预览：避免 Inkscape 意外退出
 
 - 本机的 ImageMagick 直接读取 `.svg` 时会自动调用 PATH 中的 Inkscape。已复现 `magick svg/red-tee.svg ...` 触发 Inkscape `SIGABRT`；2026-10-14 和 2026-10-16 的 macOS 崩溃报告均显示在启动时的 `RegisterApplication` / `gdk_quartz_display` 调用链中退出。不要用 `magick input.svg output.png` 批量预览，也不要反复重新打开崩溃弹窗来重试。

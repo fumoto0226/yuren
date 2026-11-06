@@ -14,7 +14,7 @@ html, body, main {
   background: #FBD9E6;
 }
 
-main { display: grid; grid-template-columns: 220px minmax(0, 1fr) 250px; }
+main { display: grid; grid-template-columns: 220px minmax(0, 1fr) 250px; grid-template-rows: minmax(0, 1fr); }
 
 /* The action panel sits in the top-right corner, framed like the wardrobe
    and divided from the sliders underneath. */
@@ -105,13 +105,15 @@ main { display: grid; grid-template-columns: 220px minmax(0, 1fr) 250px; }
 .wardrobe {
   min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
   padding: 32px 18px;
   border-right: 1px solid #e3b9cc;
   color: #1a1a1a;
 }
 
 .wardrobe h1 { margin: 0 0 24px; font-size: 16px; font-weight: 600; }
-.wardrobe-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+.wardrobe-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 
 .wardrobe-tabs button,
 .decoration-option {
@@ -159,7 +161,7 @@ main { display: grid; grid-template-columns: 220px minmax(0, 1fr) 250px; }
 #character svg:active ellipse,
 #character svg:active .drag-handle { cursor: grabbing; }
 
-.controls { display: flex; flex-direction: column; gap: 22px; padding: 26px 34px 36px; }
+.controls { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 22px; padding: 26px 34px 36px; }
 /* The sliders keep their centred look inside whatever height the action
    library leaves them. */
 .control-stack {
@@ -246,3 +248,51 @@ main { display: grid; grid-template-columns: 220px minmax(0, 1fr) 250px; }
 .wardrobe::-webkit-scrollbar-thumb { background: transparent; border-radius: 8px; }
 .wardrobe.is-scrolling::-webkit-scrollbar-thumb { background: #b9909f; }
 .wardrobe::-webkit-scrollbar-button { display: none; }
+
+.decoration-style-card { position: relative; min-width: 0; border: 1px solid #d0c4c7; border-radius: 4px; background: #fff; }
+.decoration-style-card > .decoration-option { border: 0; padding-right: 22px; height: 100%; }
+.decoration-style-card.is-selected { border-color: #222; background: #ededed; }
+.decoration-style-card.is-selected > .decoration-option { background: #ededed; }
+.style-expand { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 24px; height: 32px; padding: 0; border: 0; border-radius: 6px; background: #f7d9e4; color: #664751; cursor: pointer; font-size: 21px; line-height: 1; }
+.style-expand:hover, .style-expand[aria-expanded="true"] { background: #edb9cc; color: #33202a; }
+.style-color-count { position: absolute; left: 5px; top: 5px; min-width: 20px; height: 20px; display: grid; place-items: center; padding: 0 4px; box-sizing: border-box; border-radius: 50%; background: #ececec; color: #555; font-size: 11px; font-weight: 600; pointer-events: none; }
+.decoration-group-label { grid-column: 1 / -1; padding: 14px 0 2px; color: #62565b; font-size: 12px; }
+.decoration-variant-menu { position: fixed; z-index: 1000; max-height: calc(100vh - 24px); overflow: auto; border: 1px solid #cbc6c8; border-radius: 9px; background: #fff; padding: 10px; box-shadow: 0 7px 25px #39262d30; }
+.variant-menu-heading { display: flex; align-items: center; justify-content: space-between; padding: 1px 3px 9px; font-size: 13px; }
+.variant-menu-heading button { border: 0; background: transparent; cursor: pointer; font-size: 21px; color: #777; }
+.variant-menu-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+.variant-menu-options .decoration-option { border: 1px solid #ddd; border-radius: 5px; background: #fff; min-height: 100px; width: 100%; }
+.variant-menu-options .decoration-option[aria-pressed="true"] { border-color: #222; background: #eee; }
+@media(max-width:700px) { .decoration-style-card { flex: 0 0 96px; } .decoration-style-card > .decoration-option { width: 100%; } .decoration-group-label { flex: 0 0 60px; align-content: center; } }
+
+/* Catalog counts: outfits remain separate from the total. */
+.wardrobe h1 { display: flex; align-items: center; gap: 8px; }
+.wardrobe-total-count, .wardrobe-category-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; padding: 2px 5px; border-radius: 5px;
+  background: #ececec; color: #555; font-size: 11px;
+  font-weight: 600; line-height: 1.3; font-variant-numeric: tabular-nums;
+}
+.wardrobe-total-count { min-width: 28px; font-size: 12px; background: #fff; color: #444; }
+.wardrobe-tabs button { min-width: 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.wardrobe-tabs button[aria-selected="true"] .wardrobe-category-count { background: transparent; color: inherit; }
+@media (max-width: 760px) {
+  .wardrobe-tabs button { gap: 3px; }
+  .wardrobe-category-count { min-width: 15px; padding: 1px 3px; font-size: 10px; }
+}
+
+/* Fixed category header, independently scrolling wardrobe contents. */
+.wardrobe { display: flex; flex-direction: column; min-height: 0; overflow: hidden; scrollbar-gutter: auto; }
+.wardrobe h1, .wardrobe-tabs { flex: 0 0 auto; }
+.wardrobe-panel { flex: 1 1 auto; min-height: 0; overflow: auto; scrollbar-gutter: stable; overscroll-behavior: contain; }
+.decoration-variant-menu { display: flex; flex-direction: column; max-height: 50vh; max-height: 50dvh; overflow: hidden; }
+.variant-menu-heading { flex: 0 0 auto; }
+.variant-menu-options { min-height: 0; overflow: auto; scrollbar-gutter: stable; overscroll-behavior: contain; }
+.wardrobe-panel, .variant-menu-options { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.wardrobe-panel.is-scrolling, .variant-menu-options.is-scrolling { scrollbar-color: #b9909f transparent; }
+.wardrobe-panel::-webkit-scrollbar, .variant-menu-options::-webkit-scrollbar { width: 4px; height: 4px; }
+.wardrobe-panel::-webkit-scrollbar-track, .variant-menu-options::-webkit-scrollbar-track { background: transparent; }
+.wardrobe-panel::-webkit-scrollbar-thumb, .variant-menu-options::-webkit-scrollbar-thumb { background: transparent; border-radius: 8px; }
+.wardrobe-panel.is-scrolling::-webkit-scrollbar-thumb, .variant-menu-options.is-scrolling::-webkit-scrollbar-thumb { background: #b9909f; }
+.wardrobe-panel::-webkit-scrollbar-button, .variant-menu-options::-webkit-scrollbar-button { display: none; }
+@media (max-width: 580px) { .wardrobe-panel { flex: 0 1 auto; max-height: 50vh; max-height: 50dvh; } }

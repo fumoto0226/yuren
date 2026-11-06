@@ -44,23 +44,54 @@ const COWL_JAW_SHARE = .57;
 const UPPER_LIP_SHARE = .16;
 // Aqua glass dome, as in the reference art (svg/toukui.svg).
 const HELMET_GLASS = '#A3EDFF', HELMET_GLASS_OPACITY = '0.45';
+// Three plain blue shades plus one selected finish for each shade.
+const denimFinishes=['denim-jeans','washed-denim-jeans','ripped-denim-jeans','large-ripped-denim-jeans'];
+const denimVariants=Object.fromEntries([
+ {prefix:'',name:'牛仔蓝',color:'#48769b',wash:'#c1d8e7'},
+ {prefix:'light-',name:'浅牛仔蓝',color:'#8eafc7',wash:'#e6eff4'},
+ {prefix:'dark-',name:'深牛仔蓝',color:'#294760',wash:'#779db8'},
+].flatMap(palette=>denimFinishes.map((finish,index)=>[palette.prefix+finish,{
+ finish,color:palette.color,wash:palette.wash,
+ name:palette.name+['普通牛仔裤','水洗牛仔裤','小破洞牛仔裤','大破洞牛仔裤'][index],
+}])).filter(([id])=>['denim-jeans','washed-denim-jeans','light-denim-jeans','light-ripped-denim-jeans','dark-denim-jeans','dark-large-ripped-denim-jeans'].includes(id)));
+denimVariants['jobs-gradient-jeans']={finish:'jobs-gradient',name:'渐变牛仔',color:'#667c99',wash:'#8c8c8c'};
+function denimColor(id=selectedDecorations.pants){return denimVariants[id]?.color||workwearVariants[id]?.color||decorationColors.denimBlue;}
+const thongVariants={'red-thong':{name:'红色丁字裤',color:'#c60000'},'green-thong':{name:'绿色丁字裤',color:'#55a66a'},'purple-thong':{name:'紫色丁字裤',color:'#9364bb'}};
+const workwearVariants={
+ 'denim-jumpsuit':{name:'牛仔蓝连体工装裤',color:'#48769b'},
+ 'light-denim-jumpsuit':{name:'浅牛仔蓝连体工装裤',color:'#8eafc7'},
+ 'dark-denim-jumpsuit':{name:'深牛仔蓝连体工装裤',color:'#294760'},
+ 'orange-jumpsuit':{name:'橙色连体工装裤',color:'#df893d'},
+ 'pink-jumpsuit':{name:'粉红色连体工装裤',color:'#e69bb7',belt:'#f4eee9',buckle:'#b8dfcf'},
+};
+const workerJacketVariants={
+ 'worker-jacket':{body:'#f66b19',collar:'#ff7b25',placket:'#e45b13',seam:'#b84d17'},
+ 'blue-worker-jacket':{body:'#1d3b68',collar:'#2b4c7b',placket:'#142d53',seam:'#486b97'},
+};
+const workerPantsColors={'worker-trousers':'#f66b19','blue-worker-trousers':'#1d3b68'};
+const workerHelmetColors={'worker-helmet':'#FBC723','white-worker-helmet':'#f4f3ed'};
+const isWorkerJacket=(id=selectedDecorations.outerwear)=>!!workerJacketVariants[id];
+const hasLongOuterwear=(id=selectedDecorations.outerwear)=>!!alohaSleeveStyles[id]?.longHem;
 const decorationCatalog = {
-  skin: [{ id: 'milk-frog', name: '奶鱼', icon: './svg/milk-frog.svg' },
+  skin: [{id:'flesh-6',name:'肉色皮肤6',icon:'./svg/flesh-6.svg'},{id:'hypnotic',name:'迷幻眼皮肤',icon:'./svg/hypnotic.svg'},{id:'flesh-5',name:'肉色皮肤5',icon:'./svg/flesh-5.svg'},{id:'flesh-4',name:'肉色皮肤4',icon:'./svg/flesh-4.svg'},{id:'little-yellow-fish',name:'小黄鱼皮肤',icon:'./svg/little-yellow-fish.svg'},{id:'flesh-3',name:'肉色皮肤3',icon:'./svg/flesh-3.svg'},{id:'kappa',name:'河童皮肤',icon:'./svg/kappa.svg'},{id:'flesh-2',name:'肉色皮肤2',icon:'./svg/flesh-2.svg'},
+    { id: 'milk-frog', name: '奶鱼', icon: './svg/milk-frog.svg' },
     { id: 'pochita', name: '波吉塔皮肤', icon: './svg/pochita.svg' },
     { id: 'flesh', name: '肉色皮肤', icon: './svg/flesh-skin.svg' },
     { id: 'clown', name: '小丑皮肤', icon: './svg/clown-skin.svg' },
     { id: 'alien', name: '外星皮肤', icon: './svg/alien-skin.svg' }],
-  suit: [{id:'clown-suit',name:'小丑鱼人套装',icon:'./svg/clown-suit.svg',
+  suit: [{id:'topknot-suit',name:'小辫子男套装',icon:'./svg/topknot-suit.svg',pieces:{skin:'flesh-6',helmet:'topknot-hair',shirt:'white-tie-shirt',outerwear:'charcoal-blazer',pants:'dark-gray-slight-wide-trousers',shoes:'colorblock-shoes'}},{id:'makima-suit',name:'马奇马套装',icon:'./svg/makima-suit.svg',pieces:{skin:'hypnotic',helmet:'long-braid-hair',shirt:'white-tie-shirt',pants:'dark-gray-slight-wide-trousers',shoes:'brown-shoes'}},{id:'secondary-suit',name:'中学生套装',icon:'./svg/secondary-suit.svg',pieces:{skin:'flesh-5',helmet:'secondary-hat',outerwear:'secondary-jacket',pants:'black-slight-wide-trousers',shoes:'brown-shoes'}},{id:'student-suit',name:'小学生套装',icon:'./svg/student-suit.svg',pieces:{skin:'flesh-4',helmet:'student-hat',outerwear:'student-jacket',pants:'student-shorts',shoes:'student-long-socks-shoes'}},{id:'blue-worker-suit',name:'蓝色工人套装',icon:'./svg/blue-worker-suit.svg',pieces:{skin:'flesh-3',helmet:'white-worker-helmet',outerwear:'blue-worker-jacket',pants:'blue-worker-trousers',shoes:'gray-worker-boots'}},{id:'worker-suit',name:'橙色工人套装',icon:'./svg/worker-suit.svg',pieces:{skin:'flesh-3',helmet:'worker-helmet',outerwear:'worker-jacket',pants:'worker-trousers',shoes:'worker-boots'}},{id:'kappa-suit',name:'河童套装',icon:'./svg/kappa-suit.svg',pieces:{skin:'kappa',helmet:'kappa-hair',cape:'kappa-shell'}},{id:'jobs-suit',name:'乔布斯套装',icon:'./svg/jobs-suit.svg',pieces:{skin:'flesh-2',helmet:'round-glasses',shirt:'black-turtleneck-tee',pants:'jobs-gradient-jeans',shoes:'gray-sneakers'}},{id:'clown-suit',name:'小丑鱼人套装',icon:'./svg/clown-suit.svg',
     pieces:{skin:'clown',helmet:'party-hat'}},
     {id:'shark-suit',name:'鲨鱼人套装',icon:'./svg/shark-suit.svg',
     pieces:{skin:'flesh',helmet:'shark-hood',pants:'black-shorts'}},
     {id:'pochita-suit',name:'波吉塔套装',icon:'./svg/pochita-suit.svg',
     pieces:{skin:'pochita',helmet:'chainsaw'}},
     {id:'batfish-suit',name:'蝙蝠侠鱼人套装',icon:'./svg/batfish-suit.svg',pieces:{helmet:'batfish-cowl',shirt:'batfish-armor',pants:'batfish-trousers',shoes:'batfish-boots',gloves:'batfish-gloves',cape:'charcoal-cape'}},{id:'ivory-suit',name:'白金国王套装',icon:'./svg/ivory-suit.svg',pieces:{helmet:'crown',shirt:'ivory-tunic',pants:'ivory-trousers',shoes:'dark-boots',neck:'silver-collar',cape:'crimson-cape'}},{id:'navy-suit', name:'藏蓝西装套装', icon:'./svg/navy-suit.svg',
-    pieces:{shirt:'suit-jacket', pants:'suit-trousers', shoes:'black-dress-shoes'}},
+    pieces:{outerwear:'suit-jacket', pants:'suit-trousers', shoes:'black-dress-shoes'}},
     {id:'royal-suit',name:'红白国王套装',icon:'./svg/royal-suit.svg',
       pieces:{helmet:'crown',shirt:'royal-coat',pants:'royal-trousers',shoes:'royal-shoes',neck:'royal-collar',cape:'crimson-cape'}}],
-  helmet: [{id:'party-hat',name:'派对帽',icon:'./svg/party-hat.svg'},
+  helmet: [{id:'topknot-hair',name:'辫子头',icon:'./svg/topknot-hair.svg'},{id:'long-braid-hair',name:'红色长辫发',icon:'./svg/long-braid-hair.svg'},{id:'secondary-hat',name:'中学生帽子',icon:'./svg/secondary-hat.svg'},{id:'student-hat',name:'小学生帽子',icon:'./svg/student-hat.svg'},{id:'white-worker-helmet',name:'白色工人安全帽',icon:'./svg/white-worker-helmet.svg'},{id:'worker-helmet',name:'黄色工人安全帽',icon:'./svg/worker-helmet.svg'},{id:'kappa-hair',name:'河童发型',icon:'./svg/kappa-hair.svg'},{id:'round-glasses',name:'棕框眼镜',icon:'./svg/round-glasses.svg'},
+    {id:'cigarette',name:'叼烟',icon:'./svg/cigarette.svg'},
+    {id:'party-hat',name:'派对帽',icon:'./svg/party-hat.svg'},
     {id:'shark-hood',name:'鲨鱼头套',icon:'./svg/shark-hood.svg'},
     {id:'chainsaw',name:'电锯头盔',icon:'./svg/chainsaw.svg'},
     {id:'batfish-cowl',name:'尖耳头罩',icon:'./svg/batfish-cowl.svg'},
@@ -72,9 +103,9 @@ const decorationCatalog = {
     {id:'royal-collar',name:'国王白毛领',icon:'./svg/royal-collar.svg'},
     { id: 'scarf', name: '红围巾', icon: './svg/decoration-scarf.svg' },
   ],
-  shirt: [{id:'batfish-armor',name:'鱼徽战衣',icon:'./svg/batfish-armor.svg'},{id:'ivory-tunic',name:'白金束腰阔袖上衣',icon:'./svg/ivory-tunic.svg'},
+  shirt: [{id:'white-tie-shirt',name:'白色衬衫',icon:'./svg/white-tie-shirt.svg'},{id:'black-turtleneck-tee',name:'高领黑色半袖',icon:'./svg/black-turtleneck-tee.svg'},
+    {id:'batfish-armor',name:'鱼徽战衣',icon:'./svg/batfish-armor.svg'},{id:'ivory-tunic',name:'白金束腰阔袖上衣',icon:'./svg/ivory-tunic.svg'},
     {id:'royal-coat',name:'国王礼服',icon:'./svg/royal-coat.svg'},
-    {id:'suit-jacket', name:'藏蓝西装上衣', icon:'./svg/suit-jacket.svg'},
     { id: 'plain', name: '普通长袖上衣', icon: './svg/decoration-shirt.svg' },
     { id: 'blue-vest', name: '蓝色 V 领背心', icon: './svg/blue-vest.svg', sleeveless: true },
     { id: 'yellow-tee', name: '黄色宽松短袖', icon: './svg/yellow-tee.svg' },
@@ -84,35 +115,51 @@ const decorationCatalog = {
     { id: 'coral-tee', name: '红色短袖', icon: './svg/coral-tee.svg' },
     { id: 'loose-tee', name: '宽松T恤', icon: './svg/loose-tee.svg' },
     { id: 'loose-long-sleeve', name: '宽松长袖上衣', icon: './svg/loose-long-sleeve.svg' },
+    {id:'cinched-long-sleeve',name:'收口宽松长袖',icon:'./svg/cinched-long-sleeve.svg'},
   ],
-  pants: [{id:'batfish-trousers',name:'深灰战裤',icon:'./svg/batfish-trousers.svg'},{id:'ivory-trousers',name:'象牙白阔腿裤',icon:'./svg/ivory-trousers.svg'},
+  pants: [
+    {id:'dark-gray-slight-wide-trousers',name:'深灰色微阔长裤',icon:'./svg/dark-gray-slight-wide-trousers.svg'},
+    {id:'black-slight-wide-trousers',name:'黑色微阔长裤',icon:'./svg/black-slight-wide-trousers.svg'},
+    {id:'student-shorts',name:'藏蓝小学生短裤',icon:'./svg/student-shorts.svg'},
+    {id:'blue-worker-trousers',name:'深蓝工人裤',icon:'./svg/blue-worker-trousers.svg'},{id:'worker-trousers',name:'橙色工人裤',icon:'./svg/worker-trousers.svg'},{id:'batfish-trousers',name:'深灰战裤',icon:'./svg/batfish-trousers.svg'},{id:'ivory-trousers',name:'象牙白阔腿裤',icon:'./svg/ivory-trousers.svg'},
     {id:'royal-trousers',name:'国王白长裤',icon:'./svg/royal-trousers.svg'},
     {id:'suit-trousers', name:'藏蓝西装长裤', icon:'./svg/suit-trousers.svg'},
     { id: 'plain', name: '紧身裤', icon: './svg/decoration-pants.svg' },
     { id: 'jumpsuit', name: '蓝色连体裤', icon: './svg/decoration-jumpsuit.svg', sleeveless: true },
     { id: 'navy-jumpsuit', name: '深蓝色连体裤', icon: './svg/navy-jumpsuit.svg', sleeveless: true },
-    { id: 'red-shorts', name: '红色内裤', icon: './svg/red-shorts.svg' },
+    { id: 'red-shorts', name: '红色四角内裤', icon: './svg/red-shorts.svg' },
+    {id:'red-briefs',name:'红色三角内裤',icon:'./svg/red-briefs.svg'},
     { id: 'pink-shorts', name: '粉色短裤', icon: './svg/pink-shorts.svg' },
     { id: 'orange-shorts', name: '橙色短裤', icon: './svg/orange-shorts.svg' },
     { id: 'black-shorts', name: '黑色短裤', icon: './svg/black-shorts.svg' },
-    { id: 'wide-shorts', name: '阔腿短裤', icon: './svg/wide-shorts.svg' },
-    { id: 'skirt', name: '灰青色裙子', icon: './svg/skirt.svg' },
-    { id: 'red-thong', name: '红色丁字裤', icon: './svg/red-thong.svg' },
+    {id:'slight-wide-shorts',name:'灰青色微阔短裤',icon:'./svg/slight-wide-shorts.svg'},
+    {id:'loose-shorts',name:'灰青色宽松短裤',icon:'./svg/loose-shorts.svg'},
+    {id:'extra-wide-shorts',name:'灰青色阔腿短裤',icon:'./svg/extra-wide-shorts.svg'},
+    { id: 'wide-shorts', name: '灰青色超阔短裤', icon: './svg/wide-shorts.svg' },
+    ...Object.entries(thongVariants).map(([id,item])=>({id,name:item.name,icon:`./svg/${id}.svg`})),
     { id: 'wide-pants', name: '蓝色裤子', icon: './svg/wide-pants.svg' },
+    ...Object.entries(denimVariants).map(([id,variant])=>({id,name:variant.name,icon:`./svg/${id}.svg`})),
+    ...Object.entries(workwearVariants).map(([id,item])=>({id,name:item.name,icon:`./svg/${id}.svg`,sleeveless:true})),
     { id: 'loose-wide-pants', name: '几何拼贴阔腿裤', icon: './svg/loose-wide-pants.svg' },
   ],
-  outerwear: [
+  outerwear: [{id:'charcoal-blazer',name:'深灰西装外套',icon:'./svg/charcoal-blazer.svg'},
+    {id:'secondary-jacket',name:'中学生外套',icon:'./svg/secondary-jacket.svg'},
+    {id:'student-jacket',name:'小学生外套',icon:'./svg/student-jacket.svg'},
+    {id:'blue-worker-jacket',name:'深蓝反光工人外套',icon:'./svg/blue-worker-jacket.svg'},{id:'worker-jacket',name:'橙色反光工人外套',icon:'./svg/worker-jacket.svg'},
+    {id:'suit-jacket', name:'藏蓝西装上衣', icon:'./svg/suit-jacket.svg'},
     {id:'aloha-jacket',name:'藏蓝短袖外套',icon:'./svg/aloha-jacket.svg'},
     {id:'aloha-long-jacket',name:'藏蓝长袖外套',icon:'./svg/aloha-long-jacket.svg'},
+    {id:'aloha-open-jacket',name:'藏蓝敞胸短袖外套',icon:'./svg/aloha-open-jacket.svg'},
+    {id:'aloha-open-long-jacket',name:'藏蓝敞胸长袖外套',icon:'./svg/aloha-open-long-jacket.svg'},
     { id: 'green-vest', name: '绿色开襟外套', icon: './svg/green-vest.svg', sleeveless: true },
   ],
-  shoes: [{id:'batfish-boots',name:'黑色战靴',icon:'./svg/batfish-boots.svg'},{id:'royal-shoes',name:'金扣礼鞋',icon:'./svg/royal-shoes.svg'},
+  shoes: [{id:'colorblock-shoes',name:'灰蓝拼色鞋',icon:'./svg/colorblock-shoes.svg'},{id:'brown-shoes',name:'棕色普通鞋',icon:'./svg/brown-shoes.svg'},{id:'student-long-socks-shoes',name:'黑鞋长白袜',icon:'./svg/student-long-socks-shoes.svg'},{id:'student-shoes',name:'黑鞋短白袜',icon:'./svg/student-shoes.svg'},{id:'gray-worker-boots',name:'灰色宽筒工地靴',icon:'./svg/gray-worker-boots.svg'},{id:'worker-boots',name:'黄色宽筒工地靴',icon:'./svg/worker-boots.svg'},{id:'gray-sneakers',name:'灰色系带休闲鞋',icon:'./svg/gray-sneakers.svg'},{id:'batfish-boots',name:'黑色战靴',icon:'./svg/batfish-boots.svg'},{id:'royal-shoes',name:'金扣礼鞋',icon:'./svg/royal-shoes.svg'},
     {id:'black-dress-shoes', name:'黑皮鞋', icon:'./svg/black-dress-shoes.svg'},
     { id: 'plain', name: '普通鞋子', icon: './svg/decoration-shoes.svg' },
     { id: 'brown-boots', name: '棕色长靴', icon: './svg/brown-boots.svg' },
     { id: 'dark-boots', name: '深棕色长靴', icon: './svg/dark-boots.svg' },
   ],
-  cape: [{id:'crimson-cape',name:'绯红披风',icon:'./svg/crimson-cape.svg'},
+  cape: [{id:'kappa-shell',name:'河童龟壳',icon:'./svg/kappa-shell.svg'},{id:'crimson-cape',name:'绯红披风',icon:'./svg/crimson-cape.svg'},
     {id:'charcoal-cape',name:'漆黑披风',icon:'./svg/charcoal-cape.svg'},
     {id:'azure-cape',name:'湛蓝披风',icon:'./svg/azure-cape.svg'},
     {id:'solid-red-cape',name:'纯色红披风',icon:'./svg/solid-red-cape.svg'},
@@ -120,6 +167,89 @@ const decorationCatalog = {
     {id:'solid-black-cape',name:'纯色黑披风',icon:'./svg/solid-black-cape.svg'}],
   gloves: [{id:'batfish-gloves',name:'黑色手套',icon:'./svg/batfish-gloves.svg'},{ id: 'plain', name: '普通手套', icon: './svg/decoration-gloves.svg' }],
 };
+// Catalog IDs stay stable for suits and saved selections; these are UI families.
+const specialShirtIds=['batfish-armor','ivory-tunic','royal-coat'];
+const decorationStyleGroups={
+ shirt:[
+  ['collared','衬衫',['white-tie-shirt']],
+  ['turtleneck-tee','高领半袖',['black-turtleneck-tee']],['long-shirt','长袖上衣',['plain']],['vest','V领背心',['blue-vest']],
+  ['tee','圆领短袖',['yellow-tee','patched-tee']],['shallow-tee','浅领短袖',['red-tee']],
+  ['triangle','三角上衣',['red-triangle']],['short-tee','短款短袖',['coral-tee']],
+  ['loose-tee','宽松T恤',['loose-tee']],['loose-long','宽松长袖',['loose-long-sleeve']],
+  ['cinched','收口长袖',['cinched-long-sleeve']]],
+ pants:[['worker','工人裤',['worker-trousers','blue-worker-trousers']],['fitted','紧身长裤',['plain','batfish-trousers']],
+  ['slight-wide','微阔长裤',['suit-trousers','dark-gray-slight-wide-trousers','black-slight-wide-trousers','royal-trousers','jobs-gradient-jeans']],
+  ['wide','宽松长裤',['wide-pants']],
+  ['extra-wide','阔腿长裤',['ivory-trousers']],
+  ['loose-wide','超阔长裤',['loose-wide-pants']],
+  ['jeans','宽松牛仔裤',Object.keys(denimVariants).filter(id=>id!=='jobs-gradient-jeans')],
+  ['denim-jumpsuit','连体工装裤',Object.keys(workwearVariants)],['jumpsuit','连体裤',['jumpsuit','navy-jumpsuit']],['briefs','四角内裤',['red-shorts']],['triangle-briefs','三角内裤',['red-briefs']],['thong','丁字裤',Object.keys(thongVariants)],
+  ['shorts','紧身短裤',['pink-shorts','orange-shorts','black-shorts']],['slight-wide-ultra-shorts','微阔超短裤',['student-shorts']],
+  ['slight-wide-shorts','微阔短裤',['slight-wide-shorts']],
+  ['loose-shorts','宽松短裤',['loose-shorts']],
+  ['extra-wide-shorts','阔腿短裤',['extra-wide-shorts']],
+  ['wide-shorts','超阔短裤',['wide-shorts']]],
+ outerwear:[['blazer','西装外套',['charcoal-blazer']],['secondary','中学生外套',['secondary-jacket']],['student','小学生外套',['student-jacket']],['worker','工人外套',['worker-jacket','blue-worker-jacket']],['suit','西装上衣',['suit-jacket']],['short','短袖外套',['aloha-jacket']],['long','长袖外套',['aloha-long-jacket']],
+  ['open-short','敞胸短袖外套',['aloha-open-jacket']],['open-long','敞胸长袖外套',['aloha-open-long-jacket']],
+  ['vest','无袖开襟外套',['green-vest']]],
+ shoes:[['colorblock-shoes','拼色鞋子',['colorblock-shoes']],['short-sock-shoes','短袜鞋',['student-shoes']],['long-sock-shoes','长袜鞋',['student-long-socks-shoes']],['work-boots','宽筒工地靴',['worker-boots','gray-worker-boots']],['sneakers','系带休闲鞋',['gray-sneakers']],['shoes','鞋子',['plain','black-dress-shoes','brown-shoes']],['boots','长靴',['brown-boots','dark-boots','batfish-boots']],
+  ['buckle','搭扣礼鞋',['royal-shoes']]],
+ gloves:[['gloves','手套',['plain']],['guards','护腕手套',['batfish-gloves']]],
+ cape:[['shell','龟壳',['kappa-shell']],['cape','披风',['crimson-cape','charcoal-cape','azure-cape','solid-red-cape','solid-blue-cape','solid-black-cape']]],
+};
+const baseDecorationSelections={};
+const BASE_GARMENT_COLOR='#a6a6a6';
+let basePaintRestore=[];
+function restoreBasePaint(){
+ for(const [node,attr,value] of basePaintRestore){
+  if(value===null)node.removeAttribute(attr);else node.setAttribute(attr,value);
+ }
+ basePaintRestore=[];
+}
+function grayGarmentNode(node){
+ if(!node)return;
+ const nodes=[node,...(node.querySelectorAll?.('path,stop,polygon,circle,rect')||[])];
+ for(const part of nodes)for(const attr of ['fill','stroke','stop-color']){
+  const value=part.getAttribute?.(attr);
+  if(!value||['none','black','#000','#000000','transparent'].includes(value.toLowerCase())||value.startsWith('url('))continue;
+  basePaintRestore.push([part,attr,value]);part.setAttribute(attr,BASE_GARMENT_COLOR);
+ }
+}
+function applyBaseGarmentPaint(){
+ const base=baseDecorationSelections;
+ const shirtKeys=['jobsCollar','jobsCollarEdge',...innerTopKeys(),'shirtTop','teeNeck','teeTopLeft','teeTopRight','tieblade','tieknot'];
+ const pantsKeys=['pants','pantsSides','pantsCrotch','shorts','shortsSides','shortsCrotch','pantsWaist','jeansDetails','redThong','briefs','skirt',
+  'jumpsuit','jumpsuitSides','jumpsuitCrotch','jumpsuitChestOutline','jumpsuitNeckLeft','jumpsuitNeckRight','jumpsuitShoulderLeft','jumpsuitShoulderRight'];
+ if(base.shirt)shirtKeys.forEach(key=>grayGarmentNode(garmentPaths[key]));
+ if(base.pants){
+  pantsKeys.forEach(key=>grayGarmentNode(garmentPaths[key]));
+  if(pantsCoverThigh())torsoMaterial.lower.forEach(grayGarmentNode);
+  if(selectedDecorations.pants==='loose-wide-pants')grayGarmentNode(torsoMaterial.fabric);
+ }
+ if(base.outerwear)['alohaBody','greenVestLeft','greenVestRight'].forEach(key=>grayGarmentNode(garmentPaths[key]));
+ if(base.cape)grayGarmentNode(capeOverlay);
+ for(const arm of armParts){
+  const style=teeStyles[selectedDecorations.shirt];
+  const end=style?.sleeveEnd||31;
+  if(base.shirt){
+   arm.segments.forEach(({front},i)=>{if(i<end&&(style||['plain','suit-jacket'].includes(selectedDecorations.shirt)))grayGarmentNode(front);});
+   grayGarmentNode(arm.sleevePanel);
+  }
+  if(base.outerwear)grayGarmentNode(arm.alohaSleeve);
+  if(base.gloves){grayGarmentNode(arm.glovePanel);grayGarmentNode(arm.handFill);}
+ }
+ for(const leg of legParts){
+  const tall=!!bootProfiles[selectedDecorations.shoes]||['brown-boots','dark-boots','batfish-boots'].includes(selectedDecorations.shoes)&&!widePantFlares[selectedDecorations.pants];
+  leg.segments.forEach(({front},i)=>{
+   if(tall&&i>=19){if(base.shoes)grayGarmentNode(front);return;}
+   if(base.pants&&(wearingJumpsuit()||['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePantFlares[selectedDecorations.pants]
+      ||['student-shorts','pink-shorts','orange-shorts','black-shorts','slight-wide-shorts','loose-shorts','extra-wide-shorts','wide-shorts'].includes(selectedDecorations.pants)&&i<shortsHemIndex()))grayGarmentNode(front);
+  });
+  if(base.pants)leg.fabricLayers.forEach(({group})=>grayGarmentNode(group));
+  if(base.shoes){grayGarmentNode(leg.sneakerDetails);grayGarmentNode(leg.bootFill);grayGarmentNode(garmentPaths['royalBuckle'+leg.side]);}
+ }
+}
+
 const decorationColors = {
   batArmor:'#535963',batBlack:'#292d35',batGold:'#FDE400',
   sharkHood:'#1b3a5c', fleshSkin:'#EDD6D6',
@@ -139,6 +269,7 @@ const decorationColors = {
   looseTee:'#a9b89c', looseLongSleeve:'#859eb4',
   royalRed:'#b72c3b',royalWhite:'#fff5e4',royalGold:'#dfb553',royalShoe:'#29212a',
   suitNavy:'#454963', dressShoes:'#101011', tieRed:'#f51b20',
+  denimBlue:'#48769b',
   widePants: '#3e4a72', wideShorts: '#547985', skirt: '#547985',
 };
 // Shared fabric definition for the live garment and its catalog thumbnail.
@@ -227,8 +358,14 @@ function legFabricPaths(shape,side,legs=100) {
     return paths;
   });
 }
+
+const denimJeansIds=[...Object.keys(denimVariants),...Object.keys(workwearVariants)];
 function widePantsPaint() {
-  return selectedDecorations.pants==='loose-wide-pants'
+  if(selectedDecorations.pants==='dark-gray-slight-wide-trousers')return '#2B2D2D';
+  if(selectedDecorations.pants==='black-slight-wide-trousers')return '#101011';
+  if(workerPantsColors[selectedDecorations.pants])return workerPantsColors[selectedDecorations.pants];
+  if(selectedDecorations.pants==='jobs-gradient-jeans')return 'url(#jobs-pelvis-gradient)';
+  return denimJeansIds.includes(selectedDecorations.pants)?denimColor():selectedDecorations.pants==='loose-wide-pants'
     ?'url(#loose-pants-fabric)':selectedDecorations.pants==='suit-trousers'
       ?decorationColors.suitNavy:['royal-trousers','ivory-trousers'].includes(selectedDecorations.pants)
         ?decorationColors.royalWhite:decorationColors.widePants;
@@ -244,7 +381,7 @@ const milkFrogBellySource='M47 78C36 78 34 96 35.5 108C36.4 117 40 119 47 119C54
 // colour, whenever the chainsaw is off.
 // Hats that sit over the horn and leave nothing of it showing.
 const hornCovered = (helmet = selectedDecorations.helmet) =>
-  helmet === 'crown' || helmet === 'batfish-cowl' || helmet === 'chainsaw';
+  helmet==='topknot-hair' || helmet==='long-braid-hair' || helmet==='secondary-hat' || helmet==='student-hat' || !!workerHelmetColors[helmet] || helmet === 'kappa-hair' || helmet === 'crown' || helmet === 'batfish-cowl' || helmet === 'chainsaw';
 // Hats that are the horn, repainted: the party hat and the shark hood.
 const hornWorn = (helmet = selectedDecorations.helmet) =>
   helmet === 'party-hat' || helmet === 'shark-hood';
@@ -253,8 +390,11 @@ const hornWorn = (helmet = selectedDecorations.helmet) =>
 // the horn takes the antenna's place and brings the horn itself back.
 const antennaShown = (helmet = selectedDecorations.helmet) =>
   !!skinTrait('antenna') && !hornCovered(helmet) && !hornWorn(helmet);
+function skinHeadContour(helmet=selectedDecorations.helmet){
+ return !hornCovered(helmet)&&!hornWorn(helmet)?skinTrait('headContour'):undefined;
+}
 function hornHidden(helmet = selectedDecorations.helmet) {
-  return hornCovered(helmet) || antennaShown(helmet);
+  return hornCovered(helmet) || antennaShown(helmet) || !!skinHeadContour(helmet);
 }
 // Everything a skin changes, in one place, so adding one is a single entry
 // rather than a condition sprinkled through the renderer. `mouthShut` is
@@ -266,10 +406,18 @@ function hornHidden(helmet = selectedDecorations.helmet) {
 let skinTraits;
 function skinTrait(name) {
   skinTraits ||= {
+    'little-yellow-fish':{color:'#FFEE00',headContour:yellowFishHeadContour},
+    kappa:{color:'#89CD71',eyeWhite:kappaEyeWhite,pupil:{rx:1.31738,ry:1.18774,dx:-2.2119,dy:3.9096},kappaDetails:true},
     'milk-frog': {color: milkFrogColors.skin, eye: milkFrogColors.eye, belly: true},
     pochita: {color: pochitaColors.skin, eyeWhite: pochitaEyeWhite,
       pupil: pochitaPupil, lip: POCHITA_LIP, tail: true, mouthShut: .76},
+    hypnotic:{color:'#FBD5CA',eye:'#EB8E15',eyeWhite:hypnoticEyeSource,pupil:{rx:0,ry:0},eyeRings:true},
     flesh: {color: decorationColors.fleshSkin},
+    'flesh-2':{color:'#f4ece6'},
+    'flesh-3':{color:'#f9d4ad'},
+    'flesh-6':{color:'#FBD5CA'},
+    'flesh-5':{color:'#dda579'},
+    'flesh-4':{color:'#ffc1bf'},
     clown: {color: decorationColors.clownWhite, marks: true},
     alien: {color: decorationColors.alienGreen, eye: 'black', pupil: {rx: 1.31738,
       ry: 1.18774, dy: 0, color: 'white'}, antenna: true},
@@ -283,11 +431,12 @@ function skinTrait(name) {
 }
 // Hoods that are a head of their own rather than something worn on one.
 const FACE_TRAITS = ['eye', 'eyeWhite', 'pupil', 'lip', 'marks', 'mouthShut',
-  'antenna'];
+  'antenna','kappaDetails','headContour','eyeRings'];
 const fullHood = (helmet = selectedDecorations.helmet) =>
   helmet === 'batfish-cowl' || helmet === 'shark-hood';
 function skinColor(){ return skinTrait('color') || '#C5C5C5'; }
 let bellyPatch,bellyClip;
+let jobsPelvisGradient;
 
 const clamp01 = value => Math.max(0, Math.min(1, value));
 const smooth = value => {
@@ -445,6 +594,16 @@ function buildWarp(config) {
     // moves with the head but the jaw never touches it. The chainsaw
     // reaches down either side of the mouth, so on a jaw-following role
     // its teeth would swing with every syllable.
+    if(role==='cigarette'){
+      // At full closure the cigarette axis is exactly the deformed mouth seam.
+      const [lipX,lipY]=openJaw(...JAW.spike);
+      const seamAngle=Math.atan2(lipY-JAW.corner[1],lipX-JAW.corner[0]);
+      const angle=mouth<0?-mouth*(seamAngle-CIGARETTE_ANGLE):-mouth*.12;
+      const cos=Math.cos(angle),sin=Math.sin(angle);
+      const dx=x-JAW.corner[0],dy=y-JAW.corner[1];
+      x=JAW.corner[0]+dx*cos-dy*sin;y=JAW.corner[1]+dx*sin+dy*cos;
+      role='head';
+    }
     if (role === 'headRigid') role = 'head';
     // Helmet: keep the lower rim locked to the shoulders, but spread the blend
     // over most of the lower arc. The earlier short 46–56 blend produced a
@@ -601,6 +760,7 @@ let lastHat = 'plain';
 let scarfPaths = [];
 let outfitOverlay;
 let neckOverlay;
+let longHairOverlay;
 let capeOverlay;
 let dragLayer;
 let activeDrag;
@@ -1445,7 +1605,7 @@ function legGeometry(side, warp) {
     crease+=`C${pair(first)} ${pair(second)} ${pair(p2)}`;
   }
   const creaseOpacity=smooth((1-length/restLength-.25)/.3);
-  return {hose,bootFill,bootOutline,shoeOut:{x:footFrame.n.x*sign,y:footFrame.n.y*sign},shoeUp:{x:-shoeFrame.t.x,y:-shoeFrame.t.y},
+  return {side,hose,bootFill,bootOutline,shoeCurves,shoeOut:{x:footFrame.n.x*sign,y:footFrame.n.y*sign},shoeUp:{x:-shoeFrame.t.x,y:-shoeFrame.t.y},
     bootOuter:footStart,bootInner:footEnd,bootToe,bootHeel,
     ankleOuterEdge,ankleInnerEdge,
     crease,creaseOpacity,centerline,hip,ankle,knee,
@@ -1771,12 +1931,18 @@ let partyHatPaths=[];
 let batCowlClipPath;
 let sharkEyeClipPath;
 let pupilClipGroup;
+let hypnoticEyePaths=[];
 let headFillNode;
 let chainsawPaths=[];
+let cigarettePaths=[];
+let jobsGlassesPaths=[];
+let kappaHairPaths=[],kappaSkinPaths=[],workerHatPaths=[],studentHatPaths=[],secondaryHatPaths=[],topknotHairPaths=[];
 let pochitaCordPaths=[];
 let crownPaths=[];
 let buttOutlines = [];
 let garmentPaths;
+let outerwearInnerClip;
+let underwearRootCutout;
 let jumpsuitChestCutout;
 let torsoMaterial;
 const scarfSources = [
@@ -1786,10 +1952,22 @@ const scarfSources = [
   'M34.5 59C30 65 24.5 72 25 80C31 73 35.5 66 36 59Z',
   'M32.5 57.2C34 55.7 37 55.7 38.6 57.4C38.9 59 36.4 60.2 34.3 59.4C32.7 59.2 32 58.1 32.5 57.2Z',
 ];
+const collaredNeckSource='M26.1046 56.4524L32.6 57.58L47 62L61.4 56.68L67.7274 55.0466';
+const collaredShirtSpecs=[
+ {source:'M45.5 64L48.5 64L49.8 69L47 72L44.2 69Z',fill:'#131313'},
+ {source:'M46.2 72L47.8 72L50.5 98L47 108L43.5 98Z',fill:'#131313'},
+ {source:'M32.6 57.58L47 62L42.2 69L32 63Z',fill:'#D9D9D9',edge:'M47 62L42.2 69L32 63L32.6 57.58'},
+ {source:'M61.4 56.68L47 62L51.8 69L62 62.3Z',fill:'#D9D9D9',edge:'M47 62L51.8 69L62 62.3L61.4 56.68'}
+];
+function collaredShirtMarkup(warp){
+ return collaredShirtSpecs.map(s=>`<path d="${workerGarmentPath(s.source,warp)}" fill="${s.fill}" stroke="${s.edge?'none':'black'}" stroke-width=".7" stroke-linejoin="round"/>`+(s.edge?`<path d="${workerGarmentPath(s.edge,warp)}" fill="none" stroke="black" stroke-width="1" stroke-linejoin="round"/>`:'')).join('');
+}
+
 const shirtSource = `M26.1046 56.4524L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}
   C66.9913 84.8335 66.1 103 65.9 112L27.7 112
   C27.6 103 27.5018 84.2394 27.478 ${LEFT_ARMPIT_Y}Z`;
 // Jacket, white shirt insert and collar share the live torso coordinate system.
+const collaredBodySource=shirtSource.replace('M26.1046 56.4524L67.7274 55.0466',collaredNeckSource);
 const suitFrontSource = 'M35 56.15L59 55.35L53.3 69L53.3 112L40.7 112L40.7 69Z';
 const suitFrontEdgesSource = 'M35 56.15L40.7 69L40.7 112M59 55.35L53.3 69L53.3 112';
 // Close the visible waist across the white opening at the jacket hem.
@@ -1817,12 +1995,14 @@ const shortsLowerSource = `M65.8486 125.059C63.5 127.5 54 131.8 49.4914 132.8
 const shirtHemSource = 'M27.7 112L65.9 112';
 const vestHemSource = 'M27.7 102L65.9 102';
 const pantsWaistSource = 'M27.7 110.5L65.9 110.5';
+// Higher leg openings, with the same crotch height as the boxer-style red shorts.
+const briefsSource='M27.7 114.5L65.9 114.5L65.9 121C58 122 53 125.8 49.4914 132.8C48.4 132.3 45.9 132.3 44.6804 132.8C41 126.8 35 123 28 121Z';
 function redThongSource(legs) {
   // The waistband follows the torso. Only the centre strip grows with the
   // leg length: at the shortest setting it stops at the body's crotch, and
   // at the longest setting it keeps the original 141-unit endpoint.
   const end=clean(lerp(132.8,141,clamp01((legs-50)/130)));
-  return `M27.7 110.5L65.9 110.5L65.45 119.5
+  return `M27.7 110.5L65.9 110.5L65.85 119.5
     L50.5 119.5L50.5 ${end}L43.7 ${end}L43.7 119.5L28.15 119.5Z`;
 }
 const redTriangleSource = `M26.1046 56.4524L67.7274 55.0466
@@ -1864,36 +2044,175 @@ const alohaCollar=alohaLeftCollar+' '+transformPath(alohaLeftCollar,(x,y)=>({
   x:94-x,y:y<60?y+alohaNeckY(94-x)-alohaNeckY(x):y,
 }));
 const alohaSleeveStyles={
+  'secondary-jacket':{longHem:true,end:31,flare:1,color:'#101011',student:true},
+  'student-jacket':{longHem:true,end:31,flare:1,color:'#102f68',student:true},
+  'worker-jacket':{longHem:true,end:27,flare:4,color:'#f66b19',worker:true},
+  'blue-worker-jacket':{longHem:true,end:27,flare:4,color:'#1d3b68',worker:true},
+  'charcoal-blazer':{longHem:true,end:31,flare:1,color:'#2B2D2D',blazer:true},
+  'suit-jacket':{end:31,flare:0,color:decorationColors.suitNavy,suit:true},
   'aloha-jacket':{end:22,flare:7},
   'aloha-long-jacket':{end:31,flare:4},
+  'aloha-open-jacket':{end:22,flare:7,openFront:true},
+  'aloha-open-long-jacket':{end:31,flare:4,openFront:true},
 };
 const alohaSleeveStyle=alohaSleeveStyles['aloha-jacket'];
 // Leave the armhole open, just like looseTopSidesSource: closing each panel
 // with a stroke would draw a seam separating the shoulder from the sleeve.
 const alohaEdges=`M27.478 ${LEFT_ARMPIT_Y}C26 80 25 101 25 112L44 112L45 66L40 ${alohaNeckY(40)}L26.1046 56.4524
   M67.5459 ${RIGHT_ARMPIT_Y}C68.2 80 69 101 69 112L49 112L49 66L54 ${alohaNeckY(54)}L67.7274 55.0466`;
-function alohaBodyMarkup(warp){
-  const d=Object.values(alohaSources).map(source=>torsoGarmentPath(source,warp,true)).join('');
-  const collar=torsoGarmentPath(alohaCollar,warp,true);
+const alohaOpenSources={
+  left:`M26.1046 56.4524L38 ${alohaNeckY(38)}L40 72L38 112L25 112
+    C25 101 26 80 27.478 ${LEFT_ARMPIT_Y}Z`,
+  right:`M56 ${alohaNeckY(56)}L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}
+    C68.2 80 69 101 69 112L56 112L54 72Z`,
+};
+const alohaOpenLeftCollar=`M31.5 ${alohaNeckY(31.5)}L38 ${alohaNeckY(38)}L40 72L35 78Z`;
+const alohaOpenCollar=alohaOpenLeftCollar+' '+transformPath(alohaOpenLeftCollar,(x,y)=>({
+  x:94-x,y:y<60?y+alohaNeckY(94-x)-alohaNeckY(x):y,
+}));
+const alohaOpenEdges=`M27.478 ${LEFT_ARMPIT_Y}C26 80 25 101 25 112L38 112L40 72L38 ${alohaNeckY(38)}L26.1046 56.4524
+  M67.5459 ${RIGHT_ARMPIT_Y}C68.2 80 69 101 69 112L56 112L54 72L56 ${alohaNeckY(56)}L67.7274 55.0466`;
+function alohaBodyMarkup(warp,openFront=false){
+  const d=Object.values(openFront?alohaOpenSources:alohaSources).map(source=>torsoGarmentPath(source,warp,true)).join('');
+  const collar=torsoGarmentPath(openFront?alohaOpenCollar:alohaCollar,warp,true);
   return `<path d="${d}" fill="${alohaColor}"/>`
-    +`<path d="${torsoGarmentPath(alohaEdges,warp,true)}" fill="none" stroke="black" stroke-width="1" stroke-linejoin="round"/>`
+    +`<path d="${torsoGarmentPath(openFront?alohaOpenEdges:alohaEdges,warp,true)}" fill="none" stroke="black" stroke-width="1" stroke-linejoin="round"/>`
     +`<path d="${collar}" fill="${alohaColor}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`;
 }
+const blazerPanels={
+ left:`M26.1046 56.4524L33 57.5C34 70 40 84 47 94L46 114L43 125L25.5 125L27.478 ${LEFT_ARMPIT_Y}Z`,
+ right:`M67.7274 55.0466L61 56.8C60 70 54 84 47 94L46 114L50 125L68.5 125L67.5459 ${RIGHT_ARMPIT_Y}Z`
+};
+const blazerEdges=`M26.1046 56.4524L33 57.5C34 70 40 84 47 94L46 114L43 125L25.5 125L27.478 ${LEFT_ARMPIT_Y} M67.7274 55.0466L61 56.8C60 70 54 84 47 94L46 114L50 125L68.5 125L67.5459 ${RIGHT_ARMPIT_Y}`;
+function blazerMarkup(warp){
+ const tag=(d,fill,stroke='none',width=1)=>`<path d="${workerGarmentPath(d,warp)}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round"/>`;
+ return Object.values(blazerPanels).map(d=>tag(d,'#2B2D2D')).join('')+tag(blazerEdges,'none','black')
+ +tag('M33 57.5L30.5 66L35 68L30 79L47 94 M61 56.8L63.5 65L59 68L64 79L47 94','none','black',.7)
+ +tag(circleSource(47,102,1),'#151c1d');
+}
+function suitOuterMarkup(warp){
+  const path=(source,fill='none',outline=false,width=1)=>`<path d="${garmentPath(source,warp)}" fill="${fill}" stroke="${outline?'black':'none'}" stroke-width="${width}" stroke-linejoin="round" paint-order="stroke fill"/>`;
+  return path(shirtSource,decorationColors.suitNavy)
+    +path(suitFrontSource,'white')
+    +Object.values(suitCollarSources).map(source=>path(source,'white')).join('')
+    +path(shirtSidesSource,'none',true)+path(shirtTopSource,'none',true)
+    +path(suitFrontEdgesSource,'none',true)+path(suitHemSource,'none',true)
+    +Object.values(tieSources).map(source=>path(source,decorationColors.tieRed,true,2)).join('');
+}
 function alohaSleeveMarkup(shape,id,style=alohaSleeveStyle){
+  if(style.worker)return workerSleeveMarkup(shape,id,style);
   // Use the loose tee's overlapping hose segments, smooth flare, and cuff.
   // No closed polygon or transverse stroke at the shoulder attachment.
   const {end,flare}=style;
   const strokes=(color,extra)=>shape.hose.slice(0,end).map(({d,width},i)=>{
     // Earlier round segments can also cross the cuff when the elbow folds.
     // Clip the entire cloth, including every black and colored stroke.
-    const clip=` clip-path="url(#${id})"`;
+    const clip=style.student&&i<6?'':` clip-path="url(#${id})"`;
     const shoulder=color==='black'&&i<6&&/^(left|right)-/.test(id)
       ?` mask="url(#${id.split('-')[0]}-shoulder-mask)"`:'';
     return `<path d="${d}" fill="none" stroke="${color}" stroke-width="${width+extra+sleeveExtraWidth(i,end,flare)}" stroke-linecap="${i===0||i>=end-4?'butt':'round'}" stroke-linejoin="round"${clip}${shoulder}/>`;
   }).join('');
   return `<defs><clipPath id="${id}"><polygon points="${limbClipPoints(shape,end,false)}"/></clipPath></defs>`
-    +strokes('black',2)+strokes(alohaColor,0)
+    +strokes('black',2)+strokes(style.color||alohaColor,0)
     +`<path d="${cuffPath(shape,end,flare)}" fill="none" stroke="black" stroke-width="1"/>`;
+}
+// Group 548.svg: merged head and three-point fin; lower root meets the turtleneck at (67.7,49.9).
+const yellowFishHeadContour='M26.1046 56.4524C25.612 42.5399 27.1648 31.0087 32.3001 23.0968C34.6926 25.4067 37.416 27.9423 40.1394 29.4449L44.2249 11.0386C49.064137 11.532936 57.634140 18.326616 62.594742 26.559224L74.142000 27.653500L70.666900 33.511000L76.2 35.862800L70.9 40.8L76.4 44.2L67.7 49.9C67.75 51.8 67.7274 53.2 67.7274 55.0466';
+// User-supplied Vector 861.svg, fitted against the head as in the reference.
+const workerHelmetSource="M0.507446 1.38414C0.355226 0.469707 2.72483 -0.59714 5.23202 3.06067C9.4993 1.28262 23.0628 -2.90173 29.6163 10.5102C36.5751 24.7515 27.6357 33.3392 21.2346 36.8954C21.3362 39.1815 21.0212 42.9613 18.9485 39.7912C16.3575 35.8285 0.659666 2.29857 0.507446 1.38414Z";
+const workerHatSpecs=[
+ {source:'M26.1046 56.4524C34 57 53 47 67.1 40.8',fill:'none',stroke:'#24211c',role:'headRigid',strokeWidth:2.2},
+ {source:transformPath(workerHelmetSource,(x,y)=>({x:50.6+x*1.03,y:10+y*1.03})),fill:'#FBC723',stroke:'black',role:'headRigid'},
+];
+// User Group 570.svg, aligned to the reference head.
+const studentHatSpecs=[{"source": "M27.9143 6.76744C25.2444 4.48523 19.8023 2.31143 12.7705 4.81204L12.3549 11.8407L19.7618 31.822L26.1234 37.0602C32.5241 32.039 34.9883 27.0359 34.3412 22.2694C33.6941 17.5028 30.5842 9.04965 27.9143 6.76744Z", "fill": "#FFE83F", "stroke": "black", "role": "headRigid"}, {"source": "M21.7184 47.6251C15.4834 23.4045 10.9755 14.3893 2.70689 0.554932C5.11358 0.697216 8.5164 2.10588 12.3021 4.78466C17.0341 8.13313 26.5922 33.0968 25.8476 37.7481C25.252 41.4691 23.0944 44.2093 21.7184 47.6251Z", "fill": "#FFE83F", "stroke": "black", "role": "headRigid"}, {"source": "M17.1302 11.0944C19.3686 10.1981 28.43 10.9379 31.9865 13.8483", "fill": "none", "stroke": "black", "role": "headRigid"}, {"source": "M32.3252 14.8317C31.7358 18.0849 27.7462 24.1984 23.2289 26.7659", "fill": "none", "stroke": "black", "role": "headRigid"}].map(spec=>({...spec,source:transformPath(spec.source,(x,y)=>({x:x+48.3,y:y+9}))}));
+// User Group 572.svg, placed beside the original head crest.
+
+const topknotHairSpecs=[{"source": "M46.5312 0.515869C75.3317 1.71587 74.1988 31.1825 70.0321 45.5159L70.0317 46.5159C68.4317 46.1159 67.0317 41.8492 67.5317 40.0159C64.5317 41.0159 65.0316 44.8492 65.5317 45.5159C61.9313 44.3159 62.6982 36.6825 63.5316 33.0159C61.9316 36.2159 62.1983 40.3492 62.5316 42.0159C58.9316 37.6159 61.6983 28.1825 63.5316 24.0159C60.7316 24.8159 59.6982 29.3492 59.5316 31.5159C58.3315 22.7159 59.0316 17.5159 59.5316 16.0159C55.9315 17.2159 55.0315 21.1825 55.0315 23.0159C53.0315 22.2159 54.1982 15.0159 55.0315 11.5159C53.0315 12.3159 52.1981 16.1825 52.0315 18.0159C49.2314 14.8159 45.8646 2.8492 46.5312 0.515869Z", "fill": "#2F3C4C", "stroke": "black", "role": "headRigid"}, {"source": "M90.0317 24.0983C79.735 20.9511 73.0747 25.4097 71.0317 28.0324L89.4188 29.0159C88.9285 27.4422 85.9457 26.3932 84.5156 26.0653L90.0317 24.0983Z", "fill": "#2E3B4B", "stroke": "black", "role": "headRigid"}].map(spec=>({...spec,source:transformPath(spec.source,(x,y)=>({x:x-2.1314,y:y+10.0227}))}));
+const longHairSpecs=[{"source": "M20.0002 85.0601C17.2002 81.4601 20.1669 77.5601 22.0002 76.0601C26.0003 76.8601 25 81.0601 24.5 82.5601C23.9486 84.2143 24.6667 86.0601 25 87.5601C23.8 87.9601 22 84.7267 21.5 83.0601L22 87.5601C21 86.5601 20.3334 85.3934 20.0002 85.0601Z", "fill": "#CF4D4A", "stroke": "black", "role": "headRigid"}, {"source": "M1.5 0.560059C28.3 3.36006 28 30.0601 24.5 43.0601C29.5 46.0601 26 51.5601 23.5 54.0601C28 57.5601 25.5 61.0601 23 64.5601C25.4 65.3601 25 72.0601 22 75.5601C16.4 71.1601 17.6667 66.0601 20 64.0601C14.8 62.8601 16.8333 57.2267 18.5 54.5601C13.7 51.7601 16.5 47.0601 18.5 45.0601C15.2559 40.7345 16.1685 38.5457 17.7185 36.384C13.0763 41.52 6.26767 41.6242 3 41.0601C12.8276 37.5502 15.9481 31.8161 16.145 26.5601C16.2035 25.7601 12.0727 28.8934 10 30.5601C8.8 26.0092 12.1645 21.1639 14.5 20.0601C11.5 18.5601 5 20.5601 5 22.0601C2.6 18.8601 7.5 13.5601 11.5 11.5601C6.3 12.3601 2 16.2267 0.5 18.0601C0.5 13.2601 5.5 10.0601 8 9.06006C3.2 7.06006 1.66667 2.56006 1.5 0.560059Z", "fill": "#CF4D4A", "stroke": "black", "role": "headRigid"}].map(spec=>({...spec,source:transformPath(spec.source,(x,y)=>({x:x+45.7249,y:y+10.4786}))}));
+// Latest user Group 571.svg: original cap and badge geometry and placement.
+const secondaryHatSpecs=[{"source": "M74.2873 41.7422C71.6708 43.0987 71.6708 43.0987 68.0716 43.9998C68.578 37.1551 67.6136 28.5631 65.6731 22.4388C64.5101 18.7685 63.0187 16.8489 61.7725 14.5843C61.0723 13.3118 59.2999 10.3403 58.7205 9.72349C58.7205 9.72349 52.454 -0.453276 59.0204 4.52991C65.5869 9.5131 68.7057 11.0544 70.0697 12.824C82.6029 9.21384 86.1091 28.6937 83.2518 35.8941C82.4975 39.5559 76.8991 41.0948 74.2873 41.7422Z", "fill": "black", "stroke": "black", "role": "headRigid"}, {"source": "M72.29 13.1643L72.9746 14.5819L74.8877 14.4591L73.3977 15.4581L74.0823 16.8757L72.4768 16.0755L70.9868 17.0744L71.4845 15.5809L69.879 14.7806L71.7922 14.6578L72.29 13.1643Z", "fill": "#FCDD43", "stroke": "none", "role": "headRigid"}].map(spec=>({...spec,source:transformPath(spec.source,(x,y)=>({x,y:y+10.5386}))}));
+const secondaryNeckSource='M26.0276 55.9849L43.5276 58.4849L46.0273 59.9849L48.0276 58.4849L68.0276 55.9849';
+const secondaryBodyEdgesSource=`M27.478 ${LEFT_ARMPIT_Y}L25.5 125.4849L68.5 125.4849L67.5459 ${RIGHT_ARMPIT_Y}`;
+const secondaryBodySource=secondaryNeckSource+`L67.5459 ${RIGHT_ARMPIT_Y}L68.5 125.4849L25.5 125.4849L27.478 ${LEFT_ARMPIT_Y}Z`;
+const studentBodySource=`M26.1046 56.4524L32 59L47 63L62 59L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}C67.8 83 68.5 103 68.5 116C57 117.5 36 117.5 25.5 116C25.5 101 26.5 82 27.478 ${LEFT_ARMPIT_Y}Z`;
+const studentCollarLeft='M32 59L47 63L44.5 70L32 65.5Z';
+const studentCollars=[studentCollarLeft,transformPath(studentCollarLeft,(x,y)=>({x:94-x,y}))];
+function studentOuterMarkup(warp,secondary=false){
+ const tag=(d,fill,stroke='none',width=1)=>`<path d="${workerGarmentPath(d,warp)}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round"/>`;
+ return tag(secondary?secondaryBodySource:studentBodySource,secondary?'#101011':'#102f68')
+ +tag(secondary?secondaryBodyEdgesSource:`M27.478 ${LEFT_ARMPIT_Y}C26.5 82 25.5 101 25.5 116C36 117.5 57 117.5 68.5 116C68.5 103 67.8 83 67.5459 ${RIGHT_ARMPIT_Y}`,'none','black')
+ +(secondary?'':studentCollars.map(d=>tag(d,'#fffdf4','black',.7)).join(''))
+ +tag(secondary?secondaryNeckSource:'M26.1046 56.4524L32 59L47 63L62 59L67.7274 55.0466','none','black')
+ +(secondary?[65.4849,74.4849,83.4849,92.4849].map(y=>tag(circleSource(46.0273,y,2),'#FCDD43')).join(''):[42,52].flatMap(x=>[84,92].map(y=>tag(circleSource(x,y,1.65),'#ffdb43'))).join(''));
+}
+const studentSockStyles={'student-shoes':{start:24},'student-long-socks-shoes':{start:20}};
+function studentSockStart(shoes=selectedDecorations.shoes){return studentSockStyles[shoes]?.start||24;}
+function studentSockVisible(index,pants=selectedDecorations.pants,shoes=selectedDecorations.shoes){
+ return !!studentSockStyles[shoes]&&index>=studentSockStart(shoes)&&!widePantFlares[pants]&&!['plain','batfish-trousers','jumpsuit','navy-jumpsuit'].includes(pants)&&!workwearVariants[pants];
+}
+function exposedLegPaint(index){return studentSockVisible(index)?'#fffdf8':skinColor();}
+const workerHemY=123;
+const workerBodySource=`M26.1046 56.4524L31.5 58.5L47 64L62.5 58.5L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}C68 88 69 108 69.5 ${workerHemY}C58 124 36 124 24.5 ${workerHemY}C25 108 26 88 27.478 ${LEFT_ARMPIT_Y}Z`;
+const workerTopEdgeSource='M26.1046 56.4524L31.5 58.5L47 64L62.5 58.5L67.7274 55.0466';
+const workerBodyEdgesSource=`M27.478 ${LEFT_ARMPIT_Y}C26 88 25 108 24.5 ${workerHemY}C36 124 58 124 69.5 ${workerHemY}C69 108 68 88 67.5459 ${RIGHT_ARMPIT_Y}`;
+const workerCollarLeft='M31.5 58.5L47 64L42 72L31 65.5Z';
+const workerCollarSources=[workerCollarLeft,transformPath(workerCollarLeft,(x,y)=>({x:94-x,y}))];
+const workerCollarEdges=['M47 64L42 72L31 65.5L31.5 58.5',transformPath('M47 64L42 72L31 65.5L31.5 58.5',(x,y)=>({x:94-x,y}))];
+function workerGarmentPath(source,warp){
+ return transformPath(source,(x,y)=>{const role=y<=64?'head':'body';return applyDragPose(warp(x,y,role),x,y,role,warp);});
+}
+function workerOuterMarkup(warp,id=selectedDecorations.outerwear){
+ const palette=workerJacketVariants[id]||workerJacketVariants['worker-jacket'];
+ const tag=(d,fill,stroke='none',width=1)=>`<path d="${workerGarmentPath(d,warp)}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round"/>`;
+ return tag(workerBodySource,palette.body)
+  +[79,95].map(y=>tag(`M26 ${y}L68 ${y}L68 ${y+6}L26 ${y+6}Z`,'#ddf29a')+tag(`M26 ${y+2}L68 ${y+2}L68 ${y+4}L26 ${y+4}Z`,'#d6e4d9')).join('')
+  +tag(`M45.4 65L49 65L49 123.75L45.4 123.75Z`,palette.placket)
+  +tag(workerBodyEdgesSource,'none','black')
+  +workerCollarSources.map(source=>tag(source,palette.collar)).join('')
+  +workerCollarEdges.map(source=>tag(source,'none','black',.7)).join('')
+  +tag(workerTopEdgeSource,'none','black')
+  +tag('M47 70L47 123.75','none',palette.seam,.55);
+}
+function workerSleeveMarkup(shape,id,style){
+ const basic=alohaSleeveMarkup(shape,id,{...style,worker:false});
+ const band=(from,to,color)=>{const end=style.end,pts=[];
+  for(const [i,sign] of [[from,-1],[from,1],[to,1],[to,-1]]){const p=shape.centerline[i],a=shape.centerline[Math.max(0,i-1)],b=shape.centerline[Math.min(32,i+1)],l=Math.hypot(b.x-a.x,b.y-a.y)||1,r=(shape.hose[Math.min(i,31)].width+sleeveExtraWidth(i,end,style.flare))/2;pts.push(`${p.x-(b.y-a.y)/l*r*sign} ${p.y+(b.x-a.x)/l*r*sign}`);}
+  return `<path d="M${pts.join('L')}Z" fill="${color}"/>`;};
+ return basic+band(19,24,'#ddf29a')+band(21,22,'#d6e4d9');
+}
+const bootProfiles={'worker-boots':{extra:2,color:'#ffcb28',tuckPants:true},'gray-worker-boots':{extra:2,color:'#81868b',tuckPants:true}};
+function bootCoversPants(shape,pantsFlare,shoes=selectedDecorations.shoes){
+ const profile=bootProfiles[shoes];
+ if(!profile)return false;
+ return profile.tuckPants||profile.extra>wideLegExtraWidth(19,pantsFlare||0);
+}
+function workerBootExtra(index){return 2+smooth((index-19)/13);}
+function workerBootShoe(shape){
+ // Add a little width at the ankle only, fading out over the original foot.
+ const mid={x:(shape.bootOuter.x+shape.bootInner.x)/2,y:(shape.bootOuter.y+shape.bootInner.y)/2};
+ const width=Math.hypot(shape.bootOuter.x-shape.bootInner.x,shape.bootOuter.y-shape.bootInner.y)||1;
+ const across={x:(shape.bootOuter.x-shape.bootInner.x)/width,y:(shape.bootOuter.y-shape.bootInner.y)/width};
+ const map=(x,y)=>{const dx=x-mid.x,dy=y-mid.y;
+  const fade=clamp01(1+(dx*shape.shoeUp.x+dy*shape.shoeUp.y)/7);
+  const shift=(dx*across.x+dy*across.y)*3/width*fade;
+  return {x:x+across.x*shift,y:y+across.y*shift};
+ };
+ return {...shape,bootOuter:map(shape.bootOuter.x,shape.bootOuter.y),bootInner:map(shape.bootInner.x,shape.bootInner.y),
+  bootFill:transformPath(shape.bootFill,map),bootOutline:transformPath(shape.bootOutline,map)};
+}
+function workerBootMarkup(shape,side,legs=100,pantsFlare=0,shoes='worker-boots'){
+ const color=bootProfiles[shoes]?.color||'#ffcb28';
+ // Thumbnail counterpart of the native tall-boot renderer: the same calf,
+ // same shoe, and shared cuff half-plane; never a separate triangular shaft.
+ if(!bootCoversPants(shape,pantsFlare,shoes))return '';
+ const id=side+'-worker-boot-thumb';
+ const shoe=workerBootShoe(shape);
+ const strokes=shape.hose.slice(19).map(({d,width},j)=>`<path d="${d}" fill="none" stroke="${color}" stroke-width="${width+workerBootExtra(j+19)}" stroke-linecap="${j<5||j===12?'butt':'round'}"/>`).join('');
+ return `<defs><clipPath id="${id}"><polygon points="${limbClipPoints(shape,19,true)}"/></clipPath></defs>`
+  +`<g clip-path="url(#${id})">${strokes}<path d="${trouserCalfEdges(shoe,0,legs,true,workerBootExtra)}" fill="none" stroke="black" stroke-width="1"/></g>`
+  +`<path d="${shoe.bootFill}" fill="${color}"/><path d="${shoe.bootOutline}" fill="none" stroke="black" stroke-width="1"/>`
+  +`<path d="${cuffPath(shape,19,workerBootExtra(19))}" fill="none" stroke="black" stroke-width="1"/>`;
 }
 // Brim first, then the round crown. Both follow the head's deformation.
 const yellowHatSources = {
@@ -1963,6 +2282,8 @@ const alienAntennaSource='M66.013 42.961C70.444 41.414 75.246 43.792 76.561 45.0
 // The clown: a white fish with a red ball on the point of its nose — the
 // head's own spike — and a red spot on its cheek. Both ride on the head,
 // so the nose ball moves with the upper lip when it talks.
+const hypnoticEyeSource=transformPath("M53.6243 27.2554C51.6647 24.7276 51.8131 20.9821 54.666 18.4201C56.9533 16.3909 61.7955 16.1308 63.7897 20.9382C65.784 25.7455 61.5821 28.723 60.233 29.302C58.8839 29.881 55.5839 29.7831 53.6243 27.2554Z",(x,y)=>({x:x-3.2407,y:y+10.5386}));
+const hypnoticEyeSpecs=[{"source": "M63.6411 23.5C63.6411 25.9853 61.6264 28 59.1411 28C56.6558 28 54.6411 25.9853 54.6411 23.5C54.6411 21.0147 56.6558 19 59.1411 19C61.6264 19 63.6411 21.0147 63.6411 23.5Z", "fill": "none", "stroke": "#B2211E", "role": "headRigid"}, {"source": "M61.6411 23.5C61.6411 24.8807 60.5218 26 59.1411 26C57.7604 26 56.6411 24.8807 56.6411 23.5C56.6411 22.1193 57.7604 21 59.1411 21C60.5218 21 61.6411 22.1193 61.6411 23.5Z", "fill": "none", "stroke": "#B2211E", "role": "headRigid"}, {"source": "M60.1411 23.5C60.1411 24.0523 59.6934 24.5 59.1411 24.5C58.5888 24.5 58.1411 24.0523 58.1411 23.5C58.1411 22.9477 58.5888 22.5 59.1411 22.5C59.6934 22.5 60.1411 22.9477 60.1411 23.5Z", "fill": "#B2211E", "stroke": "none", "role": "headRigid"}].map(spec=>({...spec,source:transformPath(spec.source,(x,y)=>({x:x-3.2407,y:y+10.5386}))}));
 const clownMarkSources = [
   {source: circleSource(44.2249, 11.0386, 3.4), outline: true},
   {source: circleSource(43.6, 41.6, 3), outline: false},
@@ -2003,6 +2324,20 @@ const sharkToothSources = [
 // eye and the starter cord are the skin.
 const pochitaColors = {skin:'#EB733E', casing:'#303232', blade:'#AAB3B8',
   motor:'#3B3D40', teeth:'#D9D9D9'};
+// A single clean cigarette, anchored inside the mouth notch (behind the fish).
+const CIGARETTE_ANGLE=Math.atan2(-22.9,-11);
+function cigarettePoint(along,across=0){
+ const c=Math.cos(CIGARETTE_ANGLE),s=Math.sin(CIGARETTE_ANGLE);
+ return {x:JAW.corner[0]+along*c-across*s,y:JAW.corner[1]+along*s+across*c};
+}
+const cigaretteTip=cigarettePoint(25);
+const cigaretteSpecs=[
+ {start:-.5,end:23,fill:'#f7f3e8'},
+ {start:-.5,end:6,fill:'#d8a05e'},
+ {start:23,end:25,fill:'#dc786d'},
+].map(({start,end,fill})=>({fill,source:[[start,-1.35],[end,-1.35],[end,1.35],[start,1.35]].map(([a,b],i)=>{
+ const p=cigarettePoint(a,b);return `${i?'L':'M'}${clean(p.x)} ${clean(p.y)}`;
+}).join('')+'Z'}));
 const chainsawSources = {
   casing:'M65.4 -7.962L65.4 30.538L41.4 36.038L36.9 28.538L36.9 -7.962'
     +'C36.9 -24.462 66.4 -21.462 65.4 -7.962Z',
@@ -2074,6 +2409,9 @@ const batCowlSource='M37.2318 47.6825'
   +'C68.1178 48.4357 60.7496 48.0823 56.7084 47.6825'
   +'L54.9523 51.035L39.4667 51.035L37.2318 47.6825Z';
 const ivorySpecs={
+ kappaShell:{category:'cape',id:'kappa-shell',fill:'#373d38',outline:true,source:'M38 55C49 49 65 51 70 61C78 75 81 96 76 111C72 122 63 127 52 123C38 117 29 99 29 80C29 67 32 59 38 55Z'},
+ kappaShellRim:{category:'cape',id:'kappa-shell',fill:'none',outline:true,stroke:'#242c26',strokeWidth:.7,source:'M63 55C73 68 79 93 73 110C70 118 63 123 56 123'},
+ kappaShellScutes:{category:'cape',id:'kappa-shell',fill:'none',outline:true,stroke:'#28322a',strokeWidth:.65,source:'M65 66L72 77L68 91L73 104 M68 91L59 88 M72 77L77 78 M73 104L76 110'},
  batBadge:{category:'shirt',id:'batfish-armor',fill:'#FDE400',outline:true,source:'M32 75C32 65 62 65 62 75C62 85 32 85 32 75Z'},
  batFish:{category:'shirt',id:'batfish-armor',fill:'#080909',outline:true,stroke:'#626262',strokeWidth:.65,source:'M37 75C41 69 48 69 53 74C55 71.5 57 71 57 71L55.5 75L57 79C55 78.8 54 77 53 76C48 81 41 81 37 75Z'},
  batFishMarks:{category:'shirt',id:'batfish-armor',fill:'#626262',source:'M42 73L42.6 72.7L44.5 76.8L43.9 77.1Z M44 72.7L44.6 73L42.7 77.1L42.1 76.8Z M45.2 73L45.8 72.7L47.7 76.8L47.1 77.1Z M47.2 72.7L47.8 73L45.9 77.1L45.3 76.8Z M48.4 73L49 72.7L50.9 76.8L50.3 77.1Z M50.4 72.7L51 73L49.1 77.1L48.5 76.8Z'},
@@ -2093,6 +2431,7 @@ const ivorySpecs={
  capeFolds:{category:'cape',id:'crimson-cape',fill:'#801729',source:'M30 72L25 177L29 178Z M63 72L66 178L71 177Z'},
 };
 const capeStyles={
+ 'kappa-shell':{kappaShell:'#373d38',kappaShellRim:'none',kappaShellScutes:'none'},
   'crimson-cape':{capeCloth:'#a91e32',capeLining:'#d4494a',capeFolds:'#801729'},
   'charcoal-cape':{capeCloth:'#35383e',capeLining:'#50545c',capeFolds:'#272a30'},
   'azure-cape':{capeCloth:'#1769bd',capeLining:'#3896df',capeFolds:'#114986'},
@@ -2100,6 +2439,9 @@ const capeStyles={
   'solid-blue-cape':{capeCloth:'#1769bd'},
   'solid-black-cape':{capeCloth:'#35383e'},
 };
+function backAccessoryPath(spec,warp){
+ return spec.id==='kappa-shell'?transformPath(spec.source,(x,y)=>applyDragPose(warp(x,y,'body'),x,y,'body',warp)):capePath(spec.source,warp);
+}
 function capePath(source,warp){
   const resting=warp(47,56,'body');
   const shoulder=applyDragPose(resting,47,56,'body',warp);
@@ -2122,12 +2464,13 @@ function ivorySleeveWidth(i){
   const turn=Math.max(0,(i-23)/5);
   return 11*smooth((i-7)/15)*Math.sqrt(Math.max(0,1-turn*turn));
 }
-function ivorySleeveEdges(shape,filled=false){
+function ivorySleeveEdges(shape,filled=false,style=null){
+ const end=style?style.sleeveEnd:28;
  const edges=[[],[]];
  // Match the last original upper-arm segment's actual tangent and width.
  const join=shape.hose[5].d.match(/-?\d+(?:\.\d+)?/g).map(Number);
  const dx=join[6]-join[4],dy=join[7]-join[5],length0=Math.hypot(dx,dy)||1;
- const joinRadius=(shape.hose[5].width+1)/2;
+ const joinRadius=(shape.hose[5].width+1+(style?teeSleeveWidth(5,style):0))/2;
  const joinOffset={x:dy/length0*joinRadius,y:-dx/length0*joinRadius};
  // Each sample's own measurements first: where it sits, which way its two
  // edges point, how far out they would like to be, and how tightly the arm
@@ -2135,10 +2478,10 @@ function ivorySleeveEdges(shape,filled=false){
  // one apart the centre line is too short a chord to measure a turn from
  // without the answer jumping about.
  const samples=[];
- for(let i=6;i<=28;i++){
+ for(let i=6;i<=end;i++){
    const a=shape.centerline[Math.max(0,i-1)],b=shape.centerline[i+1],p=shape.centerline[i];
    const length=Math.hypot(b.x-a.x,b.y-a.y)||1;
-   const width=i===28?shape.hose[28].width:shape.hose[i].width;
+   const width=shape.hose[i].width;
    const before=shape.centerline[Math.max(0,i-2)];
    const after=shape.centerline[Math.min(shape.centerline.length-1,i+2)];
    const into={x:p.x-before.x,y:p.y-before.y},outOf={x:after.x-p.x,y:after.y-p.y};
@@ -2156,7 +2499,7 @@ function ivorySleeveEdges(shape,filled=false){
    const tangent=bisectorLength>.2
      ?{x:bisector.x/bisectorLength,y:bisector.y/bisectorLength}:unitIn;
    samples.push({p,
-     radius:(width+ivorySleeveWidth(i)+1)/2,
+     radius:(width+(style?teeSleeveWidth(i===end?end-1:i,style):ivorySleeveWidth(i))+1)/2,
      normal:{x:tangent.y,y:-tangent.x},
      bend:{x:unitOut.x-unitIn.x,y:unitOut.y-unitIn.y},
      turnRadius:turn>1e-4?(intoLength+outLength)/2/(2*Math.tan(turn/2)):Infinity,
@@ -2240,8 +2583,12 @@ function ivorySleeveEdges(shape,filled=false){
    const a=points[j],before=points[Math.max(0,j-1)],after=points[Math.min(points.length-1,j+2)];
    return `C${pair({x:a.x+(p.x-before.x)/6,y:a.y+(p.y-before.y)/6})} ${pair({x:p.x-(after.x-a.x)/6,y:p.y-(after.y-a.y)/6})} ${pair(p)}`;
  }).join('');
+ if(filled==='cuff')return `M${pair(edges[0].at(-1))}L${pair(edges[1].at(-1))}`;
  if(filled)return curve(edges[0])+curve([...edges[1]].reverse()).replace(/^M/,'L')+'Z';
  return edges.map(curve).join('');
+}
+function cinchedSleeveEdges(shape,filled=false){
+ return ivorySleeveEdges(shape,filled,teeStyles['cinched-long-sleeve']);
 }
 // A spec's fill is either a palette name, the shared outline ink, or a
 // colour written out in full.
@@ -2311,6 +2658,128 @@ function pochitaTailPaths(warp, sway, ground) {
     transformPath(source, place(squash, rigid)));
 }
 const shirtTopSource = 'M26.1046 56.4524L67.7274 55.0466';
+// Imported reference coordinates align to the original eye and body scale.
+const jobsReferencePoint=(x,y)=>({x:55.355+(x-55.6994)/.992954,y:34.4914+(y-23.7843)/.992954});
+// Keep the round rim clear of the head silhouette; terminate temples on its rim.
+
+// Frame 14.svg uses the same character, shifted upward by 10.26956.
+const kappaSourcePath=d=>transformPath(d,(x,y)=>({x,y:y+10.26956}));
+const kappaEyeWhite=kappaSourcePath("M48.3525 32.1096C46.5365 30.1183 46.8592 27.0241 49.7967 24.7782C52.1506 22.9981 56.9441 22.5559 58.6871 26.4246C60.4301 30.2932 56.1411 32.945 54.7818 33.4857C53.4225 34.0264 50.1685 34.1009 48.3525 32.1096Z");
+const kappaHairSpecs=[{"source": "M 28.0274 23.7153 C 47.2274 37.3153 51.3604 16.2153 50.527 3.71533 L 44.027 0.715332 L 40.027 19.2153 L 32.5273 13.2153 C 28.9273 18.0153 27.694 22.2153 28.0274 23.7153 Z", "fill": "#E5E287", "stroke": "black", "role": "head"}, {"source": "M 59.5815 12.4006 C 60.562 20.3424 64.024 36.793 70.029 39.0617 C 71.2149 34.6152 70.7856 23.0579 59.5815 12.4006 Z", "fill": "#E2FFD3", "stroke": "black", "role": "head"}, {"source": "M 70.5273 34.2153 C 71.194 35.0487 73.2273 36.6153 76.0273 36.2153 L 71.5273 38.2153 L 73.0273 42.7153 L 68.0273 38.2153 L 68.0273 42.7153 L 64.0273 35.7153 C 63.5273 36.7153 61.8273 38.6153 59.0273 38.2153 C 60.0273 37.0487 62.0273 34.1153 62.0273 31.7153 C 61.5273 32.5487 60.0273 34.2153 58.0273 34.2153 C 59.0273 32.882 61.0273 29.5153 61.0273 26.7153 C 61.0273 23.9153 57.0273 21.2153 55.0273 20.2153 L 59.0273 20.2153 L 54.0273 15.2153 L 58.0273 15.2153 C 58.0273 13.9994 57.5284 11.4251 55.6203 10.0711 L 55.0273 9.71533 C 55.2387 9.82099 55.436 9.94035 55.6203 10.0711 L 60.0273 12.7153 C 61.8607 23.382 66.4273 42.3153 70.0273 36.7153 L 70.5273 34.2153 Z", "fill": "#277137", "stroke": "black", "role": "head"}, {"source": "M 48.0273 8.21533 L 46.5273 5.21533", "fill": "none", "stroke": "black", "role": "head"}].map(s=>({...s,source:kappaSourcePath(s.source)}));
+const kappaSkinSpecs=[{"source": "M 76.5273 76.7153 C 73.7273 59.1153 69.0273 48.0487 67.0273 44.7153 L 67.0273 110.215 C 71.3607 106.382 79.3273 94.3153 76.5273 76.7153 Z", "fill": "#373D38", "stroke": "black", "role": "body"}, {"source": "M 36.5273 88.7153 C 39.8607 85.382 48.5273 80.7153 56.5273 88.7153", "fill": "none", "stroke": "black", "role": "body"}, {"source": "M 44.5273 94.7153 L 49.0273 97.7153", "fill": "none", "stroke": "black", "role": "body"}, {"source": "M 48.5273 94.2153 L 46.0273 98.2153", "fill": "none", "stroke": "black", "role": "body"}, {"source": "M 43.0273 29.2153 L 45.0273 30.2153", "fill": "none", "stroke": "#E76F6F", "role": "head"}, {"source": "M 43.0273 31.2153 L 45.0273 32.2153 M 43.0273 33.2153 L 45.0273 34.2153", "fill": "none", "stroke": "#E76F6F", "role": "head"}].map(s=>({...s,source:kappaSourcePath(s.source)}));
+const kappaMouthSpecs=[kappaHairSpecs.shift(),kappaHairSpecs.pop()];
+kappaSkinSpecs.shift();
+kappaSkinSpecs.push(...kappaMouthSpecs);
+const jobsGlassesCenter={x:54.7,y:34.8},jobsGlassesRadii={x:9.05,y:10.5};
+const jobsGlassesSpecs=[
+ {source:'M54.7 17.054L54.7 24.3 M59.96 43.35L67.9315 50.7245',fill:'none',strokeWidth:1.1},
+ {source:transformPath('M1 0C1 .552285 .552285 1 0 1C-.552285 1 -1 .552285 -1 0C-1 -.552285 -.552285 -1 0 -1C.552285 -1 1 -.552285 1 0Z',
+  (x,y)=>({x:jobsGlassesCenter.x+x*jobsGlassesRadii.x,y:jobsGlassesCenter.y+y*jobsGlassesRadii.y})),fill:'#f1f1f1',opacity:.5,strokeWidth:1.1},
+];
+const jobsCollarEdgeSource='M26.35 56.45L26.1 50.3C38 51.3 58 52.2 67.7 49.9L67.7 55.05';
+const jobsCollarSource='M26.1 50.3C38 51.3 58 52.2 67.7 49.9L67.7 63L26.5 63Z';
+// Use the character's existing shoe geometry; only add a sole and laces.
+function jobsSneakerPaths(shape,side){
+ const pair=p=>`${clean(p.x)} ${clean(p.y)}`;
+ const up=shape.shoeUp;
+ const lift=p=>({x:p.x+up.x*1.8,y:p.y+up.y*1.8});
+ const bottom=[shape.shoeCurves[0][2],...shape.shoeCurves[1],...shape.shoeCurves[2]];
+ const top=bottom.map(lift);
+ const sole=`M${pair(bottom[0])}C${bottom.slice(1,4).map(pair).join(' ')}C${bottom.slice(4).map(pair).join(' ')}L${pair(top[6])}`
+   +`C${[top[5],top[4],top[3]].map(pair).join(' ')}C${[top[2],top[1],top[0]].map(pair).join(' ')}Z`;
+ const mirror=side==='left'?-1:1;
+ const toe={x:shape.shoeOut.x*mirror,y:shape.shoeOut.y*mirror},upAxis={x:-toe.y,y:toe.x};
+ if(upAxis.x*shape.shoeUp.x+upAxis.y*shape.shoeUp.y<0){upAxis.x*=-1;upAxis.y*=-1;}
+ const anchor={x:shape.bootOuter.x+toe.x*.6,y:shape.bootOuter.y+toe.y*.6};
+ // The two loops and loose ends come directly from the supplied SVG.
+ const laceSource='M13.7669 168.989C15.8355 170.188 19.5756 172.911 17.9869 174.202C16.3982 175.492 14.5116 171.264 13.7669 168.989Z M13.7669 168.989L10.4157 174.202 M13.5186 168.74C11.9671 167.499 8.6779 165.488 7.93319 167.375C7.18847 169.261 11.3465 169.071 13.5186 168.74Z';
+ const laces=transformPath(laceSource,(x,y)=>({x:anchor.x+toe.x*(13.7669-x)+upAxis.x*(168.989-y),y:anchor.y+toe.y*(13.7669-x)+upAxis.y*(168.989-y)}));
+ return {fill:shape.bootFill,outline:shape.bootOutline,sole,laces};
+}
+function jobsSneakerDetails(shape,side){
+ const p=jobsSneakerPaths(shape,side),id=side+'-sneaker-detail-clip';
+ return `<defs><clipPath id="${id}"><path d="${shape.bootFill}"/></clipPath></defs><g clip-path="url(#${id})"><path d="${p.sole}" fill="#8c8c8c" stroke="black" stroke-width=".65" stroke-linejoin="round"/></g><path d="${p.laces}" fill="none" stroke="black" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+// Toe patch follows the actual morphed shoe, clipped inside its existing outline.
+function colorblockShoeDetails(shape,side){
+ const {toe,up}=shape.instepAxes,origin=shape.instep;
+ const p=(x,y)=>`${clean(origin.x+toe.x*x+up.x*y)} ${clean(origin.y+toe.y*x+up.y*y)}`;
+ const id=side+'-colorblock-clip';
+ const boundary=`M${p(1.5,-12)}C${p(2.2,-4)} ${p(2.2,4)} ${p(1.5,12)}`;
+ return `<defs><clipPath id="${id}"><path d="${shape.bootFill}"/></clipPath></defs><g clip-path="url(#${id})"><path d="${boundary}L${p(100,12)}L${p(100,-12)}Z" fill="#D9D9D9"/><path d="${boundary}" fill="none" stroke="black" stroke-width="1"/></g>`;
+}
+// Material colours depend on distance down the cloth, never on screen height.
+function jobsDenimColor(t){
+ const stops=[[0,[102,124,153]],[.38,[59,99,151]],[.82,[113,128,146]],[1,[140,140,140]]];
+ t=clamp01(t);let i=0;while(i<stops.length-2&&t>stops[i+1][0])i++;
+ const [a,from]=stops[i],[b,to]=stops[i+1],f=smooth((t-a)/(b-a));
+ return '#'+from.map((v,k)=>Math.round(lerp(v,to[k],f)).toString(16).padStart(2,'0')).join('');
+}
+function jobsLegColor(t){return jobsDenimColor(t);}
+let jobsReferenceLegs;
+function jobsMaterialReference(){
+ if(jobsReferenceLegs)return jobsReferenceLegs;
+ const saved=dragPoses.splice(0);
+ try{
+  const warp=buildWarp({body:100,width:100,arms:100,legs:100,head:100});
+  const left=legGeometry('left',warp),right=legGeometry('right',warp);
+  jobsReferenceLegs={shapes:{left,right},left:left.centerline,right:right.centerline,waist:110.5,end:(left.centerline[32].y+right.centerline[32].y)/2};
+ }finally{dragPoses.push(...saved);}
+ return jobsReferenceLegs;
+}
+function jobsClothGradient(shape,index,legs=100){
+ const ref=jobsMaterialReference(),source=ref[shape.side||'left'];
+ const a=shape.centerline[index],b=shape.centerline[index+1],r=source[index],s=source[index+1];
+ const rx=s.x-r.x,ry=s.y-r.y,dx=b.x-a.x,dy=b.y-a.y;
+ const rest=Math.hypot(rx,ry)||1,now=Math.hypot(dx,dy)||.001;
+ const cos=(rx*dx+ry*dy)/(rest*now),sin=(rx*dy-ry*dx)/(rest*now);
+ // Deform the ORIGINAL vertical cloth coordinate, rather than replacing it
+ // with a new 0–100% coordinate beginning at every thigh's centreline.
+ const scale=now/rest,v={x:-sin*scale,y:cos*scale};
+ const y0=r.y-ref.waist,y1=ref.end-r.y;
+ return {x1:a.x-v.x*y0,y1:a.y-v.y*y0,x2:a.x+v.x*y1,y2:a.y+v.y*y1,
+  from:jobsDenimColor(0),to:jobsDenimColor(1),stops:Array.from({length:33},(_,k)=>({offset:k/32,color:jobsDenimColor(k/32)}))};
+}
+// A continuous mesh carries material coordinates through every bend.
+function jobsClothMesh(shape,side,legs=100,warp=null){
+ const ref=jobsMaterialReference(),source=ref.shapes[side],parts=[[],[]];
+ // Bake the material coordinates once, before any pose changes. Only the
+ // positions deform afterwards; no body/screen-based recolouring is allowed.
+ ref.meshUV ||= {};
+ ref.meshUV[side] ||= Array.from({length:33},(_,i)=>[-1,1].map(u=>{
+  const radius=(source.hose[Math.min(i,31)].width+wideLegExtraWidth(Math.min(i,31),3.5))/2+.5;
+  const p=legFabricPoint(source,u*radius,source.restLength*i/32,100);
+  return (p.y-ref.waist)/(ref.end-ref.waist);
+ }));
+ const vertex=(i,u)=>{
+  const radius=(shape.hose[Math.min(i,31)].width+wideLegExtraWidth(Math.min(i,31),3.5))/2+.5;
+  const p=legFabricPoint(shape,u*radius,shape.restLength*i/32,legs);
+  return {x:p.x,y:p.y,t:ref.meshUV[side][i][u<0?0:1]};
+ };
+ const rows=Array.from({length:33},(_,i)=>[vertex(i,-1),vertex(i,1)]);
+ for(let i=0;i<32;i++){
+  for(const [tri,points] of [[rows[i][0],rows[i][1],rows[i+1][1]],[rows[i][0],rows[i+1][1],rows[i+1][0]]].entries()){
+   const [a,b,c]=points,dx=b.x-a.x,dy=b.y-a.y,ex=c.x-a.x,ey=c.y-a.y,det=dx*ey-dy*ex;
+   let g=null;
+   if(Math.abs(det)>1e-7){
+    const gx=((b.t-a.t)*ey-(c.t-a.t)*dy)/det,gy=(dx*(c.t-a.t)-ex*(b.t-a.t))/det,n=gx*gx+gy*gy;
+    if(n>1e-12){const x=a.x-gx*a.t/n,y=a.y-gy*a.t/n;g={x1:x,y1:y,x2:x+gx/n,y2:y+gy/n};}
+   }
+   parts[i<19?0:1].push({d:points.map((p,k)=>`${k?'L':'M'}${clean(p.x)} ${clean(p.y)}`).join('')+'Z',
+    color:g?`url(#${side}-jobs-mesh-${i*2+tri})`:jobsDenimColor(a.t),g,index:i*2+tri,points});
+  }
+ }
+ return parts;
+}
+function jobsJeansDetails(warp){
+ const path=(d,fill,stroke='black')=>`<path d="${torsoGarmentPath(d,warp)}" fill="${fill}" stroke="${stroke}" stroke-width=".7"/>`;
+ return path('M27.6 109.3L65.95 109.3L65.9 110.5L27.7 110.5Z',jobsDenimColor(0),'none')
+  +path('M27.6 109.3L65.95 109.3','none')
+  +path('M27.7 110.5L65.9 110.5L65.8 115L27.8 115Z','#181818')
+  +[34,58].map(x=>path(`M${x} 109L${x+2.7} 109L${x+2.7} 116L${x} 116Z`,'#3b6397')).join('')
+  +path('M43.4 107.8L51.6 107.8L51.6 116L43.4 116Z','#997b46')
+  +path('M45 109.4L50 109.4L50 114.4L45 114.4Z','#181818');
+}
 const teeNeckSource = 'M34.2 56.18C39 62.2 43 65.3 47 65.3C51 65.3 55.5 61.5 59.6 55.32';
 const redTeeNeckSource = 'M34.2 56.18C39 57.5 43 58.8 47 58.8C51 58.8 55.5 57.2 59.6 55.32';
 const teeSource = `M26.1046 56.4524L34.2 56.18
@@ -2342,13 +2811,27 @@ function sleeveExtraWidth(index,end,flare) {
   return index<end?flare*smooth(index/(end-1)):0;
 }
 const teeStyles = {
+  'black-turtleneck-tee':{color:'#101010',sleeveEnd:23,flare:2.5},
   'loose-tee':{color:decorationColors.looseTee,sleeveEnd:20,flare:5,loose:true},
   'loose-long-sleeve':{color:decorationColors.looseLongSleeve,sleeveEnd:31,flare:7,loose:true},
+  'cinched-long-sleeve':{color:decorationColors.yellowTee,sleeveEnd:31,flare:1,loose:true,cinched:true},
   'yellow-tee': {color:decorationColors.yellowTee,sleeveEnd:20,flare:2.5},
   'patched-tee': {color:decorationColors.patchedTee,sleeveEnd:20,flare:2.5},
   'red-tee': {color:decorationColors.redTee,sleeveEnd:20,flare:2.5},
   'coral-tee': {color:decorationColors.coralTee,sleeveEnd:17,flare:3},
 };
+// Keep the sleeve full through the forearm, then ease into the wrist.
+function teeSleeveWidth(index,style){
+  if(!style)return 0;
+  if(!style.cinched)return sleeveExtraWidth(index,style.sleeveEnd,style.flare);
+  if(index>=style.sleeveEnd)return 0;
+  const full=sleeveExtraWidth(index,style.sleeveEnd,7);
+  if(index<=23)return full;
+  // A rounded inward turn, rather than an S-shaped taper that the cloth
+  // tension pass would flatten into a straight diagonal.
+  const turn=Math.min(1,(index-23)/7);
+  return style.flare+(full-style.flare)*Math.sqrt(Math.max(0,1-turn*turn));
+}
 const patchSources = {
   blue: 'M55.7 77.5L65.4 77.5L65.1 91.8L55.5 90.8Z',
   red: 'M28.4 93.5L38.2 93.5L38.2 105.5L28.6 106Z',
@@ -2393,17 +2876,30 @@ function garmentPath(source, warp) {
 }
 // Color the lower torso itself, rather than stacking fabric on a grey
 // copy of the same edge: antialiased grey pixels otherwise survive at hips.
+function jobsPelvisAxis(warp){
+  const point=x=>applyDragPose(warp(x,110.5,'body'),x,110.5,'body',warp);
+  const a=point(27.7),b=point(65.9),span=Math.hypot(b.x-a.x,b.y-a.y)||1;
+  const center={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+  // Material length comes from the unposed proportions. The pelvis axis is
+  // perpendicular to its own waist, never aimed at either moving leg.
+  const ref=jobsMaterialReference();
+  const top=warp(47,ref.waist,'body'),bottom=warp(47,ref.end,'legs');
+  const length=Math.abs(bottom.y-top.y);
+  return {x1:center.x,y1:center.y,x2:center.x-(b.y-a.y)/span*length,y2:center.y+(b.x-a.x)/span*length};
+}
 function updateTorsoMaterial(node,warp) {
-  const colors={'batfish-trousers':decorationColors.batArmor,'ivory-trousers':decorationColors.royalWhite,'royal-trousers':decorationColors.royalWhite,plain:decorationColors.pants,'suit-trousers':decorationColors.suitNavy,
-    'wide-pants':decorationColors.widePants,'loose-wide-pants':decorationColors.widePants,
-    'pink-shorts':decorationColors.pinkShorts,'orange-shorts':decorationColors.orangeShorts,
+  const colors={'dark-gray-slight-wide-trousers':'#2B2D2D','black-slight-wide-trousers':'#101011',...workerPantsColors,'batfish-trousers':decorationColors.batArmor,'ivory-trousers':decorationColors.royalWhite,'royal-trousers':decorationColors.royalWhite,plain:decorationColors.pants,'suit-trousers':decorationColors.suitNavy,
+    'denim-jumpsuit':decorationColors.denimBlue,'large-ripped-denim-jeans':decorationColors.denimBlue,'washed-denim-jeans':decorationColors.denimBlue,'ripped-denim-jeans':decorationColors.denimBlue,'denim-jeans':decorationColors.denimBlue,'wide-pants':decorationColors.widePants,'loose-wide-pants':decorationColors.widePants,
+    'student-shorts':'#102f68','pink-shorts':decorationColors.pinkShorts,'orange-shorts':decorationColors.orangeShorts,
     'black-shorts':decorationColors.blackShorts,'wide-shorts':decorationColors.wideShorts,
+    'slight-wide-shorts':decorationColors.wideShorts,'loose-shorts':decorationColors.wideShorts,'extra-wide-shorts':decorationColors.wideShorts,
     'red-shorts':decorationColors.redShorts,
     jumpsuit:decorationColors.jumpsuit,'navy-jumpsuit':decorationColors.navyJumpsuit};
-  const color=colors[selectedDecorations.pants];
+  const color=denimVariants[selectedDecorations.pants]?.color||workwearVariants[selectedDecorations.pants]?.color||colors[selectedDecorations.pants];
   const patterned=selectedDecorations.pants==='loose-wide-pants';
+  const jobs=selectedDecorations.pants==='jobs-gradient-jeans';
   if(torsoMaterial.upperSkin){
-    torsoMaterial.upperSkin.style.display=patterned?'':'none';
+    torsoMaterial.upperSkin.style.display=patterned||jobs?'':'none';
     // The torso above the waistband is bare skin, so it follows the chosen
     // skin color instead of the default grey.
     torsoMaterial.upperSkin.setAttribute('fill',skinColor());
@@ -2414,15 +2910,18 @@ function updateTorsoMaterial(node,warp) {
   const a=point(27.7),b=point(65.9),span=Math.hypot(b.x-a.x,b.y-a.y)||1;
   const normal={x:-(b.y-a.y)/span,y:(b.x-a.x)/span};
   const center={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+  if(jobs&&jobsPelvisGradient){
+    for(const [key,value] of Object.entries(jobsPelvisAxis(warp)))jobsPelvisGradient.setAttribute(key,value);
+  }
   for(const [key,value] of Object.entries({
     x1:center.x-normal.x*1000,y1:center.y-normal.y*1000,
     x2:center.x+normal.x*1000,y2:center.y+normal.y*1000,
   }))torsoMaterial.gradient.setAttribute(key,value);
   torsoMaterial.lower.forEach(stop=>stop.setAttribute('stop-color',color));
-  node.setAttribute('fill',patterned?widePantsPaint():'url(#torso-material)');
-  if(patterned&&torsoMaterial.fabric){
+  node.setAttribute('fill',patterned||jobs?widePantsPaint():'url(#torso-material)');
+  if((patterned||jobs)&&torsoMaterial.fabric){
     const right={x:normal.y,y:-normal.x};
-    torsoMaterial.fabric.setAttribute('patternTransform',
+    if(patterned)torsoMaterial.fabric.setAttribute('patternTransform',
       `matrix(${right.x} ${right.y} ${normal.x} ${normal.y} ${center.x} ${center.y})`);
     const corner=(side,depth)=>`${center.x+right.x*side*1000-normal.x*depth} ${center.y+right.y*side*1000-normal.y*depth}`;
     torsoMaterial.upperClip.setAttribute('points',
@@ -2466,14 +2965,19 @@ function skirtPath(warp,legs=100) {
 }
 function wearingJumpsuit() {
   return selectedDecorations.pants==='jumpsuit'
-    ||selectedDecorations.pants==='navy-jumpsuit';
+    ||selectedDecorations.pants==='navy-jumpsuit'||!!workwearVariants[selectedDecorations.pants];
 }
-const widePantFlares = {'ivory-trousers':8,'royal-trousers':3,'suit-trousers':3.5,'wide-pants':5.5,'loose-wide-pants':10.5};
+const widePantFlares = {'dark-gray-slight-wide-trousers':3.5,'black-slight-wide-trousers':3.5,'worker-trousers':5.5,'blue-worker-trousers':5.5,...Object.fromEntries([...Object.keys(denimVariants),...Object.keys(workwearVariants)].map(id=>[id,5.5])),'jobs-gradient-jeans':3.5,'denim-jumpsuit':5.5,'large-ripped-denim-jeans':5.5,'washed-denim-jeans':5.5,'ripped-denim-jeans':5.5,'denim-jeans':5.5,'ivory-trousers':8,'royal-trousers':3,'suit-trousers':3.5,'wide-pants':5.5,'loose-wide-pants':10.5};
 // Same knee-length cut as the fitted shorts, widening toward its open hem.
 // How much each flared knee cut widens towards its hem.
-const kneeShortFlares={'wide-shorts':10};
-function wideShortsExtraWidth(index,flare=10) {
-  return flare*smooth(Math.min(index,19)/19);
+const kneeShortFlares={'student-shorts':3,'slight-wide-shorts':3,'loose-shorts':5.5,'extra-wide-shorts':8,'wide-shorts':10};
+// How far down the leg a pair of shorts ends. The ultra shorts stop at 11
+// rather than nearer the knee: a hem that ends close to 19 is within reach
+// of the calf once the knee folds, and its cut edge then crosses the bare
+// shin instead of sitting above it.
+function shortsHemIndex(pants=selectedDecorations.pants){return pants==='student-shorts'?11:19;}
+function wideShortsExtraWidth(index,flare=10,end=19) {
+  return flare*smooth(Math.min(index,end)/end);
 }
 function wideLegExtraWidth(index,flare=5.5) {
   return flare*smooth((index/31-.04)/.9);
@@ -2499,6 +3003,104 @@ function wideLegHemPoints(shape,flare=5.5,legs=100) {
   const nx=(end.y-before.y)/length,ny=-(end.x-before.x)/length;
   return [{x:end.x+nx*radius,y:end.y+ny*radius},
     {x:end.x-nx*radius,y:end.y-ny*radius}];
+}
+const JEANS_STROKE_WIDTH=.65;
+const jeansDetailSpecs=[
+ {source:'M46 115L46 124.5C46 126 47.5 126 49 124.5',stroke:'black'},
+ {source:'M35 115C35 118 31.5 120 28 120.8 M59 115C59 118 62.5 120 65.7 120.8',stroke:'black'},
+];
+function jeansDetailsMarkup(warp,id=selectedDecorations.pants){
+ if(id==='jobs-gradient-jeans')return jobsJeansDetails(warp);
+ const path=(source,fill,stroke='black')=>`<path d="${torsoGarmentPath(source,warp)}" fill="${fill}" stroke="${stroke}" stroke-width="${JEANS_STROKE_WIDTH}" stroke-linejoin="round" stroke-linecap="round"/>`;
+ return path('M27.7 110.5L65.9 110.5L65.7 114.3L27.8 114.3Z','#705039')
+  +[34.2,58.2].map(x=>path(`M${x} 110.1L${x+2} 110.1L${x+2} 115L${x} 115Z`,denimColor(id),'black')).join('')
+  +jeansDetailSpecs.map(({source,stroke})=>path(source,'none',stroke)).join('')
+  +path('M44 110.5L50 110.5L50 114.5L44 114.5Z','#d5b36b')
+  +path('M45.5 111.6L48.5 111.6L48.5 113.4L45.5 113.4Z','#705039','none');
+}
+// Muted workwear belt with broad denim keepers and a plain chest pocket.
+function denimBibMarkup(warp,id=selectedDecorations.pants){
+ const path=(d,fill='none',stroke='black')=>`<path d="${torsoGarmentPath(d,warp)}" fill="${fill}" stroke="${stroke}" stroke-width="${JEANS_STROKE_WIDTH}" stroke-linejoin="round" stroke-linecap="round"/>`;
+ return path('M49.5 74L62 74L62 83.5L55.75 86.3L49.5 83.5Z',denimColor(id))
+  +path('M27.7 110.5L65.9 110.5L65.7 114.3L27.8 114.3Z',workwearVariants[id]?.belt||'#46535b')
+  +[30.8,39,51.2,59.3].map(x=>path(`M${x} 110L${x+3.8} 110L${x+3.8} 115L${x} 115Z`,denimColor(id),'none')
+    +path(`M${x} 110L${x} 115 M${x+3.8} 110L${x+3.8} 115`)).join('')
+  +path('M44.5 110.3L49.5 110.3L49.5 114.6L44.5 114.6Z',workwearVariants[id]?.buckle||'#89959b')
+  +jeansDetailSpecs.map(({source})=>path(source)).join('');
+}
+// Uneven clusters: one large opening, two medium ones, and nearby slits.
+function largeJeansCuts(part,side){
+ const cuts=side==='left'
+  ?[[12.5,-.3,4.3,2.05],[24.7,.5,2.8,1.05],
+    [9.7,-1.6,1.3,.24],[15.2,.9,1.65,.3],[11.2,4.1,.65,.35],
+    [23,-1.3,1.15,.24],[26.5,1.5,.85,.22]]
+  :[[16,.6,3.05,1.2],[13.9,-.8,1.45,.25],[17.9,1.4,1.1,.28],
+    [15.3,-3.2,.7,.35]];
+ return cuts.filter(([i])=>part?i>=19:i<19);
+}
+// Openings are cut out of the denim, with a separate live skin underlay.
+function largeJeansHoles(shape,part,side,legs=100){
+ return largeJeansCuts(part,side).map(([i,a,w,h])=>{
+  const map=(x,y)=>legFabricPoint(shape,a+x,shape.restLength*(i+y)/32,legs);
+  return transformPath(`M${-w} ${-.6*h}L${-w*.6} ${-h}L-.5 ${-.8*h}L${w*.55} ${-h}L${w} ${-.5*h}L${w*.85} ${h*.65}L${w*.3} ${h}L-.6 ${h*.8}L${-w*.85} ${h*.7}Z`,map);
+ });
+}
+function largeJeansThreads(shape,part,side,legs=100){
+ return largeJeansCuts(part,side).map(([i,a,w,h])=>{
+  const map=(x,y)=>legFabricPoint(shape,a+x,shape.restLength*(i+y)/32,legs);
+  // Sparse horizontal weft across the opening; loose ends hang from its rim.
+  const source=h>.7
+   ?`M${-w*.9} ${-h*.35}C${-w*.3} ${-h*.1} ${w*.35} ${-h*.5} ${w*.96} ${-h*.2} M${-w*.87} ${h*.35}C${-w*.25} ${h*.1} ${w*.3} ${h*.65} ${w*.9} ${h*.45} M${-w*.55} ${-h}L${-w*.46} ${-h*.35} M${w*.45} ${-h*.9}L${w*.38} ${-h*.35} M${-w*.25} ${h*.8}L${-w*.35} ${h*1.28} M${w*.65} ${h*.75}L${w*.8} ${h*1.15}`
+   :`M${-w} 0L${w*.9} .08 M${-w*.5} ${h}L${-w*.4} ${h+.35}`;
+  return `<path d="${transformPath(source,map)}" fill="none" stroke="#e0e5db" stroke-width=".28" stroke-linecap="round"/>`;
+ }).join('');
+}
+// A heavier lower/right cut edge makes the opening read as thick cloth.
+function largeJeansCutEdges(shape,part,side,legs=100){
+ return largeJeansCuts(part,side).filter(([, , ,h])=>h>.7).map(([i,a,w,h])=>{
+  const map=(x,y)=>legFabricPoint(shape,a+x,shape.restLength*(i+y)/32,legs);
+  const source=`M${w} ${-.5*h}L${w*.85} ${h*.65}L${w*.3} ${h}L-.6 ${h*.8}L${-w*.85} ${h*.7}`;
+  return `<path d="${transformPath(source,map)}" fill="none" stroke="#203b50" stroke-width="1.05" stroke-linejoin="round" stroke-linecap="round"/>`;
+ }).join('');
+}
+function jeansLegSeam(shape,part,legs=100,side='left'){
+ const start=part?19:4,end=part?32:19;
+ return [side==='left'?-1:1].map(sign=>Array.from({length:end-start+1},(_,j)=>{
+  const i=start+j,k=Math.min(i,31);
+  const across=sign*Math.max(0,(shape.hose[k].width+wideLegExtraWidth(k,5.5))/2-1.5);
+  const point=legFabricPoint(shape,across,shape.restLength*i/32,legs);
+  return `${j?'L':'M'}${clean(point.x)} ${clean(point.y)}`;
+ }).join('')).join('');
+}
+// Texture lives in the cloth's across/along coordinates, not the canvas.
+function jeansTextureMarkup(shape,part,side,id,legs=100){
+ const variant=denimVariants[id];
+ id=variant?.finish||id;
+ const point=(across,index)=>legFabricPoint(shape,across,shape.restLength*index/32,legs);
+ const pair=p=>`${clean(p.x)} ${clean(p.y)}`;
+ if(id==='jobs-gradient')return ''; // One shared continuous material, no overlaid colour bands.
+ if(id==='washed-denim-jeans'){
+  let markup='';
+  const start=part?19:3,end=part?32:19;
+  for(let i=start;i<end;i++)for(let band=0;band<15;band++){
+   const u=-.82+band*1.64/15,v=u+1.64/15;
+   const radius=j=>(shape.hose[Math.min(j,31)].width+wideLegExtraWidth(Math.min(j,31),5.5))/2;
+   const points=[point(u*radius(i),i),point(v*radius(i),i),point(v*radius(i+1),i+1),point(u*radius(i+1),i+1)];
+   const fade=Math.sin(Math.PI*(i-start+.5)/(end-start));
+   const opacity=.4*Math.exp(-5*((u+v)/2)**2)*Math.sqrt(fade);
+   markup+=`<path d="${points.map((p,k)=>`${k?'L':'M'}${pair(p)}`).join('')}Z" fill="${variant?.wash||'#c1d8e7'}" opacity="${opacity.toFixed(3)}"/>`;
+  }
+  return markup;
+ }
+ if(id==='large-ripped-denim-jeans')return largeJeansHoles(shape,part,side,legs).map(d=>`<path d="${d}" fill="none" stroke="#294b65" stroke-width=".55"/><path d="${d}" fill="none" stroke="#dce3dc" stroke-width=".45" stroke-dasharray="1.2 2.8"/>`).join('')+largeJeansCutEdges(shape,part,side,legs)+largeJeansThreads(shape,part,side,legs);
+ if(id!=='ripped-denim-jeans')return '';
+ const cuts=side==='left'?[[11,-1,2.3],[24,.6,1.7]]:[[15,.7,2.1]];
+ return cuts.filter(([index])=>part?index>=19:index<19).map(([index,across,width])=>{
+  const map=(x,y)=>point(across+x,index+y);
+  const edge=transformPath(`M${-width} -.55L-.9 -.8L0 -.5L1 -.75L${width} -.35L${width-.3} .6L.5 .85L-.4 .5L${-width+.1} .7Z`,map);
+  const threads=transformPath(`M${-width} -.9L${-width-.5} -.2 M${width} -.5L${width+.5} .25 M-1.2 -.55L-1 .65 M.3 -.5L.5 .6 M1.2 -.5L1.1 .55`,map);
+  return `<path d="${edge}" fill="${skinColor()}" stroke="#294b65" stroke-width=".45" stroke-linejoin="round"/><path d="${threads}" fill="none" stroke="#dce3dc" stroke-width=".4" stroke-linecap="round"/>`;
+ }).join('');
 }
 function wideLegHemPath(shape,flare=5.5,legs=100) {
   const [a,b]=wideLegHemPoints(shape,flare,legs);
@@ -2548,17 +3150,31 @@ function cuffPath(shape, index, extraWidth=0, inset=0) {
 // leather, so their outlines have to meet: ending on the tube left the two
 // black lines a fraction apart and a nick of background showed between
 // them on the outer side when the leg was pulled long.
-function trouserCalfEdges(shape,flare=0,legs=100,toMouth=false) {
+function updateLegClothPartition(parts,end){
+ const {segments,rootBlack,thighBlack,shinBlack,thighSkin,shinSkin}=parts;
+ if(shinSkin.clothPartitionEnd===end)return;
+ const fronts=new Set(segments.map(s=>s.front));
+ for(const [i,{back}] of segments.entries()){
+  const parent=i<3?rootBlack:i<end?thighBlack:shinBlack;
+  if(back.parentNode!==parent)parent.appendChild(back);
+ }
+ for(const [parent,lower] of [[thighSkin,false],[shinSkin,true]]){
+  const anchor=[...parent.children].find(node=>!fronts.has(node))||null;
+  for(const [i,{front}] of segments.entries())if((i>=end)===lower)parent.insertBefore(front,anchor);
+ }
+ shinSkin.clothPartitionEnd=end;
+}
+function trouserCalfEdges(shape,flare=0,legs=100,toMouth=false,extraWidth=null,startIndex=19) {
   return [-1,1].map(side=>{
     const points=[];
-    for(let i=19;i<=32;i++) {
+    for(let i=startIndex;i<=32;i++) {
       const point=i===32&&flare?wideLegEnd(shape,legs):shape.centerline[i];
       // Match the hem tangent exactly at the terminal corner.
       const before=shape.centerline[i===32&&flare?30:i-1];
       const after=i===32?point:shape.centerline[i+1];
       const length=Math.hypot(after.x-before.x,after.y-before.y)||1;
       const radius=(shape.hose[Math.min(i,31)].width+1
-        +(flare?wideLegExtraWidth(Math.min(i,31),flare):0))/2;
+        +(extraWidth?extraWidth(i):flare?wideLegExtraWidth(Math.min(i,31),flare):0))/2;
       const edge={x:point.x+side*(after.y-before.y)/length*radius,
         y:point.y-side*(after.x-before.x)/length*radius};
       if(toMouth&&i===32) {
@@ -2619,6 +3235,10 @@ function hasSleevelessOutfit() {
     ||!!decorationCatalog.shirt.find(item=>item.id===selectedDecorations.shirt)?.sleeveless
     ||!!decorationCatalog.outerwear.find(item=>item.id===selectedDecorations.outerwear)?.sleeveless;
 }
+function placeNeckGarmentBelowAccessories(node) {
+  // Clothing may cover the head/neck seam, but never an independent necklace.
+  neckOverlay.insertBefore(node,scarfPaths[0]?.node||null);
+}
 function placeOuterwearOverNeckline() {
   // Shirt neckline strokes live in neckOverlay so the head cannot erase
   // them. Keep the jacket panels after those strokes, but below the scarf.
@@ -2626,9 +3246,10 @@ function placeOuterwearOverNeckline() {
   for(const key of ['greenVestLeft','greenVestRight','alohaBody'])
     neckOverlay.insertBefore(garmentPaths[key],scarf);
 }
+function wearingUnderwear(){return !!thongVariants[selectedDecorations.pants]||['red-briefs','red-shorts'].includes(selectedDecorations.pants);}
 function pantsCoverThigh() {
   return wearingJumpsuit()||!!widePantFlares[selectedDecorations.pants]
-    ||['plain','batfish-trousers','pink-shorts','orange-shorts','black-shorts','wide-shorts'].includes(selectedDecorations.pants);
+    ||['plain','batfish-trousers','student-shorts','pink-shorts','orange-shorts','black-shorts','slight-wide-shorts','loose-shorts','extra-wide-shorts','wide-shorts'].includes(selectedDecorations.pants);
 }
 function buttOutlineOpacity(side) {
   // The raised trouser or shorts leg supplies this hip contour itself. The
@@ -2638,6 +3259,7 @@ function buttOutlineOpacity(side) {
   // The triangle keeps a low moving leg behind the torso. Its original
   // hip arc would then cut across the moving thigh as a second contour.
   if(selectedDecorations.shirt==='red-triangle'&&!selectedDecorations.pants) return 0;
+  if(wearingUnderwear())return 0;
   if(selectedDecorations.pants==='skirt'||pantsCoverThigh()||(selectedDecorations.pants&&legInFront[side])) return 0;
   const drag=dragPoses.find(pose=>pose.part===side+'Leg');
   return smooth(((drag?Math.hypot(drag.x,drag.y):0)-2)/10);
@@ -2720,8 +3342,8 @@ function updateLegOcclusion(shapes,warp) {
   for(const side of ['left','right']) {
     const poses=dragPoses.filter(pose=>pose.part===side+'Leg');
     const pose=poses.reduce((sum,p)=>({x:sum.x+p.x,y:sum.y+p.y}),{x:0,y:0});
-    if(!poses.length||(!selectedDecorations.pants&&selectedDecorations.shirt!=='red-triangle')
-      ||wearingJumpsuit()) {
+    if(!poses.length||!hasLongOuterwear()
+      &&((!selectedDecorations.pants&&selectedDecorations.shirt!=='red-triangle')||wearingJumpsuit())) {
       legInFront[side]=false;
       continue;
     }
@@ -2776,24 +3398,29 @@ function applyArmOcclusion(side,rootBlack,skinRoot) {
   if(sleeveless&&!armInFront[side]) skinRoot.setAttribute('mask',mask);
   else skinRoot.removeAttribute('mask');
 }
-function topCoversPants() {
-  const id=selectedDecorations.shirt;
-  return !!id&&!['plain','blue-vest','red-tee','red-triangle'].includes(id);
-}
-function updateGarmentOrder() {
-  const upper=['shirt',...Object.keys(royalGarmentSpecs).filter(key=>royalGarmentSpecs[key].category==='shirt'),'suitFront','suitFrontEdges','suitCollarLeft','suitCollarRight','shirtSides','vest','vestSides','vestNeck',
+function innerTopKeys() {
+  return ['shirt','collaredDetails',...Object.keys(royalGarmentSpecs).filter(key=>royalGarmentSpecs[key].category==='shirt'),'suitFront','suitFrontEdges','suitCollarLeft','suitCollarRight','shirtSides','vest','vestSides','vestNeck',
     'vestTopLeft','vestTopRight','vestShoulderLeft','vestShoulderRight',
     ...Object.keys(ivorySpecs).filter(key=>ivorySpecs[key].category==='shirt'),'tee','teeSides','patchblue','patchred','patchstitches','redTriangle','waist'];
+}
+function updateGarmentOrder() {
+  const upper=innerTopKeys();
   const lower=['jumpsuit','jumpsuitSides','jumpsuitCrotch','jumpsuitChestOutline',
     'pants','pantsSides','pantsCrotch','shorts','shortsSides','shortsCrotch',
-    'pantsWaist','redThong','skirt','jumpsuitNeckLeft','jumpsuitNeckRight',
+    'pantsWaist','jeansDetails','redThong','briefs','skirt','jumpsuitNeckLeft','jumpsuitNeckRight',
     'jumpsuitShoulderLeft','jumpsuitShoulderRight'];
-  for(const key of (topCoversPants()?[...lower,...upper]:[...upper,...lower])) {
+  for(const key of [...upper,...lower]) {
     const node=garmentPaths[key];
     if(node?.parentNode===outfitOverlay)outfitOverlay.appendChild(node);
   }
-  // Moving calves still cover the fabric in a fold; the jacket remains in
-  // neckOverlay above both the loose shirt and trousers.
+  // An extended coat covers the pelvis, but a folded calf/boot covers
+  // its hem. Keep this coat between the trouser panels and calf copies.
+  const longCoat=garmentPaths.alohaBody;
+  if(hasLongOuterwear()&&longCoat)
+    outfitOverlay.appendChild(longCoat);
+  else if(longCoat?.parentNode===outfitOverlay&&neckOverlay)
+    neckOverlay.insertBefore(longCoat,scarfPaths[0]?.node||null);
+  // Moving calves still cover the fabric in a fold.
   for(const {calfOverlay} of legParts)outfitOverlay.appendChild(calfOverlay);
 }
 function updatePartOrder() {
@@ -2804,8 +3431,8 @@ function updatePartOrder() {
     const part = pose.part.replace('Wrist','Hand');
     // Separate trousers and shorts cover a low thigh root. Keep that leg
     // ahead of its partner but under the clothes until it rises in front.
-    if(part.endsWith('Leg')&&(selectedDecorations.pants||selectedDecorations.shirt==='red-triangle')
-      &&!wearingJumpsuit()
+    if(part.endsWith('Leg')&&(selectedDecorations.pants||selectedDecorations.shirt==='red-triangle'||hasLongOuterwear())
+      &&(!wearingJumpsuit()||hasLongOuterwear())
       &&!legInFront[part.replace('Leg','')]) {
       const i=ordered.indexOf(part);
       if(i>=0) ordered.splice(1,0,...ordered.splice(i,1));
@@ -2849,31 +3476,32 @@ function updatePartOrder() {
   for(const part of ordered) if(part.endsWith('Leg')) {
     const side=part.replace('Leg','');
     if(dragPoses.some(pose=>pose.part===part)
+      &&(!hasLongOuterwear()||legInFront[side])
       &&((!selectedDecorations.pants&&selectedDecorations.shirt!=='red-triangle')
         ||wearingJumpsuit()||legInFront[side]))
       svg.appendChild(partLayers[part]);
   }
-  // Palm and forearm end up above everything, a dragged leg included: a leg
-  // swung across the body must not cut through the hand. That leaves the
-  // garment below a resting arm, but it still reads as covering the shoulder
-  // because applyArmOcclusion masks the arm's root away there — the look never
-  // depended on the garment sitting on top, only on that mask.
-  if(sleeveless||selectedDecorations.pants==='skirt') for(const part of ordered)
+  // Every outfit shares this rule: palms and forearms cover legs, including
+  // calfOverlay inside the garment group. Active dragging is handled last.
+  // Shoulder masks still tuck resting sleeveless arms into their straps.
+  for(const part of ordered)
     if(part.endsWith('Hand')) svg.appendChild(partLayers[part]);
-  // The neck accessory stays above everything the arm has not reached. Once an
-  // arm swings up past the shoulder line it passes in front of the scarf, so
-  // it goes back on top; swung low it stays tucked behind, as before.
+  // Resting arms stay behind the neck accessory; raised arms cross over it.
   if(neckOverlay) svg.appendChild(neckOverlay);
   for(const part of ordered)
     if(part.endsWith('Hand')&&armRaised[part.replace('Hand','')])
       svg.appendChild(partLayers[part]);
-  // While the pointer actually holds a leg, that whole leg -- thigh, shin and
-  // foot share one group -- rides above everything, hands included, so the
-  // limb being moved is never cut by an arm.
+  // While held, a foreground leg overrides hands, clothes and neckwear.
+  // Release restores the hand-first rule above; retain low-root thresholds.
   if(activeDrag?.pose.part.endsWith('Leg')
-    &&(!(selectedDecorations.shirt==='red-triangle'&&!selectedDecorations.pants)
+    // A long coat covers low thigh roots even while held. Promote only
+    // after the existing angle threshold; high drags still cover the hands.
+    &&(!hasLongOuterwear()||legInFront[activeDrag.pose.part.replace('Leg','')])
+    &&(!(selectedDecorations.shirt==='red-triangle'&&!selectedDecorations.pants)&&!wearingUnderwear()&&selectedDecorations.pants!=='jobs-gradient-jeans'
       ||legInFront[activeDrag.pose.part.replace('Leg','')]))
     svg.appendChild(partLayers[activeDrag.pose.part]);
+  // Long hair stays ahead of every visible part, including raised hands and held legs.
+  if(longHairOverlay)svg.appendChild(longHairOverlay);
   // Invisible handles follow the same order as the visible parts.
   if(dragLayer) {
     ordered.forEach(part=>[...dragLayer.children].filter(node=>
@@ -3956,7 +4584,10 @@ function mouthPose() {
   return posed ? posed.mouth : 0;
 }
 
+function cigaretteVisible(){return selectedDecorations.helmet==='cigarette';}
 function update() {
+  cigarettePaths.forEach(node=>{node.style.display=cigaretteVisible()?'':'none';});
+  restoreBasePaint();
   if (!svg) return;
   const config = Object.fromEntries(
     Object.entries(controls).map(([key, input]) => [key, Number(input.value)])
@@ -3974,6 +4605,8 @@ function update() {
     const eyeWhite = selectedDecorations.helmet === 'shark-hood'
       ? sharkEyeWhite : skinTrait('eyeWhite');
     const lip = skinTrait('lip');
+    const skinHead=skinHeadContour();
+    if(skinHead&&(index===5||index===-1&&role==='head'))original=skinHead+(index===-1?'Z':'');
     if (index === 8 && eyeWhite) original = eyeWhite;
     else if (lip && original.includes(lip.from))
       original = original.replace(lip.from, lip.to);
@@ -3981,7 +4614,7 @@ function update() {
       const pointRole = role.startsWith('helmet-') ? 'helmet' : classifyPoint(x, y, role);
       const point = warp(x, y, pointRole);
       basePoints.push(point.x, point.y);
-      return applyDragPose(point, x, y, pointRole, warp);
+      return applyDragPose(point, x, y, pointRole==='cigarette'?'head':pointRole, warp);
     });
     node.setAttribute('d', transformed);
     if(index===1||index===-1&&node.getAttribute('stroke')==='none')
@@ -4004,6 +4637,8 @@ function update() {
   paths.filter(path=>path.index===1||path.index===11).forEach(({node})=>{
     node.style.display=hornHidden()?'none':'';
   });
+  kappaSkinPaths.forEach((node,i)=>{node.style.display=(kappaSkinSpecs[i].role==='body'?selectedDecorations.skin==='kappa':skinTrait('kappaDetails'))?'':'none';});
+  hypnoticEyePaths.forEach(node=>{node.style.display=skinTrait('eyeRings')?'':'none';});
   clownMarkPaths.forEach(node=>{node.style.display=skinTrait('marks')?'':'none';});
   if(alienAntennaPath){
     alienAntennaPath.style.display=antennaShown()?'':'none';
@@ -4054,52 +4689,86 @@ function update() {
     const tail=pochitaTailPaths(warp,sway,warp(47,193,'legs').y);
     pochitaCordPaths.forEach((node,i)=>node.setAttribute('d',tail[i]));
   }
+  const underwear=wearingUnderwear();
+  if(underwearRootCutout)underwearRootCutout.setAttribute('d',underwear?(thongVariants[selectedDecorations.pants]?torsoGarmentPath(redThongSource(config.legs),warp):garmentPath(selectedDecorations.pants==='red-briefs'?briefsSource:pantsSource,warp)):'');
   const suitJacket=selectedDecorations.shirt==='suit-jacket';
   const ivoryTunic=selectedDecorations.shirt==='ivory-tunic';
   const royalCoat=selectedDecorations.shirt==='royal-coat';
   const batArmor=selectedDecorations.shirt==='batfish-armor';
-  const longSleeve=selectedDecorations.shirt==='plain'||suitJacket||royalCoat||ivoryTunic||batArmor;
+  const longSleeve=selectedDecorations.shirt==='white-tie-shirt'||selectedDecorations.shirt==='plain'||suitJacket||royalCoat||ivoryTunic||batArmor;
   const teeStyle=teeStyles[selectedDecorations.shirt];
   const isTee=!!teeStyle;
   const wideFlare=widePantFlares[selectedDecorations.pants]||0;
   const widePants=wideFlare>0;
   const kneeShortColors={
-    'pink-shorts':decorationColors.pinkShorts,
+    'student-shorts':'#102f68','pink-shorts':decorationColors.pinkShorts,
     'orange-shorts':decorationColors.orangeShorts,
     'black-shorts':decorationColors.blackShorts,
     'wide-shorts':decorationColors.wideShorts,
+    'slight-wide-shorts':decorationColors.wideShorts,'loose-shorts':decorationColors.wideShorts,'extra-wide-shorts':decorationColors.wideShorts,
   };
-  legParts.forEach(({segments,bootFill,bootOutline,shoeClip,
+  legParts.forEach(({segments,bootFill,bootOutline,sneakerDetails,shoeClip,
       shoeCuff,shortHem,bootTop,wideHem,shortsClip,skinClip,wideClip,ankleClip,
-      calfEdges,calfOverlay,fabricLayers,fabricMasks,crease,
-      side,group,thighBlack,shinBlack,thighSkin,shinSkin})=>{
+      calfEdges,calfOverlay,fabricLayers,fabricMasks,jeansSeams,jeansTextures,jeansHoleMasks,jeansSkin,jeansGradients,crease,
+      side,group,rootBlack,thighBlack,shinBlack,thighSkin,shinSkin,sockTopClip,sockBottomClip,sockTop})=>{
     const shape=legShapes[side];
+    // Every sock segment is cut at the same line, not just the first: the
+    // stroke is far wider than the gap between samples, so the round caps
+    // of the next two segments used to pile up above it as a dome.
+    sockBottomClip.ownerClip?.setAttribute('clip-path',`url(#${side}-ankle-hem-clip)`);
+    const sockStart=studentSockStart();
+    sockTopClip.setAttribute('points',limbClipPoints(shape,sockStart,false));
+    sockBottomClip.setAttribute('points',limbClipPoints(shape,sockStart,true));
+    const jobsMesh=selectedDecorations.pants==='jobs-gradient-jeans'?jobsClothMesh(shape,side,config.legs,warp):null;
+    if(jobsMesh)for(const patch of jobsMesh.flat())if(patch.g){
+      const node=jeansGradients[patch.index];
+      for(const k of ['x1','y1','x2','y2'])node.setAttribute(k,patch.g[k]);
+    }
+    const open=denimVariants[selectedDecorations.pants]?.finish==='large-ripped-denim-jeans';
+    const holes=[0,1].map(part=>open?largeJeansHoles(shape,part,side,config.legs):[]);
+    jeansHoleMasks.forEach((node,part)=>{node.innerHTML='<rect x="-1000" y="-1000" width="2000" height="2000" fill="white"/>'+holes[part].map(d=>`<path d="${d}" fill="black"/>`).join('');});
+    jeansSkin.forEach((node,part)=>{node.innerHTML=holes[part].map(d=>`<path d="${d}" fill="${skinColor()}"/>`).join('');});
+    jeansTextures.forEach((node,part)=>{if(selectedDecorations.pants==='jobs-gradient-jeans')node.setAttribute('mask',`url(#${side}-fabric-${part})`);else node.removeAttribute('mask');node.innerHTML=jeansTextureMarkup(shape,part,side,selectedDecorations.pants,config.legs);});
+    jeansSeams.forEach((node,part)=>{
+      node.setAttribute('d',jeansLegSeam(shape,part,config.legs,side));
+      node.style.display=denimJeansIds.includes(selectedDecorations.pants)&&selectedDecorations.pants!=='jobs-gradient-jeans'?'':'none';
+    });
+    const foregroundUnderwear=underwear&&legInFront[side];
+    for(const node of [rootBlack,thighBlack,shinBlack]){
+      if(foregroundUnderwear||node===shinBlack&&pantsCoverThigh()&&shape.creaseOpacity>.55)node.removeAttribute('mask');
+      else node.setAttribute('mask',`url(#${side}-hip-${node===rootBlack?'root':'contour'}-mask)`);
+    }
     const kneeShorts=!!kneeShortColors[selectedDecorations.pants];
+    const shortsEnd=shortsHemIndex();
     const shortsFlare=kneeShortFlares[selectedDecorations.pants]||0;
     const wideShorts=shortsFlare>0;
     const splitCloth=pantsCoverThigh();
     const darkBoots=['dark-boots','batfish-boots'].includes(selectedDecorations.shoes);
-    const bootColor=selectedDecorations.shoes==='batfish-boots'?decorationColors.batBlack:darkBoots?decorationColors.darkBoots:decorationColors.brownBoots;
-    const wearingTallBoots=selectedDecorations.shoes==='brown-boots'||darkBoots;
+    const wideBoots=bootCoversPants(shape,wideFlare);
+    const bootColor=bootProfiles[selectedDecorations.shoes]?.color||(selectedDecorations.shoes==='batfish-boots'?decorationColors.batBlack:darkBoots?decorationColors.darkBoots:decorationColors.brownBoots);
+    const wearingTallBoots=selectedDecorations.shoes==='brown-boots'||darkBoots||!!bootProfiles[selectedDecorations.shoes];
     // A wide trouser keeps its full width and fabric over the boot shaft.
     // Other trousers tuck into the boot, which replaces the lower leg.
-    const tallBoots=wearingTallBoots&&!widePants;
+    const tallBoots=wideBoots||wearingTallBoots&&!widePants;
+    // The boot owns all material below the cuff, including denim details.
+    for(const nodes of [jeansSkin,jeansTextures])nodes.forEach((node,part)=>{node.style.display=tallBoots&&part===1?'none':'';});
+    if(tallBoots)jeansSeams[1].style.display='none';
     // A boot shaft is continuous material from the knee into the foot, the
     // same as a trouser leg, so it is drawn the same way: the calf's own
     // black strokes are hidden and two open side edges drawn instead.
     // Leaving the strokes on put a round cap across the boot wherever the
     // knee folded, and it showed with or without trousers underneath.
-    const continuousCalf=(splitCloth&&!kneeShorts||tallBoots)&&!widePants;
+    const continuousCalf=splitCloth&&!kneeShorts&&!widePants||tallBoots;
     // A bare calf under shorts also ends at the shoe mouth. Its front-layer
     // copy must not redraw the tube's rounded underside over the foot — on
     // a boot that was the line that appeared at the ankle in a squat.
-    const ankleBound=(continuousCalf||kneeShorts||selectedDecorations.pants==='skirt')&&!widePants;
+    const ankleBound=!widePants;
     // Continuous cloth over a shoe finishes on the shoe's own mouth
     // corners, so the trouser's side edge and the shoe's outline join
     // instead of leaving a nick between them.
-    calfEdges.setAttribute('d',trouserCalfEdges(shape,wideFlare,config.legs,
-      tallBoots||(continuousCalf&&!widePants)));
-    calfEdges.style.display=continuousCalf?'':'none';
+    calfEdges.setAttribute('d',trouserCalfEdges(wideBoots?workerBootShoe(shape):shape,wideFlare,config.legs,
+      !widePants||tallBoots,wideBoots?workerBootExtra:null,continuousCalf?19:29));
+    calfEdges.style.display=continuousCalf||!widePants?'':'none';
     // The flared leg passes in front of the shoe upper. In other outfits the
     // shoe sits on top of the limb instead.
     const shoeAnchor=widePants&&!tallBoots?shinBlack:shoeCuff;
@@ -4108,18 +4777,19 @@ function update() {
     // continue across the visible skin as a second diagonal.
     const layers=splitCloth
       ?[thighBlack,thighSkin,fabricLayers[0].group,shortHem,
-        shinBlack,shinSkin,fabricLayers[1].group,calfEdges]
+        shinBlack,shinSkin,fabricLayers[1].group,calfEdges,sockTop]
       :[thighBlack,shinBlack,thighSkin,shinSkin,shortHem,
-        ...fabricLayers.map(layer=>layer.group)];
+        ...fabricLayers.map(layer=>layer.group),calfEdges,sockTop];
     layers.forEach(layer=>group.insertBefore(layer,crease));
     group.insertBefore(bootFill,shoeAnchor);
     group.insertBefore(bootOutline,shoeAnchor);
     for(const node of calfOverlay.querySelectorAll('[data-calf-shoe]'))node.style.display=widePants?'':'none';
-    shortsClip.setAttribute('points',limbClipPoints(shape,19,false));
-    skinClip.setAttribute('points',limbClipPoints(shape,19,true));
+    const clothEnd=kneeShorts&&!tallBoots?shortsEnd:19;
+    shortsClip.setAttribute('points',limbClipPoints(shape,clothEnd,false));
+    skinClip.setAttribute('points',limbClipPoints(shape,clothEnd,true));
     wideClip.setAttribute('points',legEndClipPoints(shape,config.legs));
     ankleClip.setAttribute('points',ankleHemClipPoints(shape));
-    if(ankleBound)
+    if(ankleBound&&!bootProfiles[selectedDecorations.shoes])
       calfOverlay.setAttribute('clip-path',`url(#${side}-ankle-hem-clip)`);
     else calfOverlay.removeAttribute('clip-path');
     // Side-edge samples may reach past the hem during compression. Clip
@@ -4132,17 +4802,27 @@ function update() {
     // the shoe's outline whenever the leg was pulled long.
     else if(continuousCalf&&!tallBoots)calfEdges.setAttribute('clip-path',`url(#${side}-ankle-hem-clip)`);
     else calfEdges.removeAttribute('clip-path');
-    // Clip the complete calf, including later round caps that can reach back
-    // across the knee. The individual hem clips still trim the distal end.
+    // Long cloth keeps the original calf clip. Ultra shorts clip only near
+    // the cuff: a folded bare calf must be able to return across that plane.
     for(const node of [shinBlack,shinSkin,fabricLayers[1].group]) {
-      if(splitCloth)node.setAttribute('clip-path',`url(#${side}-skin-hem-clip)`);
+      if(splitCloth&&!(kneeShorts&&shortsEnd<19&&!tallBoots))node.setAttribute('clip-path',`url(#${side}-skin-hem-clip)`);
       else node.removeAttribute('clip-path');
     }
     // The folded calf is in front of the pelvis. Reuse the actual rendered
     // calf (including its fabric) above the waist fill, rather than repainting
     // isolated lines that the pelvis can cut into rectangular fragments.
     calfOverlay.style.display=(splitCloth||tallBoots)&&shape.creaseOpacity>.55?'':'none';
+    updateLegClothPartition({segments,rootBlack,thighBlack,shinBlack,thighSkin,shinSkin},clothEnd);
     segments.forEach(({back,front},i)=>{
+      // The bare-leg partition follows the actual cuff, including ultra shorts.
+      // Otherwise the old index19 black tube starts inside exposed skin.
+      // Below the angle threshold the cloth covers the thigh root. Once
+      // raised in front, keep its full fill and outline together.
+      for(const node of [back,front]){
+        if(underwear&&!legInFront[side]&&i<10)node.setAttribute('mask','url(#underwear-root-mask)');
+        else if(open&&node===front&&!(tallBoots&&i>=19))node.setAttribute('mask',`url(#${side}-jeans-holes-${i<19?0:1})`);
+        else node.removeAttribute('mask');
+      }
       const segmentPath=widePants&&!tallBoots&&i===31
         ?wideLegLastPath(shape,config.legs):shape.hose[i].d;
       back.setAttribute('d',segmentPath);
@@ -4151,10 +4831,10 @@ function update() {
       // caps leave the wider black stroke exposed between adjacent samples,
       // producing small knee slashes even with no visible fold line.
       // The shared half-plane clips, rather than those caps, define the join.
-      const cuffBoundary=(kneeShorts||tallBoots)&&i>=16&&i<=23;
+      const cuffBoundary=(kneeShorts||tallBoots)&&(i>=clothEnd-3&&i<=clothEnd+4||i>=16&&i<=23);
       if(i!==0) back.setAttribute('stroke-linecap',cuffBoundary||i===31?'butt':'round');
       front.setAttribute('stroke-linecap',cuffBoundary||i===31?'butt':'round');
-      const nearHem=i>=13&&i<=26;
+      const nearHem=i>=clothEnd-6&&i<=clothEnd+(kneeShorts&&shortsEnd<19?3:7);
       const clip=widePants&&!tallBoots&&i>=24
         ?`url(#${side}-wide-hem-clip)`
         // A boot's own shoe is drawn over the end of its shaft, so the
@@ -4164,20 +4844,19 @@ function update() {
         :ankleBound&&!tallBoots&&i>=24
           ?`url(#${side}-ankle-hem-clip)`
         :(splitCloth||tallBoots)&&nearHem
-          ?`url(#${side}-${i<19?'shorts':'skin'}-hem-clip)`:null;
+          ?`url(#${side}-${i<clothEnd?'shorts':'skin'}-hem-clip)`:null;
       for(const node of [back,front]) {
         if(clip) node.setAttribute('clip-path',clip);
         else node.removeAttribute('clip-path');
       }
+      if(studentSockVisible(sockStart)&&i>=sockStart-1)front.setAttribute('clip-path',`url(#${side}-sock-${i<sockStart?'top':'bottom'}-hem-clip)`);
       // The fill covers the middle of the black stroke, so it needs two
       // extra units to leave a one-unit outline on each side like the SVG.
       // The body fill masks part of the black underside near a folded hip.
       // Restore that lost ink along the round upper-leg contour only.
       const roundedHipInk=crouch*.75*(1-smooth(i/16));
-      const wideExtra=wideShorts&&i<19?wideShortsExtraWidth(i,shortsFlare)
-        :widePants&&!tallBoots?wideLegExtraWidth(i,wideFlare):0;
-      back.setAttribute('stroke-width',shape.hose[i].width+2+roundedHipInk+wideExtra);
-      front.setAttribute('d',segmentPath);
+      const wideExtra=wideShorts&&i<shortsEnd?wideShortsExtraWidth(i,shortsFlare,shortsEnd)
+        :wideBoots&&i>=19?workerBootExtra(i):widePants&&(!tallBoots||i<19)?wideLegExtraWidth(i,wideFlare):0;
       // The shoe's mouth is a shade wider than the leg tube it stands on,
       // and the difference grows as the leg is pulled long: a wedge of
       // background then shows between the trouser's end and the side of
@@ -4190,20 +4869,22 @@ function update() {
           shape.bootOuter.y-shape.bootInner.y)-shape.hose[i].width)
           *smooth((i-26)/4)
         :0;
+      back.setAttribute('stroke-width',shape.hose[i].width+2+roundedHipInk+wideExtra+bootMouth);
+      front.setAttribute('d',segmentPath);
       front.setAttribute('stroke-width',shape.hose[i].width+wideExtra+bootMouth);
       const legColor=tallBoots&&i>=19
         ? bootColor
         : wearingJumpsuit()
-          ? selectedDecorations.pants==='navy-jumpsuit'
+          ? workwearVariants[selectedDecorations.pants]?denimColor():selectedDecorations.pants==='navy-jumpsuit'
             ? decorationColors.navyJumpsuit:decorationColors.jumpsuit
         : ['plain','batfish-trousers'].includes(selectedDecorations.pants) ? selectedDecorations.pants==='batfish-trousers'?decorationColors.batArmor:decorationColors.pants
         : widePants ? widePantsPaint()
-        : kneeShorts&&i<19?kneeShortColors[selectedDecorations.pants]:skinColor();
+        : kneeShorts&&i<shortsEnd?kneeShortColors[selectedDecorations.pants]:exposedLegPaint(i);
       const patterned=selectedDecorations.pants==='loose-wide-pants'&&!(tallBoots&&i>=19);
-      front.setAttribute('stroke',patterned?'#607e79':legColor);
+      front.setAttribute('stroke',selectedDecorations.pants==='jobs-gradient-jeans'&&!(tallBoots&&i>=19)?jobsDenimColor((jobsMaterialReference()[side][i].y-jobsMaterialReference().waist)/(jobsMaterialReference().end-jobsMaterialReference().waist)):patterned?'#607e79':legColor);
       // Preserve both side edges explicitly; removing a whole thigh-shaped
       // area from the black tube also erased the inner fold and outer border.
-      back.style.display=continuousCalf&&i>=19?'none':'';
+      back.style.display=continuousCalf&&i>=19||!widePants&&i>=29?'none':'';
 
       for(const [part,fabricMask] of fabricMasks[i].entries()){
       fabricMask.setAttribute('stroke',part!==(i<19?0:1)||tallBoots&&i>=19?'none':'white');
@@ -4216,16 +4897,16 @@ function update() {
 
     });
     const patterned=selectedDecorations.pants==='loose-wide-pants';
-    const fabricPaths=patterned?legFabricPaths(shape,side,config.legs):null;
+    const fabricPaths=jobsMesh|| (patterned?legFabricPaths(shape,side,config.legs):null);
     fabricLayers.forEach(({group,nodes},part)=>{
-      group.style.display=patterned&&!(tallBoots&&part===1)?'':'none';
-      if(patterned){
+      group.style.display=(patterned||jobsMesh)&&!(tallBoots&&part===1)?'':'none';
+      if(patterned||jobsMesh){
         while(nodes.length<fabricPaths[part].length){
           const path=document.createElementNS(SVG_NS,'path');group.appendChild(path);nodes.push(path);
         }
         nodes.forEach((node,i)=>{
           const patch=fabricPaths[part][i];node.setAttribute('d',patch?.d||'');
-          if(patch)node.setAttribute('fill',patch.color);
+          if(patch){node.setAttribute('fill',patch.color);node.setAttribute('stroke',jobsMesh?patch.color:'none');node.setAttribute('stroke-width',jobsMesh?'.25':'0');}
         });
       }
     });
@@ -4234,16 +4915,17 @@ function update() {
     // short of it and left a wedge of background between the two. The
     // ankle still keeps the shoe's own width and direction — it is only
     // made long enough to stay tucked behind the hem.
-    const shoe=widePants&&!tallBoots
-      ?extendedShoe(shape,Math.max(3,wideLegHemPoints(shape,wideFlare||5.5,config.legs)
-        .reduce((most,point)=>Math.max(most,
-          (point.x-shape.bootOuter.x)*shape.shoeUp.x
-          +(point.y-shape.bootOuter.y)*shape.shoeUp.y),0)+1.5))
-      :{fill:shape.bootFill,outline:shape.bootOutline};
+    const shoeExtension=widePants&&!tallBoots?Math.max(3,wideLegHemPoints(shape,wideFlare||5.5,config.legs)
+      .reduce((most,p)=>Math.max(most,(p.x-shape.bootOuter.x)*shape.shoeUp.x+(p.y-shape.bootOuter.y)*shape.shoeUp.y),0)+1.5):3;
+    let shoe=widePants&&!tallBoots?extendedShoe(shape,shoeExtension):{fill:shape.bootFill,outline:shape.bootOutline};
+    if(wideBoots){const boot=workerBootShoe(shape);shoe={fill:boot.bootFill,outline:boot.bootOutline};}
+    const sneakers=selectedDecorations.shoes==='gray-sneakers';
+    sneakerDetails.innerHTML=sneakers?jobsSneakerDetails(shape,side):selectedDecorations.shoes==='colorblock-shoes'?colorblockShoeDetails(shape,side):'';
+    group.insertBefore(sneakerDetails,selectedDecorations.shoes==='colorblock-shoes'?bootOutline:shoeAnchor);
     bootFill.setAttribute('d',shoe.fill);
     bootFill.setAttribute('fill',wearingTallBoots?bootColor
       :selectedDecorations.shoes==='royal-shoes'?decorationColors.royalShoe
-      :selectedDecorations.shoes==='black-dress-shoes'?decorationColors.dressShoes
+      :selectedDecorations.shoes==='colorblock-shoes'?'#2F465D':selectedDecorations.shoes==='brown-shoes'?'#623813':studentSockStyles[selectedDecorations.shoes]?'#111214':sneakers?'#bfbfbf':selectedDecorations.shoes==='black-dress-shoes'?decorationColors.dressShoes
       :selectedDecorations.shoes?decorationColors.shoes:skinColor());
     bootOutline.setAttribute('d',shoe.outline);
     shoeClip.setAttribute('d',shoe.fill);
@@ -4259,12 +4941,16 @@ function update() {
     // The calf is painted over this line and hides its lower half. Shift the
     // one-unit stroke half a unit into the shorts so a full-width black edge
     // remains visible without making the stroke itself thicker.
-    shortHem.setAttribute('d',cuffPath(shape,19,wideShorts?wideShortsExtraWidth(19,shortsFlare)
+    shortHem.setAttribute('d',cuffPath(shape,shortsEnd,wideShorts?wideShortsExtraWidth(shortsEnd,shortsFlare,shortsEnd)
       :widePants&&!tallBoots?wideLegExtraWidth(19,wideFlare):0,.5));
     // A full-length trouser has no transverse cuff at the knee. Its visible
     // fold comes from the calf side contour after thigh/calf occlusion.
     shortHem.style.display=kneeShorts&&!tallBoots?'':'none';
-    bootTop.setAttribute('d',cuffPath(shape,19));
+    // The sock's own cuff: the same transverse line the shorts get, so the
+    // white ends on a drawn edge instead of a bare colour change.
+    sockTop.setAttribute('d',cuffPath(shape,sockStart,0,.5));
+    sockTop.style.display=studentSockVisible(sockStart)?'':'none';
+    bootTop.setAttribute('d',cuffPath(shape,19,wideBoots?workerBootExtra(19):0));
     bootTop.style.display=tallBoots?'':'none';
     wideHem.setAttribute('d',wideLegHemPath(shape,wideFlare||5.5,config.legs));
     wideHem.style.display=widePants&&!tallBoots?'':'none';
@@ -4282,6 +4968,8 @@ function update() {
     bellyClip.setAttribute('d',torso.node.getAttribute('d'));
     bellyPatch.style.display=skinTrait('belly')?'':'none';
   }
+  garmentPaths.jeansDetails.innerHTML=denimJeansIds.includes(selectedDecorations.pants)?(workwearVariants[selectedDecorations.pants]?denimBibMarkup(warp):jeansDetailsMarkup(warp)):'';
+  garmentPaths.jeansDetails.style.display=denimJeansIds.includes(selectedDecorations.pants)?'':'none';
   garmentPaths.pants.setAttribute('d',garmentPath(pantsSource,warp));
   garmentPaths.pants.setAttribute('fill',widePants?widePantsPaint():selectedDecorations.pants==='batfish-trousers'?decorationColors.batArmor:decorationColors.pants);
   garmentPaths.pants.style.display=['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePants?'':'none';
@@ -4291,10 +4979,11 @@ function update() {
   garmentPaths.pantsCrotch.style.display=['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePants?'':'none';
   const wearingSkirt=selectedDecorations.pants==='skirt';
   const shorts=selectedDecorations.pants==='red-shorts'
+    ||selectedDecorations.pants==='student-shorts'
     ||selectedDecorations.pants==='pink-shorts'
     ||selectedDecorations.pants==='orange-shorts'
     ||selectedDecorations.pants==='black-shorts'
-    ||selectedDecorations.pants==='wide-shorts';
+    ||!!kneeShortFlares[selectedDecorations.pants];
   garmentPaths.shorts.setAttribute('d',garmentPath(pantsSource,warp));
   garmentPaths.shorts.setAttribute('fill',selectedDecorations.pants==='red-shorts'
     ?decorationColors.redShorts:kneeShortColors[selectedDecorations.pants]
@@ -4307,12 +4996,15 @@ function update() {
   garmentPaths.shortsCrotch.style.display=shorts?'':'none';
   garmentPaths.skirt.setAttribute('d',skirtPath(warp,config.legs));
   garmentPaths.skirt.style.display=wearingSkirt?'':'none';
+  garmentPaths.briefs.setAttribute('d',garmentPath(briefsSource,warp));
+  garmentPaths.briefs.style.display=selectedDecorations.pants==='red-briefs'?'':'none';
   garmentPaths.redThong.setAttribute('d',torsoGarmentPath(redThongSource(config.legs),warp));
-  garmentPaths.redThong.style.display=selectedDecorations.pants==='red-thong'?'':'none';
+  garmentPaths.redThong.setAttribute('fill',thongVariants[selectedDecorations.pants]?.color||decorationColors.redThong);
+  garmentPaths.redThong.style.display=thongVariants[selectedDecorations.pants]?'':'none';
   garmentPaths.redTriangle.setAttribute('d',redTrianglePath(warp));
   garmentPaths.redTriangle.style.display=selectedDecorations.shirt==='red-triangle'?'':'none';
-  garmentPaths.shirt.setAttribute('d',ivoryTunic?torsoGarmentPath(ivoryBodySource,warp):garmentPath(shirtSource,warp));
-  garmentPaths.shirt.setAttribute('fill',batArmor?decorationColors.batArmor:ivoryTunic?decorationColors.royalWhite:suitJacket?decorationColors.suitNavy:royalCoat?decorationColors.royalRed:decorationColors.shirt);
+  garmentPaths.shirt.setAttribute('d',ivoryTunic?torsoGarmentPath(ivoryBodySource,warp):garmentPath(selectedDecorations.shirt==='white-tie-shirt'?collaredBodySource:shirtSource,warp));
+  garmentPaths.shirt.setAttribute('fill',selectedDecorations.shirt==='white-tie-shirt'?'#D9D9D9':batArmor?decorationColors.batArmor:ivoryTunic?decorationColors.royalWhite:suitJacket?decorationColors.suitNavy:royalCoat?decorationColors.royalRed:decorationColors.shirt);
   for(const [key,source] of Object.entries({suitFront:suitFrontSource,suitFrontEdges:suitFrontEdgesSource,
       suitCollarLeft:suitCollarSources.left,suitCollarRight:suitCollarSources.right})) {
     garmentPaths[key].setAttribute('d',garmentPath(source,warp));
@@ -4327,19 +5019,35 @@ function update() {
     garmentPaths[key].style.display=(spec.category==='shirt'?royalCoat:selectedDecorations.neck==='royal-collar')?'':'none';
   }
   for(const [key,spec] of Object.entries(ivorySpecs)){
-    garmentPaths[key].setAttribute('d',spec.category==='cape'?capePath(spec.source,warp):torsoGarmentPath(spec.source,warp,spec.category==='neck'));
+    garmentPaths[key].setAttribute('d',spec.category==='cape'?backAccessoryPath(spec,warp):torsoGarmentPath(spec.source,warp,spec.category==='neck'));
     if(spec.category==='cape'){
       const paint=capeStyles[selectedDecorations.cape]?.[key];
       garmentPaths[key].style.display=paint?'':'none';
       garmentPaths[key].setAttribute('fill',paint||spec.fill);
     }else garmentPaths[key].style.display=selectedDecorations[spec.category]===spec.id?'':'none';
   }
+  garmentPaths.collaredDetails.innerHTML=selectedDecorations.shirt==='white-tie-shirt'?collaredShirtMarkup(warp):'';
   garmentPaths.shirt.style.display=longSleeve?'':'none';
   garmentPaths.shirtSides.setAttribute('d',ivoryTunic?torsoGarmentPath(ivorySidesSource,warp):garmentPath(shirtSidesSource,warp));
   garmentPaths.shirtSides.style.display=longSleeve?'':'none';
   const isVest=selectedDecorations.shirt==='blue-vest';
   garmentPaths.alohaBody.style.display=alohaSleeveStyles[selectedDecorations.outerwear]?'':'none';
-  if(alohaSleeveStyles[selectedDecorations.outerwear])garmentPaths.alohaBody.innerHTML=alohaBodyMarkup(warp);
+  if(alohaSleeveStyles[selectedDecorations.outerwear])garmentPaths.alohaBody.innerHTML=alohaSleeveStyles[selectedDecorations.outerwear].blazer?blazerMarkup(warp):alohaSleeveStyles[selectedDecorations.outerwear].student?studentOuterMarkup(warp,selectedDecorations.outerwear==='secondary-jacket'):isWorkerJacket()?workerOuterMarkup(warp):alohaSleeveStyles[selectedDecorations.outerwear].suit?suitOuterMarkup(warp):alohaBodyMarkup(warp,alohaSleeveStyles[selectedDecorations.outerwear].openFront);
+  // Clip only the inner garments, leaving the open chest and the skin intact.
+  const outerStyle=alohaSleeveStyles[selectedDecorations.outerwear];
+  const fittedOuter=!!outerStyle||selectedDecorations.outerwear==='green-vest';
+  if(outerwearInnerClip){
+    const boundary=outerStyle?.student?(selectedDecorations.outerwear==='secondary-jacket'?secondaryBodySource:studentBodySource):outerStyle?.worker?workerBodySource:outerStyle
+      ?`M26.1046 56.4524L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}C68.2 80 69 101 69 112L25 112C25 101 26 80 27.478 ${LEFT_ARMPIT_Y}Z`
+      :`M26.1046 56.4524L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}C66.9913 84.8335 66.1 103 65.9 112L27.7 112C27.6 103 27.5018 84.2394 27.478 ${LEFT_ARMPIT_Y}Z`;
+    outerwearInnerClip.setAttribute('d',outerStyle?.student||outerStyle?.worker?workerGarmentPath(boundary,warp):outerStyle?.suit?garmentPath(shirtSource,warp):torsoGarmentPath(boundary,warp,true));
+  }
+  for(const key of [...innerTopKeys(),'shirtTop','teeNeck','teeTopLeft','teeTopRight']){
+    const node=garmentPaths[key];
+    if(!node)continue;
+    if(fittedOuter)node.setAttribute('clip-path','url(#outerwear-inner-clip)');
+    else node.removeAttribute('clip-path');
+  }
   const isGreenVest=selectedDecorations.outerwear==='green-vest';
   garmentPaths.vest.setAttribute('d',garmentPath(vestSource,warp));
   garmentPaths.vest.style.display=isVest?'':'none';
@@ -4353,18 +5061,22 @@ function update() {
     garmentPaths[key].style.display=isGreenVest?'':'none';
   }
   garmentPaths.shirtTop.setAttribute('d',
-    transformPath(shirtTopSource,
+    transformPath(selectedDecorations.shirt==='white-tie-shirt'?collaredNeckSource:shirtTopSource,
       (x,y)=>applyDragPose(warp(x,y,'head'),x,y,'head',warp)));
   garmentPaths.shirtTop.style.display=longSleeve?'':'none';
+  garmentPaths.jobsCollar.setAttribute('d',torsoGarmentPath(jobsCollarSource,warp,true));
+  garmentPaths.jobsCollar.style.display=selectedDecorations.shirt==='black-turtleneck-tee'?'':'none';
+  garmentPaths.jobsCollarEdge.setAttribute('d',torsoGarmentPath(jobsCollarEdgeSource,warp,true));
+  garmentPaths.jobsCollarEdge.style.display=garmentPaths.jobsCollar.style.display;
   garmentPaths.tee.setAttribute('d',teeStyle?.loose?looseTopPath(looseTopSource,warp):garmentPath(
-    selectedDecorations.shirt==='red-tee'?redTeeSource:teeSource,warp));
+    ['red-tee','black-turtleneck-tee'].includes(selectedDecorations.shirt)?redTeeSource:teeSource,warp));
   garmentPaths.tee.setAttribute('fill',teeStyle?.color||decorationColors.yellowTee);
   garmentPaths.tee.style.display=isTee?'':'none';
   garmentPaths.teeSides.setAttribute('d',teeStyle?.loose?looseTopPath(looseTopSidesSource,warp):garmentPath(shirtSidesSource,warp));
   garmentPaths.teeSides.style.display=isTee?'':'none';
   garmentPaths.teeNeck.setAttribute('d',garmentPath(
-    selectedDecorations.shirt==='red-tee'?redTeeNeckSource:teeNeckSource,warp));
-  garmentPaths.teeNeck.style.display=isTee?'':'none';
+    ['red-tee','black-turtleneck-tee'].includes(selectedDecorations.shirt)?redTeeNeckSource:teeNeckSource,warp));
+  garmentPaths.teeNeck.style.display=isTee&&selectedDecorations.shirt!=='black-turtleneck-tee'?'':'none';
   for(const side of ['left','right']) {
     const suffix=side==='left'?'Left':'Right';
     const top=transformPath(vestTopSources[side],
@@ -4391,9 +5103,9 @@ function update() {
   garmentPaths.waist.style.display=longSleeve
     ||isVest||isTee?'':'none';
   garmentPaths.pantsWaist.setAttribute('d',garmentPath(pantsWaistSource,warp));
-  garmentPaths.pantsWaist.style.display=['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePants||shorts?'':'none';
+  garmentPaths.pantsWaist.style.display=!workwearVariants[selectedDecorations.pants]&&(['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePants||shorts)?'':'none';
   garmentPaths.jumpsuit.setAttribute('d',garmentPath(jumpsuitSource,warp));
-  garmentPaths.jumpsuit.setAttribute('fill',selectedDecorations.pants==='navy-jumpsuit'
+  garmentPaths.jumpsuit.setAttribute('fill',workwearVariants[selectedDecorations.pants]?denimColor():selectedDecorations.pants==='navy-jumpsuit'
     ?decorationColors.navyJumpsuit:decorationColors.jumpsuit);
   jumpsuitChestCutout.setAttribute('d',garmentPath(jumpsuitChestSource,warp));
   garmentPaths.jumpsuit.style.display=wearingJumpsuit()?'':'none';
@@ -4496,52 +5208,58 @@ function update() {
     node.style.opacity=String(buttOutlineOpacity(side));
   });
 
-  armParts.forEach(({alohaSleeve,side,segments,rootBlack,skinRoot,sleeveClip,skinClip,crease,cuff,sleevePanel,sleeveEdges,glovePanel,gloveEdges,handFill,handOutline,
+  armParts.forEach(({innerArm,outerHemClip,alohaSleeve,side,segments,rootBlack,skinRoot,sleeveClip,skinClip,crease,cuff,sleevePanel,sleeveEdges,glovePanel,gloveEdges,handFill,handOutline,
       handSource})=>{
     const shape=armShapes[side];
+    const cinched=!!teeStyle?.cinched;
     const outerSleeveStyle=alohaSleeveStyles[selectedDecorations.outerwear];
     const aloha=!!outerSleeveStyle;
     alohaSleeve.style.display=aloha?'':'none';
     if(aloha)alohaSleeve.innerHTML=alohaSleeveMarkup(shape,side+'-aloha',outerSleeveStyle);
-    const sleeveEnd=aloha?outerSleeveStyle.end:ivoryTunic?28:royalCoat?25:teeStyle?.sleeveEnd||31;
+    if(aloha){
+      outerHemClip.setAttribute('points',limbClipPoints(shape,outerSleeveStyle.end,true));
+      innerArm.setAttribute('clip-path',`url(#${side}-outer-hem-clip)`);
+    }else innerArm.removeAttribute('clip-path');
+    const sleeveEnd=ivoryTunic?28:royalCoat?25:teeStyle?.sleeveEnd||31;
     const flare=teeStyle?.flare||0;
     applyArmOcclusion(side,rootBlack,skinRoot);
     sleeveClip.setAttribute('points',limbClipPoints(shape,sleeveEnd,false));
     skinClip.setAttribute('points',limbClipPoints(shape,sleeveEnd,true));
     segments.forEach(({back,front},i)=>{
-      back.style.display=front.style.display=(aloha&&i<outerSleeveStyle.end||ivoryTunic&&i>=6&&i<28)?'none':'';
+      back.style.display=front.style.display=(ivoryTunic&&i>=6&&i<28||cinched&&i>=6&&i<31)?'none':'';
       back.setAttribute('d',shape.hose[i].d);
-      const sleeveBoundary=(isTee||royalCoat||ivoryTunic||aloha)&&i>=sleeveEnd-4&&i<=sleeveEnd+6;
+      const sleeveBoundary=(isTee||royalCoat||ivoryTunic)&&i>=sleeveEnd-4&&i<=sleeveEnd+6;
       back.setAttribute('stroke-linecap',ivoryTunic&&i===5?'butt':ivoryTunic&&i>0&&i<28?'round':sleeveBoundary?'butt':i===0||i===31?'butt':'round');
       front.setAttribute('stroke-linecap',ivoryTunic&&i===5?'butt':ivoryTunic&&i>0&&i<28?'round':sleeveBoundary?'butt':i===0||i===31?'butt':'round');
       // Clip only the spans whose round ends can reach the seam. A curled
       // forearm may cross back over the shoulder side and must stay visible.
       const nearCuff=i>=sleeveEnd-7&&i<=sleeveEnd+6;
-      const clip=(isTee||royalCoat||ivoryTunic||aloha)&&nearCuff
+      const clip=(isTee||royalCoat||ivoryTunic)&&nearCuff
         ?`url(#${side}-${i<sleeveEnd?'sleeve':'skin'}-clip)`:null;
       if(clip) { back.setAttribute('clip-path',clip);front.setAttribute('clip-path',clip); }
       else { back.removeAttribute('clip-path');front.removeAttribute('clip-path'); }
       // The fill covers the middle of the black stroke, so it needs two extra
       // units to leave a one-unit outline on each side like the SVG.
       const shortSleeve=isTee&&i<sleeveEnd;
-      const sleeveFlare=ivoryTunic?ivorySleeveWidth(i):sleeveExtraWidth(i,sleeveEnd,flare);
+      const sleeveFlare=ivoryTunic?ivorySleeveWidth(i):teeSleeveWidth(i,teeStyle);
       back.setAttribute('stroke-width',shape.hose[i].width+2+sleeveFlare);
       front.setAttribute('d',shape.hose[i].d);
       front.setAttribute('stroke-width',shape.hose[i].width+sleeveFlare);
       const sleeveColor=longSleeve
-        ? batArmor?decorationColors.batArmor:ivoryTunic?(i>=28?decorationColors.crown:decorationColors.royalWhite):suitJacket?decorationColors.suitNavy:royalCoat
+        ? selectedDecorations.shirt==='white-tie-shirt'?'#D9D9D9':batArmor?decorationColors.batArmor:ivoryTunic?(i>=28?decorationColors.crown:decorationColors.royalWhite):suitJacket?decorationColors.suitNavy:royalCoat
           ?i>=25?decorationColors.royalWhite:decorationColors.royalRed:decorationColors.shirt
         : shortSleeve?teeStyle.color:skinColor();
       front.setAttribute('stroke',sleeveColor);
     });
-    sleevePanel.setAttribute('d',ivoryTunic?ivorySleeveEdges(shape,true):'');
-    sleevePanel.style.display=ivoryTunic?'':'none';
-    sleeveEdges.setAttribute('d',ivoryTunic?ivorySleeveEdges(shape):'');
-    sleeveEdges.style.display=ivoryTunic?'':'none';
-    cuff.style.display=!aloha&&(longSleeve||isTee)&&!(selectedDecorations.gloves==='batfish-gloves'&&sleeveEnd>=25)?'':'none';
-    cuff.setAttribute('d',cuffPath(shape,sleeveEnd,ivoryTunic?ivorySleeveWidth(28):flare)+((royalCoat||ivoryTunic)?cuffPath(shape,31):''));
+    sleevePanel.setAttribute('d',cinched?cinchedSleeveEdges(shape,true):ivoryTunic?ivorySleeveEdges(shape,true):'');
+    sleevePanel.setAttribute('fill',cinched?teeStyle.color:decorationColors.royalWhite);
+    sleevePanel.style.display=ivoryTunic||cinched?'':'none';
+    sleeveEdges.setAttribute('d',cinched?cinchedSleeveEdges(shape):ivoryTunic?ivorySleeveEdges(shape):'');
+    sleeveEdges.style.display=ivoryTunic||cinched?'':'none';
+    cuff.style.display=(!aloha||sleeveEnd>outerSleeveStyle.end)&&(longSleeve||isTee)&&!(selectedDecorations.gloves==='batfish-gloves'&&sleeveEnd>=25)?'':'none';
+    cuff.setAttribute('d',cinched?cinchedSleeveEdges(shape,'cuff'):cuffPath(shape,sleeveEnd,ivoryTunic?ivorySleeveWidth(28):flare)+((royalCoat||ivoryTunic)?cuffPath(shape,31):''));
     crease.setAttribute('d',shape.crease);
-    crease.style.display=!aloha&&shape.creaseOpacity>.55?'':'none';
+    crease.style.display=!cinched&&shape.creaseOpacity>.55?'':'none';
     const glove=batGlovePaths(shape);
     glovePanel.setAttribute('d',glove.fill);gloveEdges.setAttribute('d',glove.outline);
     glovePanel.style.display=gloveEdges.style.display=selectedDecorations.gloves==='batfish-gloves'?'':'none';
@@ -4560,21 +5278,22 @@ function update() {
   });
 
   if (ellipse) {
-    const originalCenter = warp(ellipse.originalCx, ellipse.originalCy, 'head');
+    const pupil = skinTrait('pupil')
+      || {rx: ellipse.originalRx, ry: ellipse.originalRy, dy: 0};
+    const pupilX=ellipse.originalCx+(pupil.dx||0),pupilY=ellipse.originalCy+(pupil.dy||0);
+    const originalCenter = warp(pupilX,pupilY, 'head');
     const center = applyDragPose(
       originalCenter,
-      ellipse.originalCx,
-      ellipse.originalCy,
+      pupilX,
+      pupilY,
       'head',
       warp
     );
     const scale = config.head / 100;
     // Pochita's pupil fills most of the eye, so the skin gives its own
     // radii and its own small lift rather than scaling the reference one.
-    const pupil = skinTrait('pupil')
-      || {rx: ellipse.originalRx, ry: ellipse.originalRy, dy: 0};
     ellipse.node.setAttribute('cx', clean(center.x));
-    ellipse.node.setAttribute('cy', clean(center.y + (pupil.dy || 0) * scale));
+    ellipse.node.setAttribute('cy', clean(center.y));
     ellipse.node.setAttribute('fill', pupil.color || 'black');
     ellipse.node.setAttribute('rx', clean(pupil.rx * scale));
     ellipse.node.setAttribute('ry', clean(pupil.ry * scale));
@@ -4620,6 +5339,7 @@ function update() {
       handle.setAttribute('cy', clean(point.y));
     });
   }
+  applyBaseGarmentPaint();
 }
 
 function resetControls() {
@@ -4629,18 +5349,106 @@ function resetControls() {
   update();
 }
 
+let decorationVariantMenu=null;
+function closeDecorationVariantMenu(){
+ decorationVariantMenu?.remove();decorationVariantMenu=null;
+ document.querySelectorAll?.('[data-expand-style]').forEach(button=>button.setAttribute('aria-expanded','false'));
+}
+function styleGroup(category,key){return decorationStyleGroups[category]?.find(group=>group[0]===key);}
+function selectBaseDecoration(category,key){
+ const group=styleGroup(category,key);if(!group)return;
+ if(baseDecorationSelections[category]===key){selectDecoration(category,null);return;}
+ applyDecorationSelection(category,group[2][0]);
+ baseDecorationSelections[category]=key;
+ update();renderDecorationOptions();
+}
+function openDecorationVariantMenu(category,key,anchor){
+ const sameMenu=decorationVariantMenu?.dataset.category===category&&decorationVariantMenu?.dataset.style===key;
+ closeDecorationVariantMenu();
+ if(sameMenu){anchor.focus();return;}
+ const group=styleGroup(category,key);if(!group)return;
+ anchor.setAttribute('aria-expanded','true');
+ const menu=document.createElement('div');
+ menu.dataset.category=category;menu.dataset.style=key;
+ menu.className='decoration-variant-menu';menu.setAttribute('role','dialog');
+ menu.setAttribute('aria-label',group[1]+'颜色和花纹');
+ menu.innerHTML=`<div class="variant-menu-heading"><strong>${group[1]}</strong><button type="button" data-close-variants aria-label="关闭颜色和花纹">×</button></div>`
+  +`<div class="variant-menu-options">`
+  +group[2].map(id=>{const item=decorationCatalog[category].find(item=>item.id===id);
+   return `<button type="button" class="decoration-option" data-variant="${id}" aria-pressed="${selectedDecorations[category]===id&&!baseDecorationSelections[category]}"><img src="${item.icon}" alt=""/><span>${item.name}</span></button>`;
+  }).join('')+'</div>';
+ document.body.appendChild(menu);decorationVariantMenu=menu;
+ revealScrollbarWhileScrolling(menu.querySelector('.variant-menu-options'));
+ const rect=anchor.getBoundingClientRect();
+ const width=Math.min(288,window.innerWidth-24);
+ menu.style.width=width+'px';
+ menu.style.left=Math.max(12,Math.min(rect.right+10,window.innerWidth-width-12))+'px';
+ const tabsBottom=document.querySelector('.wardrobe-tabs').getBoundingClientRect().bottom;
+ const top=Math.max(12,tabsBottom+12);
+ menu.style.maxHeight=Math.max(0,window.innerHeight-top-12)+'px';
+ menu.style.top=top+'px';
+ menu.addEventListener('click',event=>{
+  if(event.target.closest('[data-close-variants]')){
+   closeDecorationVariantMenu();
+   // The option list is redrawn on every pick, so the button that opened
+   // this menu is a different node by now.
+   decorationOptions.querySelector(`[data-expand-style="${key}"]`)?.focus();
+   return;
+  }
+  const variant=event.target.closest('[data-variant]');
+  if(variant)selectDecoration(category,variant.dataset.variant);
+ });
+ menu.querySelector('button').focus();
+}
+// Picking a colour redraws the option list, but the menu is not part of it:
+// it stays open until the user closes it, clicks away or switches category.
+function syncDecorationVariantMenu(){
+ if(!decorationVariantMenu)return;
+ const {category,style}=decorationVariantMenu.dataset;
+ if(category!==activeDecorationCategory){closeDecorationVariantMenu();return;}
+ decorationVariantMenu.querySelectorAll('[data-variant]').forEach(button=>
+  button.setAttribute('aria-pressed',
+   String(selectedDecorations[category]===button.dataset.variant
+    &&!baseDecorationSelections[category])));
+ decorationOptions.querySelector(`[data-expand-style="${style}"]`)
+  ?.setAttribute('aria-expanded','true');
+}
+// Live wardrobe counts include every selectable catalog colour, never gray previews.
+// Outfits have their own count because their pieces are already counted elsewhere.
+function decorationCounts(){
+ const categories=Object.fromEntries(Object.entries(decorationCatalog).map(([category,items])=>
+  [category,new Set(items.map(item=>item.id)).size]));
+ return {categories,total:Object.entries(categories).reduce((sum,[category,count])=>sum+(category==='suit'?0:count),0)};
+}
+function renderDecorationCounts(){
+ const {categories,total}=decorationCounts();
+ const badge=document.querySelector('[data-decoration-total]');
+ if(badge){badge.textContent=total;badge.setAttribute('aria-label',`${total}件装饰，不含套装和灰色基础款`);}
+ for(const tab of decorationTabs){
+  const label=tab.dataset.categoryLabel||(tab.dataset.categoryLabel=tab.textContent.trim());
+  tab.innerHTML=`<span>${label}</span><span class="wardrobe-category-count">${categories[tab.dataset.category]||0}</span>`;
+ }
+}
 function renderDecorationOptions() {
-  const selected=selectedDecorations[activeDecorationCategory];
-  decorationOptions.innerHTML = [
-    // "No skin" is still a fish, so it gets a picture of one rather than a
-    // dash; the other categories really are empty.
-    `<button type="button" class="decoration-option" data-option="none" aria-pressed="${!selected}">${activeDecorationCategory==='skin'?'<img src="./svg/default-skin.svg" alt="" />':'<span class="empty-icon" aria-hidden="true">—</span>'}<span>${activeDecorationCategory==='suit'?'不使用套装':activeDecorationCategory==='skin'?'默认肤色':'不穿戴'}</span></button>`,
-    ...decorationCatalog[activeDecorationCategory].map(({id,name,icon})=>
-      `<button type="button" class="decoration-option" data-option="${id}" aria-pressed="${selected===id}"><img src="${icon}" alt="" /><span>${name}</span></button>`),
-  ].join('');
+ renderDecorationCounts();
+ const category=activeDecorationCategory,selected=selectedDecorations[category];
+ const itemButton=({id,name,icon})=>`<button type="button" class="decoration-option" data-option="${id}" aria-pressed="${selected===id&&!baseDecorationSelections[category]}"><img src="${icon}" alt=""/><span>${name}</span></button>`;
+ const none=`<button type="button" class="decoration-option" data-option="none" aria-pressed="${!selected}">${category==='skin'?'<img src="./svg/default-skin.svg" alt="" />':'<span class="empty-icon" aria-hidden="true">—</span>'}<span>${category==='suit'?'不使用套装':category==='skin'?'默认肤色':'不穿戴'}</span></button>`;
+ const groups=decorationStyleGroups[category];
+ if(!groups){decorationOptions.innerHTML=none+decorationCatalog[category].map(itemButton).join('');
+  syncDecorationVariantMenu();return;}
+ const cards=groups.map(([key,name,ids])=>{
+  const active=ids.includes(selected);
+  return `<div class="decoration-style-card${active?' is-selected':''}"><button type="button" class="decoration-option" data-base-style="${key}" aria-pressed="${active}"><img src="./svg/base-${category}-${key}.svg?v=2" alt=""/><span>${name}</span></button><span class="style-color-count" aria-label="${ids.length}种颜色或花纹">${ids.length}</span><button type="button" class="style-expand" data-expand-style="${key}" aria-expanded="false" aria-haspopup="dialog" aria-label="展开${name}的颜色和花纹"><span aria-hidden="true">▸</span></button></div>`;
+ }).join('');
+ const special=category==='shirt'?'<div class="decoration-group-label">特殊款</div>'+decorationCatalog.shirt.filter(item=>specialShirtIds.includes(item.id)).map(itemButton).join(''):'';
+ decorationOptions.innerHTML=none+cards+special;
+ syncDecorationVariantMenu();
 }
 
 function applyDecorationSelection(category,value) {
+  if(category==='suit')for(const key of Object.keys(baseDecorationSelections))delete baseDecorationSelections[key];
+  else if(category!=='skin')delete baseDecorationSelections[category];
   if(category==='skin') {
     // Skin is only the frog's own color, so it never conflicts with clothing.
     selectedDecorations.skin=value;
@@ -4661,6 +5469,7 @@ function applyDecorationSelection(category,value) {
   }
 }
 function selectDecoration(category, value) {
+  if(value&&selectedDecorations[category]===value&&!baseDecorationSelections[category])value=null;
   applyDecorationSelection(category,value);
   update();
   renderDecorationOptions();
@@ -4696,6 +5505,14 @@ function setHatSelection(value) {
   hatPaths.forEach(node=>{ node.style.display=value==='yellow-hat'?'':'none'; });
   batCowlPaths.forEach(node=>{node.style.display=value==='batfish-cowl'?'':'none';});
   chainsawPaths.forEach(node=>{node.style.display=value==='chainsaw'?'':'none';});
+  jobsGlassesPaths.forEach(node=>{node.style.display=value==='round-glasses'?'':'none';});
+  if(longHairOverlay)longHairOverlay.style.display=value==='long-braid-hair'?'':'none';
+  topknotHairPaths.forEach(node=>{node.style.display=value==='topknot-hair'?'':'none';});
+  secondaryHatPaths.forEach(node=>{node.style.display=value==='secondary-hat'?'':'none';});
+  studentHatPaths.forEach(node=>{node.style.display=value==='student-hat'?'':'none';});
+  workerHatPaths.forEach((node,index)=>{node.style.display=workerHelmetColors[value]?'':'none';if(index>0)node.setAttribute('fill',workerHelmetColors[value]||workerHelmetColors['worker-helmet']);});
+  kappaHairPaths.forEach(node=>{node.style.display=value==='kappa-hair'?'':'none';});
+  cigarettePaths.forEach(node=>{node.style.display=value==='cigarette'?'':'none';});
   sharkToothPaths.forEach(node=>{node.style.display=value==='shark-hood'?'':'none';});
   partyHatPaths.forEach(node=>{node.style.display=value==='party-hat'?'':'none';});
   const crowned = value === 'crown';
@@ -4780,10 +5597,24 @@ decorationTabs.forEach(tab => tab.addEventListener('click', () => {
   renderDecorationOptions();
 }));
 decorationOptions.addEventListener('click', event => {
-  const button = event.target.closest('[data-option]');
-  if (button) selectDecoration(activeDecorationCategory,
-    button.dataset.option === 'none' ? null : button.dataset.option);
+  const expand=event.target.closest('[data-expand-style]');
+  if(expand){openDecorationVariantMenu(activeDecorationCategory,expand.dataset.expandStyle,expand);return;}
+  const base=event.target.closest('[data-base-style]');
+  if(base){
+    const group=styleGroup(activeDecorationCategory,base.dataset.baseStyle);
+    if(group?.[2].includes(selectedDecorations[activeDecorationCategory]))selectDecoration(activeDecorationCategory,null);
+    else selectBaseDecoration(activeDecorationCategory,base.dataset.baseStyle);
+    return;
+  }
+  const button=event.target.closest('[data-option]');
+  if(button)selectDecoration(activeDecorationCategory,button.dataset.option==='none'?null:button.dataset.option);
 });
+document.addEventListener('pointerdown',event=>{
+ if(decorationVariantMenu&&!decorationVariantMenu.contains(event.target)&&!event.target.closest('[data-expand-style]'))closeDecorationVariantMenu();
+});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeDecorationVariantMenu();});
+window.addEventListener('resize',closeDecorationVariantMenu);
+
 renderDecorationOptions();
 
 fetch('./svg/参考.svg')
@@ -4828,7 +5659,10 @@ fetch('./svg/参考.svg')
     capeOverlay=document.createElementNS(SVG_NS,'g');
     capeOverlay.setAttribute('pointer-events','none');
     svg.insertBefore(capeOverlay,svg.firstChild);
-    svg.append(outfitOverlay,neckOverlay);
+    longHairOverlay=document.createElementNS(SVG_NS,'g');
+    longHairOverlay.setAttribute('pointer-events','none');
+    longHairOverlay.setAttribute('data-long-hair','');
+    svg.append(outfitOverlay,neckOverlay,longHairOverlay);
     const silhouette=paths.find(path=>path.index===2);
     const original=silhouette.original;
     const section=(start,end)=>original.slice(original.indexOf(start),
@@ -4905,6 +5739,16 @@ fetch('./svg/参考.svg')
     // and only the points stand out past it.
     // The chainsaw goes behind the head, the way the drawing has it: only
     // the part standing above the head shows, and the face is not covered.
+    const cigaretteLayer=document.createElementNS(SVG_NS,'g');
+    cigaretteLayer.setAttribute('data-cigarette','');
+    cigaretteLayer.setAttribute('pointer-events','none');
+    svg.insertBefore(cigaretteLayer,svg.firstChild);
+    cigarettePaths=cigaretteSpecs.map(({source:original,fill})=>{
+      const node=document.createElementNS(SVG_NS,'path');
+      for(const [key,value] of Object.entries({fill,stroke:'black','stroke-width':.7,'stroke-linejoin':'round'}))node.setAttribute(key,value);
+      node.style.display='none';cigaretteLayer.appendChild(node);
+      paths.push({node,original,role:'cigarette',index:-2});return node;
+    });
     chainsawPaths=Object.entries(chainsawSources).map(([part,original])=>{
       const node=document.createElementNS(SVG_NS,'path');
       node.setAttribute('fill',pochitaColors[part==='teeth'?'teeth':part]);
@@ -4993,6 +5837,31 @@ fetch('./svg/参考.svg')
       partLayers.head.insertBefore(node,headFill);
       paths.push({node,original,role:'headRigid',index:-2});
       return node;
+    });
+    const kappaNodes=(specs,hair)=>specs.map(({source:original,fill,stroke,role,strokeWidth=1},i)=>{
+      const node=document.createElementNS(SVG_NS,'path');
+      for(const [key,value] of Object.entries({fill,stroke,'stroke-width':strokeWidth,'stroke-linecap':'round','stroke-linejoin':'round','pointer-events':'none'}))node.setAttribute(key,value);
+      node.style.display='none';
+      const group=partLayers[role==='body'?'body':'head'];
+      group.appendChild(node);
+      paths.push({node,original,role,index:-2});return node;
+    });
+    hypnoticEyePaths=kappaNodes(hypnoticEyeSpecs,false);
+    kappaSkinPaths=kappaNodes(kappaSkinSpecs,false);
+    kappaHairPaths=kappaNodes(kappaHairSpecs,true);
+    workerHatPaths=kappaNodes(workerHatSpecs,true);
+    studentHatPaths=kappaNodes(studentHatSpecs,true);
+    kappaNodes(longHairSpecs,true).forEach(node=>{node.style.display='';longHairOverlay.appendChild(node);});
+    topknotHairPaths=kappaNodes(topknotHairSpecs,true);
+    secondaryHatPaths=kappaNodes(secondaryHatSpecs,true);
+    longHairOverlay.style.display='none';
+    secondaryHatPaths.forEach(node=>partLayers.head.insertBefore(node,headFill));
+    jobsGlassesPaths=jobsGlassesSpecs.map(({source:original,fill,opacity,strokeWidth})=>{
+      const node=document.createElementNS(SVG_NS,'path');
+      for(const [key,value] of Object.entries({fill,stroke:'#684516','stroke-width':strokeWidth,'stroke-linecap':'round','stroke-linejoin':'round'}))node.setAttribute(key,value);
+      if(opacity)node.setAttribute('fill-opacity',opacity);
+      node.style.display='none';partLayers.head.appendChild(node);
+      paths.push({node,original,role:'headRigid',index:-2});return node;
     });
     batCowlPaths=[batCowlSource].map(original=>{
       const node=document.createElementNS(SVG_NS,'path');
@@ -5095,6 +5964,7 @@ fetch('./svg/参考.svg')
       shortsSides:makeGarment('none',true),
       shortsCrotch:makeGarment('none',true),
       pantsWaist:makeGarment('none',true),
+      briefs:makeGarment(decorationColors.redShorts,true),
       redThong:makeGarment(decorationColors.redThong,true),
       skirt:makeGarment(decorationColors.skirt,true),
     };
@@ -5116,6 +5986,8 @@ fetch('./svg/参考.svg')
       outfitOverlay.appendChild(node);
       garmentPaths[key]=node;
     }
+    garmentPaths.collaredDetails=document.createElementNS(SVG_NS,'g');
+    outfitOverlay.appendChild(garmentPaths.collaredDetails);
     garmentPaths.alohaBody=document.createElementNS(SVG_NS,'g');
     garmentPaths.alohaBody.setAttribute('pointer-events','none');
     outfitOverlay.appendChild(garmentPaths.alohaBody);
@@ -5150,8 +6022,38 @@ fetch('./svg/参考.svg')
       node.setAttribute('clip-path',`url(#${side}-shoe-clip)`);
       garmentPaths['royalBuckle'+side]=node;
     }
+    garmentPaths.jobsCollar=makeGarment('#101010');
+    placeNeckGarmentBelowAccessories(garmentPaths.jobsCollar);
+    garmentPaths.jobsCollarEdge=makeGarment('none',true);
+    placeNeckGarmentBelowAccessories(garmentPaths.jobsCollarEdge);
+    // Outerwear still covers the inner collar; all accessories cover both.
+    placeOuterwearOverNeckline();
+    garmentPaths.jeansDetails=document.createElementNS(SVG_NS,'g');
+    garmentPaths.jeansDetails.setAttribute('pointer-events','none');
+    outfitOverlay.appendChild(garmentPaths.jeansDetails);
     const defs=document.createElementNS(SVG_NS,'defs');
     svg.prepend(defs);
+    jobsPelvisGradient=document.createElementNS(SVG_NS,'linearGradient');
+    jobsPelvisGradient.id='jobs-pelvis-gradient';jobsPelvisGradient.setAttribute('gradientUnits','userSpaceOnUse');
+    for(let i=0;i<=32;i++){
+      const stop=document.createElementNS(SVG_NS,'stop');stop.setAttribute('offset',i/32);stop.setAttribute('stop-color',jobsDenimColor(i/32));jobsPelvisGradient.appendChild(stop);
+    }
+    defs.appendChild(jobsPelvisGradient);
+
+    const underwearMask=document.createElementNS(SVG_NS,'mask');
+    underwearMask.id='underwear-root-mask';
+    underwearMask.setAttribute('maskUnits','userSpaceOnUse');
+    for(const [attr,value] of Object.entries({x:-1000,y:-1000,width:2000,height:2000}))underwearMask.setAttribute(attr,value);
+    const underwearMaskBg=document.createElementNS(SVG_NS,'rect');
+    for(const [attr,value] of Object.entries({x:-1000,y:-1000,width:2000,height:2000,fill:'white'}))underwearMaskBg.setAttribute(attr,value);
+    underwearRootCutout=document.createElementNS(SVG_NS,'path');
+    underwearRootCutout.setAttribute('fill','black');
+    underwearMask.append(underwearMaskBg,underwearRootCutout);defs.appendChild(underwearMask);
+    const outerClip=document.createElementNS(SVG_NS,'clipPath');
+    outerClip.id='outerwear-inner-clip';
+    outerClip.setAttribute('clipPathUnits','userSpaceOnUse');
+    outerwearInnerClip=document.createElementNS(SVG_NS,'path');
+    outerClip.appendChild(outerwearInnerClip);defs.appendChild(outerClip);
     const bellyClipContainer=document.createElementNS(SVG_NS,'clipPath');
     bellyClipContainer.id='milk-frog-belly-clip';
     bellyClipContainer.setAttribute('clipPathUnits','userSpaceOnUse');
@@ -5261,12 +6163,14 @@ fetch('./svg/参考.svg')
         const polygon=document.createElementNS(SVG_NS,'polygon');
         clip.appendChild(polygon);
         defs.appendChild(clip);
+        polygon.ownerClip=clip;
         return polygon;
       };
       const shortsClip=makeHemClip('shorts');
       const skinClip=makeHemClip('skin');
       const wideClip=makeHemClip('wide');
       const ankleClip=makeHemClip('ankle');
+      const sockTopClip=makeHemClip('sock-top'),sockBottomClip=makeHemClip('sock-bottom');
       // The shoe's own outline, used to cut the royal buckle so only the
       // half sitting on the instep shows.
       const shoeClipContainer=document.createElementNS(SVG_NS,'clipPath');
@@ -5324,6 +6228,29 @@ fetch('./svg/参考.svg')
         const nodes=[];
         return {group,nodes};
       });
+      const jeansGradients=Array.from({length:64},(_,i)=>{
+        const node=document.createElementNS(SVG_NS,'linearGradient');node.id=`${side}-jobs-mesh-${i}`;
+        node.setAttribute('gradientUnits','userSpaceOnUse');
+        for(const [offset,color] of Array.from({length:33},(_,k)=>[k/32,jobsDenimColor(k/32)])){
+          const stop=document.createElementNS(SVG_NS,'stop');stop.setAttribute('offset',offset);stop.setAttribute('stop-color',color);node.appendChild(stop);
+        }
+        defs.appendChild(node);return node;
+      });
+      const jeansHoleMasks=[0,1].map(part=>{
+        const node=document.createElementNS(SVG_NS,'mask');node.id=`${side}-jeans-holes-${part}`;
+        for(const [k,v] of Object.entries({maskUnits:'userSpaceOnUse',x:-1000,y:-1000,width:2000,height:2000}))node.setAttribute(k,v);
+        defs.appendChild(node);return node;
+      });
+      const jeansSkin=[thighSkin,shinSkin].map(parent=>{
+        const node=document.createElementNS(SVG_NS,'g');node.setAttribute('pointer-events','none');
+        parent.insertBefore(node,parent.firstChild);return node;
+      });
+      const jeansTextures=[thighSkin,shinSkin].map(parent=>{const node=document.createElementNS(SVG_NS,'g');node.setAttribute('pointer-events','none');parent.appendChild(node);return node;});
+      const jeansSeams=[thighSkin,shinSkin].map(parent=>{
+        const node=document.createElementNS(SVG_NS,'path');
+        for(const [attr,value] of Object.entries({fill:'none',stroke:'black','stroke-width':JEANS_STROKE_WIDTH,'stroke-dasharray':'3 2','pointer-events':'none'}))node.setAttribute(attr,value);
+        parent.appendChild(node);return node;
+      });
       const bootFill=document.createElementNS(SVG_NS,'path');
       bootFill.setAttribute('fill','#C5C5C5');
       const bootOutline=document.createElementNS(SVG_NS,'path');
@@ -5339,6 +6266,10 @@ fetch('./svg/参考.svg')
       shortHem.setAttribute('fill','none');
       shortHem.setAttribute('stroke','black');
       shortHem.setAttribute('stroke-width','1');
+      const sockTop=document.createElementNS(SVG_NS,'path');
+      sockTop.setAttribute('fill','none');
+      sockTop.setAttribute('stroke','black');
+      sockTop.setAttribute('stroke-width','1');
       const bootTop=document.createElementNS(SVG_NS,'path');
       bootTop.setAttribute('fill','none');
       bootTop.setAttribute('stroke','black');
@@ -5353,28 +6284,30 @@ fetch('./svg/参考.svg')
       crease.setAttribute('stroke-width','1');
       crease.setAttribute('stroke-linecap','round');
       group.append(rootBlack,thighBlack,shinBlack,thighSkin,shinSkin,
-        shortHem,calfEdges,crease,bootFill,bootOutline,shoeCuff,bootTop,wideHem);
+        shortHem,sockTop,calfEdges,crease,bootFill,bootOutline,shoeCuff,bootTop,wideHem);
+      const sneakerDetails=document.createElementNS(SVG_NS,'g');
+      sneakerDetails.setAttribute('pointer-events','none');group.appendChild(sneakerDetails);
       const calfOverlay=document.createElementNS(SVG_NS,'g');
       calfOverlay.setAttribute('pointer-events','none');
       calfOverlay.setAttribute('data-calf-overlay',side);
-      for(const [index,node] of [bootFill,garmentPaths['royalBuckle'+side],bootOutline].entries()){
+      for(const [index,node] of [bootFill,garmentPaths['royalBuckle'+side],sneakerDetails,bootOutline].entries()){
         node.id=`${side}-calf-shoe-${index}`;
         const copy=document.createElementNS(SVG_NS,'use');
         copy.setAttribute('href',`#${node.id}`);
         copy.setAttribute('data-calf-shoe','');
         calfOverlay.appendChild(copy);
       }
-      for(const [index,node] of [shinBlack,shinSkin,fabricLayers[1].group,calfEdges,shoeCuff,bootTop,wideHem].entries()) {
+      for(const [index,node] of [shinBlack,shinSkin,fabricLayers[1].group,calfEdges,sockTop,shoeCuff,bootTop,wideHem].entries()) {
         node.id=`${side}-calf-render-${index}`;
         const copy=document.createElementNS(SVG_NS,'use');
         copy.setAttribute('href',`#${node.id}`);
         calfOverlay.appendChild(copy);
       }
       outfitOverlay.appendChild(calfOverlay);
-      legParts.push({segments,bootFill,bootOutline,shoeClip,
+      legParts.push({segments,bootFill,bootOutline,sneakerDetails,shoeClip,
         shoeCuff,shortHem,bootTop,wideHem,shortsClip,skinClip,wideClip,ankleClip,
-        calfEdges,calfOverlay,fabricLayers,fabricMasks,crease,
-        side,group,thighBlack,shinBlack,thighSkin,shinSkin});
+        calfEdges,calfOverlay,fabricLayers,fabricMasks,jeansSeams,jeansTextures,jeansHoleMasks,jeansSkin,jeansGradients,crease,
+        side,group,rootBlack,thighBlack,shinBlack,thighSkin,shinSkin,sockTopClip,sockBottomClip,sockTop});
     });
     const sourceArms = paths.filter(path => path.role === 'arms');
     sourceArms.forEach(({ node }) => node.remove());
@@ -5396,6 +6329,7 @@ fetch('./svg/参考.svg')
         defs.appendChild(clip);
         return polygon;
       };
+      const outerHemClip=makeSleeveClip('outer-hem');
       const sleeveClip=makeSleeveClip('sleeve');
       const skinClip=makeSleeveClip('skin');
       const black=document.createElementNS(SVG_NS,'g');
@@ -5446,8 +6380,10 @@ fetch('./svg/参考.svg')
       const gloveEdges=makePath(false);gloveEdges.setAttribute('stroke-width','1');
       const handFill=makePath(true);
       const handOutline=makePath(false);
-      group.append(rootBlack,black,skinRoot,skin,crease,sleevePanel,sleeveEdges,cuff,alohaSleeve,glovePanel,gloveEdges,handFill,handOutline);
-      armParts.push({alohaSleeve,side,segments,rootBlack,skinRoot,sleeveClip,skinClip,
+      const innerArm=document.createElementNS(SVG_NS,'g');
+      innerArm.append(rootBlack,black,skinRoot,skin,crease,sleevePanel,sleeveEdges,cuff);
+      group.append(innerArm,alohaSleeve,glovePanel,gloveEdges,handFill,handOutline);
+      armParts.push({innerArm,outerHemClip,alohaSleeve,side,segments,rootBlack,skinRoot,sleeveClip,skinClip,
         crease,cuff,sleevePanel,sleeveEdges,glovePanel,gloveEdges,handFill,handOutline,
         handSource:handSources[side]});
     });
@@ -5464,10 +6400,12 @@ fetch('./svg/参考.svg')
     update();
   });
 
-const wardrobeScroll = document.querySelector('.wardrobe');
-let wardrobeScrollTimer;
-wardrobeScroll.addEventListener('scroll',()=>{
-  wardrobeScroll.classList.add('is-scrolling');
-  clearTimeout(wardrobeScrollTimer);
-  wardrobeScrollTimer=setTimeout(()=>wardrobeScroll.classList.remove('is-scrolling'),650);
-},{passive:true});
+function revealScrollbarWhileScrolling(node){
+ let timer;
+ node.addEventListener('scroll',()=>{
+  node.classList.add('is-scrolling');
+  clearTimeout(timer);
+  timer=setTimeout(()=>node.classList.remove('is-scrolling'),650);
+ },{passive:true});
+}
+revealScrollbarWhileScrolling(document.querySelector('.wardrobe-panel'));

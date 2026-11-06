@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="2 108 98 80">
+
 <defs><pattern id="loose-pants-fabric" patternUnits="userSpaceOnUse" width="24" height="32" patternTransform="translate(46.8 110.5)"><rect width="24" height="32" fill="#607e79"/><polygon fill="#b09a66" points="0,0 12,0 12,16 0,16"/><polygon fill="#b09a66" points="12,16 24,16 24,32 12,32"/><polygon fill="#874f49" points="12,0 24,0 24,10 12,10"/><polygon fill="#874f49" points="0,22 12,22 12,32 0,32"/><polygon fill="#e0d2ad" points="6,2.5 10.5,8 6,13.5 1.5,8"/><polygon fill="#e0d2ad" points="18,18.5 22.5,24 18,29.5 13.5,24"/><polygon fill="#b09a66" points="6,3.8 9.3,8 6,12.2 2.7,8"/><polygon fill="#b09a66" points="18,19.8 21.3,24 18,28.2 14.7,24"/><polygon fill="#b09a66" points="15,5 18,2 21,5 18,8"/><polygon fill="#b09a66" points="3,27 6,24 9,27 6,30"/><polygon fill="#d2c5a5" points="0,17.6 3,20.6 6,17.6 9,20.6 12,17.6 12,18.4 9,21.4 6,18.4 3,21.4 0,18.4"/><polygon fill="#d2c5a5" points="12,13.6 15,10.6 18,13.6 21,10.6 24,13.6 24,14.4 21,11.4 18,14.4 15,11.4 12,14.4"/></pattern></defs>
 <defs><clipPath id="loose-wide-pants-leg-0"><polygon points="178.70488846606582 216.3569138745438 -134.95808846606582 144.23008612545618 -52.78293757041686 -144.2958998364279 260.8800393617148 -72.16907208734028"/></clipPath></defs><g clip-path="url(#loose-wide-pants-leg-0)"><path d="M36.5697 128.693C36.5257 128.8202 36.3769 129.1715 36.2725 129.444" fill="none" stroke="black" stroke-width="18.168574480427885" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M36.2725 129.444C36.1681 129.7166 36.058 130.0126 35.9433 130.3282" fill="none" stroke="black" stroke-width="18.150394197970286" stroke-linecap="round" stroke-linejoin="round"/>
@@ -132,4 +133,5 @@
 <path d="M 27.7 110.5 L 28.4591 125.881 M 65.9 110.5 L 65.8486 125.059" fill="none" stroke="black" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M 44.6804 132.8 C 45.9 132.3 48.403 132.3 49.495 132.8" fill="none" stroke="black" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M 27.7 110.5 L 65.9 110.5" fill="none" stroke="black" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+
 </svg>

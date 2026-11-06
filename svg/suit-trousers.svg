@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="8 108 86 80">
 
 
+
 <defs><clipPath id="suit-trousers-leg-0"><polygon points="175.29390812353367 215.5725586598235 -131.54710812353366 145.0144413401765 -49.37195722788471 -143.5115446217076 257.4690590191826 -72.95342730206059"/></clipPath></defs><g clip-path="url(#suit-trousers-leg-0)"><path d="M36.5697 128.693C36.5257 128.8202 36.3769 129.1715 36.2725 129.444" fill="none" stroke="black" stroke-width="18.168574480427885" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M36.2725 129.444C36.1681 129.7166 36.058 130.0126 35.9433 130.3282" fill="none" stroke="black" stroke-width="18.150394197970286" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M35.9433 130.3282C35.8286 130.6438 35.7085 130.9816 35.5842 131.3378" fill="none" stroke="black" stroke-width="18.11695516369974" stroke-linecap="round" stroke-linejoin="round"/>
@@ -133,5 +134,6 @@
 <path d="M 27.7 110.5 L 28.4591 125.881 M 65.9 110.5 L 65.8486 125.059" fill="none" stroke="black" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M 44.6804 132.8 C 45.9 132.3 48.403 132.3 49.495 132.8" fill="none" stroke="black" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M 27.7 110.5 L 65.9 110.5" fill="none" stroke="black" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+
 
 </svg>

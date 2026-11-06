@@ -21,7 +21,7 @@ const result=JSON.parse(vm.runInContext(`JSON.stringify((()=>{
 })())`,context));
 assert.equal(result.full.suit,'navy-suit');
 assert.equal(result.full.skin,'milk-frog');
-assert.equal(result.full.helmet,null);assert.equal(result.full.outerwear,null);assert.equal(result.full.gloves,null);
+assert.equal(result.full.helmet,null);assert.equal(result.full.outerwear,'suit-jacket');assert.equal(result.full.shirt,null);assert.equal(result.full.gloves,null);
 assert.ok(result.registered,'Every suit item is also individually selectable');
 assert.equal(result.full.neck,null,'The suit leaves the neck slot free');
 assert.equal(vm.runInContext("decorationCatalog.neck.some(item=>item.id==='red-tie')",context),false,'The tie is part of the jacket, not a neck accessory');
@@ -29,7 +29,7 @@ assert.ok(result.covered,'Suit trousers use continuous leg coverage and hip mask
 assert.equal(result.paint,'#454963');
 assert.equal(result.noTie.suit,null,'An individual change exits the preset');
 assert.equal(result.noTie.neck,null);
-for(const key of ['shirt','pants','shoes'])assert.equal(result.noTie[key],result.pieces[key],'Changing neckwear keeps the suit pieces');
+for(const key of ['outerwear','pants','shoes'])assert.equal(result.noTie[key],result.pieces[key],'Changing neckwear keeps the suit pieces');
 for(const [key,value] of Object.entries(result.cleared))assert.equal(value,key==='skin'?'milk-frog':null);
 for(const [key,id] of Object.entries(result.pieces))assert.equal(result.individual[key],id);
 assert.equal(result.individual.suit,null);
@@ -75,3 +75,12 @@ const pochita=presets.find(preset=>preset.id==='pochita-suit');
 assert.equal(pochita.applied.skin,'pochita');
 assert.equal(pochita.applied.helmet,'chainsaw');
 console.log('Every suit is a combination of independently selectable catalog items; royal suit includes five pieces and preserves skin.');
+
+const layered=vm.runInContext(`(()=>{
+ applyDecorationSelection('shirt','loose-tee');
+ applyDecorationSelection('outerwear','suit-jacket');
+ const worn=selectedDecorations.shirt==='loose-tee'&&selectedDecorations.outerwear==='suit-jacket';
+ applyDecorationSelection('outerwear',null);
+ return worn&&selectedDecorations.shirt==='loose-tee'&&selectedDecorations.outerwear===null;
+})()`,context);
+assert.ok(layered,'Suit jacket occupies outerwear and preserves its inner shirt on selection/removal');

@@ -361,8 +361,24 @@ const lowHipSeams=vm.runInContext(`(()=>{
   return results;
 })()`,context);
 for(const item of lowHipSeams){
-  if(['red-shorts','red-thong'].includes(item.id))
-    assert.ok(item.opacity>0,`${item.id} retains the exposed skin boundary`);
-  else assert.equal(item.opacity,0,`${item.id} must not show a hip seam on a small diagonal pull`);
+  assert.equal(item.opacity,0,`${item.id} must not show a hip seam on a small diagonal pull`);
 }
 console.log('All continuous trousers and knee shorts hide hip seams before promotion on both sides.');
+
+const shirtUnderPants=vm.runInContext(`(()=>{
+ const children=[];
+ outfitOverlay={appendChild(node){const i=children.indexOf(node);if(i>=0)children.splice(i,1);children.push(node);}};
+ const tops=innerTopKeys();
+ const bottoms=['pants','pantsSides','pantsCrotch','pantsWaist','jeansDetails','shorts','shortsSides','shortsCrotch','briefs','redThong','jumpsuit','jumpsuitSides','jumpsuitCrotch'];
+ garmentPaths=Object.fromEntries([...tops,...bottoms].map(key=>[key,{name:key,parentNode:outfitOverlay}]));
+ legParts=[];
+ return decorationCatalog.shirt.map(item=>{
+  selectedDecorations.shirt=item.id;
+  updateGarmentOrder();
+  const lastTop=Math.max(...tops.map(key=>children.indexOf(garmentPaths[key])));
+  const firstBottom=Math.min(...bottoms.map(key=>children.indexOf(garmentPaths[key])));
+  return {id:item.id,ordered:lastTop<firstBottom};
+ });
+})()`,context);
+for(const row of shirtUnderPants)assert.ok(row.ordered,`${row.id}: all shirt pieces stay behind pants and denim belt details`);
+console.log('Every shirt, including patches and special tunic details, stays below pants and their waistband details.');

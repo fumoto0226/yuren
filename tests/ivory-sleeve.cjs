@@ -10,6 +10,8 @@ const assert = require('node:assert/strict');
 const inputs = ['body','width','arms','legs','head'].map(key => ({dataset:{control:key},value:'100'}));
 const context = vm.createContext({document:{querySelector:()=>({}),querySelectorAll:()=>inputs},requestAnimationFrame:()=>1,console});
 vm.runInContext(fs.readFileSync(path.join(__dirname,'../script.js'),'utf8').split('resetButton.addEventListener')[0],context);
+context.sleeveUnderTest=vm.runInContext(process.argv.includes('--cinched')?'cinchedSleeveEdges':'ivorySleeveEdges',context);
+context.checkCuff=process.argv.includes('--cinched');
 const results = vm.runInContext(`(() => {
   selectedDecorations.shirt = 'ivory-tunic';
   const warp = buildWarp({body:100,width:100,arms:100,legs:100,head:100});
@@ -37,7 +39,15 @@ const results = vm.runInContext(`(() => {
       Object.assign(pose, {x, y});
       dragPoses.push(pose);
       const shape = armGeometry('left', warp);
-      const edges = edgePoints(ivorySleeveEdges(shape));
+      const edges = edgePoints(sleeveUnderTest(shape));
+      if(checkCuff){
+        const cuff=sleeveUnderTest(shape,'cuff').match(/-?\\d+(?:\\.\\d+)?/g).map(Number);
+        for(let side=0;side<2;side++){
+          const end=edges[side].at(-1);
+          if(Math.hypot(end.x-cuff[side*2],end.y-cuff[side*2+1])>.001)
+            throw Error('Cuff must meet sleeve outline exactly');
+        }
+      }
       poses++;
       for (const points of edges) {
         for (let i = 0; i + 1 < points.length; i++) {

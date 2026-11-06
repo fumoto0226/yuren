@@ -24,15 +24,31 @@ const art = vm.runInContext(`(() => {
   const hand = splitArmPath(leftArmSource,wristSources.left.outer,
     wristSources.left.inner);
   return {
+    topknot:{hat:topknotHairSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),body:blazerMarkup(warp),sleeves:arms.map((a,i)=>alohaSleeveMarkup(a,'blazer-thumb-'+i,alohaSleeveStyles['charcoal-blazer'])),shoes:legs.map((l,i)=>'<path d="'+l.bootFill+'" fill="#2F465D"/>'+colorblockShoeDetails(l,i?'right':'left')+'<path d="'+l.bootOutline+'" fill="none" stroke="black" stroke-width="1"/>')},
+    collared:collaredShirtMarkup(warp),collaredBody:garmentPath(collaredBodySource,warp),collaredNeck:workerGarmentPath(collaredNeckSource,warp),
+    hypnoticEye:[{source:hypnoticEyeSource,fill:'#EB8E15',stroke:'black'},...hypnoticEyeSpecs],
+    longHair:longHairSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),
+    secondary:{body:studentOuterMarkup(warp,true),hat:secondaryHatSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),sleeves:arms.map((a,i)=>alohaSleeveMarkup(a,'secondary-thumb-'+i,alohaSleeveStyles['secondary-jacket']))},
+    student:{body:studentOuterMarkup(warp),hat:studentHatSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),sleeves:arms.map((a,i)=>alohaSleeveMarkup(a,'student-thumb-'+i,alohaSleeveStyles['student-jacket'])),sockClips:legs.map(l=>({top:limbClipPoints(l,24,true),bottom:ankleHemClipPoints(l)}))},
+    worker:{blueBody:workerOuterMarkup(warp,'blue-worker-jacket'),blueSleeves:arms.map((a,i)=>workerSleeveMarkup(a,'blue-worker-thumb-'+i,alohaSleeveStyles['blue-worker-jacket'])),blueBoots:legs.map((l,i)=>workerBootMarkup(l,i?'right':'left',100,5.5,'gray-worker-boots')),hat:workerHatSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),body:workerOuterMarkup(warp),sleeves:arms.map((a,i)=>workerSleeveMarkup(a,'worker-thumb-'+i,alohaSleeveStyles['worker-jacket'])),boots:legs.map((l,i)=>workerBootMarkup(l,i?'right':'left',100,5.5))},
     yellowHat: Object.values(yellowHatSources).map(source=>
       transformPath(source,(x,y)=>warp(x,y,'head'))),
     royal: Object.fromEntries(Object.entries(royalGarmentSpecs).map(([key,spec])=>
       [key,{...spec,fill:royalPaint(spec.fill),d:garmentPath(spec.source,warp)}])),
-    ivory:Object.fromEntries(Object.entries(ivorySpecs).map(([key,spec])=>[key,{...spec,d:spec.category==='cape'?capePath(spec.source,warp):torsoGarmentPath(spec.source,warp,spec.category==='neck')}])),
+    ivory:Object.fromEntries(Object.entries(ivorySpecs).map(([key,spec])=>[key,{...spec,d:spec.category==='cape'?backAccessoryPath(spec,warp):torsoGarmentPath(spec.source,warp,spec.category==='neck')}])),
     ivoryBody:torsoGarmentPath(ivoryBodySource,warp),ivorySides:torsoGarmentPath(ivorySidesSource,warp),
     batGloves:arms.map(shape=>batGlovePaths(shape)),
     batCowl:transformPath(batCowlSource,(x,y)=>warp(x,y,'head')),
     royalBuckles:legs.map(shape=>royalBucklePath(shape)),
+    jobsPelvisEnd:jobsMaterialReference().end,
+    jobsPelvisStops:Array.from({length:33},(_,i)=>({offset:i/32,color:jobsDenimColor(i/32)})),
+    jobsMesh:legs.map((shape,i)=>jobsClothMesh(shape,i?'right':'left',100,warp)),
+    jobsCloth:legs.map(shape=>Array.from({length:32},(_,i)=>jobsClothGradient(shape,i))),
+    jobsGlasses:jobsGlassesSpecs.map(spec=>({...spec,d:transformPath(spec.source,(x,y)=>warp(x,y,'headRigid'))})),
+    jobsCollarEdge:torsoGarmentPath(jobsCollarEdgeSource,warp,true),
+    jobsCollar:torsoGarmentPath(jobsCollarSource,warp,true),
+    jobsShoes:legs.map((shape,i)=>({paths:jobsSneakerPaths(shape,i?'right':'left'),details:jobsSneakerDetails(shape,i?'right':'left')})),
+    cigaretteSpecs,
     crownStrokeWidth,
     crown: Object.values(crownSources).map(source=>
       transformPath(source,(x,y)=>warp(x,y,'head'))),
@@ -58,10 +74,22 @@ const art = vm.runInContext(`(() => {
       collar:Object.values(suitCollarSources).map(source=>garmentPath(source,warp)),
       tie:Object.values(tieSources).map(source=>garmentPath(source,warp)),
       },
+    alohaOpen:arms.map((shape,i)=>alohaSleeveMarkup(shape,'thumb-open-'+i)).join('')+alohaBodyMarkup(warp,true),
+    alohaOpenLong:arms.map((shape,i)=>alohaSleeveMarkup(shape,'thumb-open-long-'+i,alohaSleeveStyles['aloha-open-long-jacket'])).join('')+alohaBodyMarkup(warp,true),
     alohaLong:arms.map((shape,i)=>alohaSleeveMarkup(shape,'thumb-aloha-long-'+i,alohaSleeveStyles['aloha-long-jacket'])).join('')+alohaBodyMarkup(warp),
-    aloha:arms.map((shape,i)=>alohaSleeveMarkup(shape,'thumb-aloha-'+i)).join('')+alohaBodyMarkup(warp,'thumb-aloha-body'),
+    aloha:arms.map((shape,i)=>alohaSleeveMarkup(shape,'thumb-aloha-'+i)).join('')+alohaBodyMarkup(warp),
     greenVest: Object.values(greenVestSources).map(source=>garmentPath(source,warp)),
     redTriangle: redTrianglePath(warp),
+    jeansStrokeWidth:JEANS_STROKE_WIDTH,
+    denimVariants,
+    jeansDetailsById:Object.fromEntries(Object.keys(denimVariants).map(id=>[id,jeansDetailsMarkup(warp,id)])),
+    jeansTextures:Object.fromEntries(Object.keys(denimVariants).map(id=>[id,legs.map((shape,i)=>[0,1].map(part=>jeansTextureMarkup(shape,part,i?'right':'left',id)).join(''))])),
+    workwearVariants,thongVariants,
+    workwearBibs:Object.fromEntries(Object.keys(workwearVariants).map(id=>[id,denimBibMarkup(warp,id)])),
+    largeHoles:legs.map((shape,i)=>[0,1].flatMap(part=>largeJeansHoles(shape,part,i?'right':'left'))),
+    jeansDetails:jeansDetailsMarkup(warp),
+    jeansSeams:legs.map((shape,i)=>[jeansLegSeam(shape,0,100,i?'right':'left'),jeansLegSeam(shape,1,100,i?'right':'left')].join('')),
+    briefs:garmentPath(briefsSource,warp),
     redThong: torsoGarmentPath(redThongSource(100),warp),
     colors: Object.assign({},decorationColors),
     tee: {
@@ -111,6 +139,7 @@ const art = vm.runInContext(`(() => {
 const svg = (viewBox, content) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">\n${content}\n</svg>\n`;
 const line = (d, width=1) => `<path d="${d}" fill="none" stroke="black" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+const jobsWidths=vm.runInContext('Array.from({length:32},(_,i)=>wideLegExtraWidth(i,3.5))',context);
 const wideWidths=vm.runInContext('Array.from({length:32},(_,i)=>wideLegExtraWidth(i))',context);
 const shortFlares=vm.runInContext('kneeShortFlares',context);
 const flaredShortWidths=flare=>vm.runInContext(
@@ -123,7 +152,7 @@ const tube = (shape, color, sleeveEnd=0,extraWidths=[],flareAmount=2.5) => [
   }),
   ...shape.hose.map(({ d, width },index) => {
     const flare=sleeveEnd&&index<sleeveEnd?flareAmount*(index/(sleeveEnd-1)):0;
-    return `<path d="${d}" fill="none" stroke="${color}" stroke-width="${width+flare+(extraWidths[index]||0)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    return `<path d="${d}" fill="none" stroke="${typeof color==='function'?color(index):color}" stroke-width="${width+flare+(extraWidths[index]||0)}" stroke-linecap="round" stroke-linejoin="round"/>`;
   }),
 ].join('\n');
 const seam = leg => line(`M${leg.bootOuter.x} ${leg.bootOuter.y}L${leg.bootInner.x} ${leg.bootInner.y}`);
@@ -164,13 +193,25 @@ const teeThumbnail=(color,sleeveEnd,flare,id)=>svg('-2 53 104 63',[
     true,[],flare)
     +line(vm.runInContext(`cuffPath(thumbArm,${sleeveEnd},${flare})`,
       Object.assign(context,{thumbArm:arm})))),
-  `<path d="${id==='red-tee'?art.redTee.fill:art.tee.fill}" fill="${color}"/>`,
+  `<path d="${['red-tee','black-turtleneck-tee'].includes(id)?art.redTee.fill:art.tee.fill}" fill="${color}"/>`,
   line(art.tee.sides),line(art.tee.top),
-  line(id==='red-tee'?art.redTee.neck:art.tee.neck),line(art.tee.hem),
+  id==='black-turtleneck-tee'?'':line(id==='red-tee'?art.redTee.neck:art.tee.neck),line(art.tee.hem),
 ].join('\n'));
 const looseTopThumbnail=id=>{
   const style=vm.runInContext(`teeStyles['${id}']`,context);
-  const widths=vm.runInContext(`Array.from({length:32},(_,i)=>sleeveExtraWidth(i,${style.sleeveEnd},${style.flare}))`,context);
+  const widths=vm.runInContext(`Array.from({length:32},(_,i)=>teeSleeveWidth(i,teeStyles['${id}']))`,context);
+  if(style.cinched){
+    const sleeves=art.tee.arms.map((arm,index)=>{
+      context.cinchedArm=arm;
+      const fill=vm.runInContext('cinchedSleeveEdges(cinchedArm,true)',context);
+      const edges=vm.runInContext('cinchedSleeveEdges(cinchedArm)',context);
+      const cuff=vm.runInContext("cinchedSleeveEdges(cinchedArm,'cuff')",context);
+      return tube({...arm,hose:arm.hose.slice(0,6)},style.color,0,widths)
+        +`<path d="${fill}" fill="${style.color}"/>`+line(edges)+line(cuff);
+    }).join('');
+    return svg('-6 53 112 64',sleeves+`<path d="${art.looseTop.fill}" fill="${style.color}"/>`
+      +line(art.looseTop.sides)+line(art.tee.top)+line(art.tee.neck)+line(art.looseTop.hem));
+  }
   return svg('-6 53 112 64',[
     ...art.tee.arms.map((arm,index)=>clippedTube(arm,
       limbCuff(arm,style.sleeveEnd,style.flare),style.color,
@@ -191,13 +232,14 @@ const jumpsuitThumbnail=(color,id)=>svg('11 53 79 134',[
   line(art.jumpsuit.shoulders,1.1),
 ].join('\n'));
 const fabricLegThumbnail=(leg,index,id,widths)=>{
-  const parts=vm.runInContext(`legFabricPaths(thumbLeg,thumbSide,100)`,
+  const parts=id==='jobs-gradient-jeans'?art.jobsMesh[index]:vm.runInContext(`legFabricPaths(thumbLeg,thumbSide,100)`,
     Object.assign(context,{thumbLeg:leg,thumbSide:index?'right':'left'}));
   return parts.map((paths,part)=>{
     const maskId=`${id}-fabric-${index}-${part}`;
     const strokes=leg.hose.map(({d,width},i)=>i>=(part?19:0)&&i<(part?32:19)
       ?`<path d="${d}" fill="none" stroke="white" stroke-width="${width+widths[i]}" stroke-linecap="${i===31?'butt':'round'}"/>`:'').join('');
-    return `<defs><mask id="${maskId}" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="2000" height="2000">${strokes}</mask></defs>`
+    const gradients=id==='jobs-gradient-jeans'?paths.filter(p=>p.g).map(p=>`<linearGradient id="${p.color.slice(5,-1)}" gradientUnits="userSpaceOnUse" x1="${p.g.x1}" y1="${p.g.y1}" x2="${p.g.x2}" y2="${p.g.y2}">${art.jobsPelvisStops.map(s=>`<stop offset="${s.offset}" stop-color="${s.color}"/>`).join('')}</linearGradient>`).join(''):'';
+    return `<defs>${gradients}<mask id="${maskId}" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="2000" height="2000">${strokes}</mask></defs>`
       +`<g clip-path="url(#${id}-leg-${index})"><g mask="url(#${maskId})">`
       +paths.map(({color,d})=>`<path fill="${color}" d="${d}"/>`).join('')+'</g></g>';
   }).join('');
@@ -205,17 +247,25 @@ const fabricLegThumbnail=(leg,index,id,widths)=>{
 const fabricContent=vm.runInContext('loosePantsFabricContent',context);
 const widePantsThumbnail=(id,flare,widths,viewBox)=>{
   const patterned=id==='loose-wide-pants';
-  const paint=patterned?'url(#loose-pants-fabric)':id==='suit-trousers'?art.colors.suitNavy:['royal-trousers','ivory-trousers'].includes(id)?art.colors.royalWhite:art.colors.widePants;
+  const denim=art.denimVariants[id];
+  const largeHole=denim?.finish==='large-ripped-denim-jeans';
+  const workwear=art.workwearVariants[id];
+  const isDenim=!!denim||!!workwear;
+  const paint=id==='worker-trousers'?'#f66b19':id==='jobs-gradient-jeans'?'url(#jobs-pelvis-gradient)':denim?.color||(workwear?workwear.color:patterned?'url(#loose-pants-fabric)':id==='suit-trousers'?art.colors.suitNavy:['royal-trousers','ivory-trousers'].includes(id)?art.colors.royalWhite:art.colors.widePants);
   return svg(viewBox,[
+
+  id==='jobs-gradient-jeans'?`<defs><linearGradient id="jobs-pelvis-gradient" gradientUnits="userSpaceOnUse" x1="47" y1="110.5" x2="47" y2="${art.jobsPelvisEnd}">${art.jobsPelvisStops.map(s=>`<stop offset="${s.offset}" stop-color="${s.color}"/>`).join('')}</linearGradient></defs>`:'',
   patterned?`<defs><pattern id="loose-pants-fabric" patternUnits="userSpaceOnUse" width="24" height="32" patternTransform="translate(46.8 110.5)">${fabricContent}</pattern></defs>`:'',
-  ...art.pants.legs.map((leg,index)=>clippedTube(leg,
-    legEndCuff(leg,widths),patterned?'#607e79':paint,
-    `${id}-leg-${index}`,0,true,widths)
-    +(patterned?fabricLegThumbnail(leg,index,id,widths):'')
+  ...art.pants.legs.map((leg,index)=>(id==='jobs-gradient-jeans'?'<defs>'+art.jobsCloth[index].map((g,i)=>`<linearGradient id="thumb-cloth-${index}-${i}" gradientUnits="userSpaceOnUse" x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}">${g.stops.map(s=>`<stop offset="${s.offset}" stop-color="${s.color}"/>`).join('')}</linearGradient>`).join('')+'</defs>':'')+(largeHole?`<defs><mask id="large-hole-${index}" maskUnits="userSpaceOnUse" x="-1000" y="-1000" width="2000" height="2000"><rect x="-1000" y="-1000" width="2000" height="2000" fill="white"/>${art.largeHoles[index].map(d=>`<path d="${d}" fill="black"/>`).join('')}</mask></defs>${art.largeHoles[index].map(d=>`<path d="${d}" fill="#C5C5C5"/>`).join('')}<g mask="url(#large-hole-${index})">`:'')+clippedTube(leg,
+    legEndCuff(leg,widths),id==='jobs-gradient-jeans'?i=>`url(#thumb-cloth-${index}-${i})`:patterned?'#607e79':paint,
+    `${id}-leg-${index}`,0,true,widths)+(largeHole?'</g>':'')
+    +(patterned||id==='jobs-gradient-jeans'?fabricLegThumbnail(leg,index,id,widths):'')
+    +(art.jeansTextures[id]?.[index]||'')
+    +(isDenim&&id!=='jobs-gradient-jeans'?`<path d="${art.jeansSeams[index]}" fill="none" stroke="black" stroke-width="${art.jeansStrokeWidth}" stroke-dasharray="3 2"/>`:'')
     +line(vm.runInContext(`wideLegHemPath(thumbLeg,${flare})`,
       Object.assign(context,{thumbLeg:leg})))),
   `<path d="${art.pants.fill}" fill="${paint}"/>`,
-  line(art.pants.sides),line(art.pants.crotch),line(art.pants.waist),
+  line(art.pants.sides),line(art.pants.crotch),workwear?'':line(art.pants.waist),denim?art.jeansDetailsById[id]:'',
 ].join('\n'));
 };
 
@@ -296,8 +346,8 @@ const sharkHeadContent=sharkTeeth
   +`<path d="${vm.runInContext('sharkEyeWhite',context)}" fill="white" `
   +`stroke="black" stroke-linecap="round" stroke-linejoin="round"/>`
   +(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'');
-const skinBody=color=>frogPaths.map((tag,index)=>{
-  if(index===0||index>=12)return '';
+const skinBody=(color,hideHorn=false)=>frogPaths.map((tag,index)=>{
+  if(index===0||index>=12||hideHorn&&(index===1||index===11))return '';
   let node=tag.replace(/fill="#C5C5C5"/g,`fill="${color}"`);
   if(!/\bfill=/.test(node))node=node.replace('<path ','<path fill="none" ');
   return node;
@@ -378,7 +428,7 @@ const royalCrownContent=art.crown.map(d=>`<path d="${d}" fill="${art.colors.crow
 const originalPaths=[...original.matchAll(/<path d="([^"]+)"[^>]*>/g)];
 const royalHeadContent=`<path d="${originalPaths[5][1]}Z" fill="#C5C5C5" stroke="black" stroke-linejoin="round"/>`
   +originalPaths[8][0]+(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'');
-const ivoryDetails=cat=>Object.values(art.ivory).filter(s=>s.category===cat&&s.id!=='batfish-armor').map(s=>`<path d="${s.d}" fill="${s.fill}"${s.outline?' stroke="black" stroke-width="1" stroke-linejoin="round"':''}/>`).join('');
+const ivoryDetails=cat=>Object.values(art.ivory).filter(s=>s.category===cat&&s.id!=='batfish-armor').map(s=>`<path d="${s.d}" fill="${s.fill}"${s.outline?` stroke="${s.stroke||'black'}" stroke-width="${s.strokeWidth||1}" stroke-linejoin="round"`:''}/>`).join('');
 const ivoryWidths=vm.runInContext('Array.from({length:32},(_,i)=>ivorySleeveWidth(i))',context);
 const ivoryTop=art.shirt.arms.map((arm,i)=>clippedTube({...arm,hose:arm.hose.slice(0,6)},limbCuff(arm,6),art.colors.royalWhite,`ivory-upper-${i}`,0,true,ivoryWidths)
  +clippedTube(arm,limbCuff(arm,28),art.colors.crown,`ivory-cuff-${i}`,0,false)
@@ -401,7 +451,108 @@ const batHands=art.shirt.arms.map((arm,i)=>{
 }).join('');
 const batCowl=`<path d="${art.batCowl}" fill="${art.colors.batBlack}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`;
 const batCape=Object.entries(art.ivory).filter(([key,s])=>s.category==='cape').map(([key,s])=>`<path d="${s.d}" fill="${vm.runInContext('capeStyles["charcoal-cape"]',context)[key]}"${s.outline?' stroke="black" stroke-width="1"':''}/>`).join('');
+const stripSvg=source=>source.replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'');
+const jobsGlasses=art.jobsGlasses.map(({d,fill,opacity,strokeWidth})=>`<path d="${d}" fill="${fill}" ${opacity?`fill-opacity="${opacity}"`:''} stroke="#684516" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+const jobsTop=stripSvg(teeThumbnail('#101010',23,2.5,'black-turtleneck-tee'))+`<path d="${art.jobsCollar}" fill="#101010"/>`+line(art.jobsCollarEdge);
+const jobsShoes=art.jobsShoes.map(({paths,details})=>`<path d="${paths.fill}" fill="#bfbfbf"/><path d="${paths.outline}" fill="none" stroke="black" stroke-width="1"/>`+details).join('');
+const jobsPants=stripSvg(widePantsThumbnail('jobs-gradient-jeans',3.5,jobsWidths,'8 108 86 80'));
+const kappaArt=vm.runInContext('({hair:kappaHairSpecs,skin:kappaSkinSpecs,eye:kappaEyeWhite})',context);
+const kappaTag=s=>`<path d="${s.source}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="${s.strokeWidth||1}" stroke-linecap="round" stroke-linejoin="round"/>`;
+const kappaBase=hideTriangle=>frogPaths.map((tag,index)=>{
+ if(index===0||index>=12||hideTriangle&&(index===1||index===11))return '';
+ let node=tag.replace(/fill="#C5C5C5"/g,'fill="#89CD71"');
+ if(!/\bfill=/.test(node))node=node.replace('<path ','<path fill="none" ');
+ if(index===8)node=node.replace(/d="[^"]+"/,`d="${kappaArt.eye}"`);
+ return node;
+}).join('')+`<ellipse cx="53.1431" cy="38.40106" rx="1.31738" ry="1.18774" transform="rotate(-14.9815 53.1431 38.40106)" fill="black"/>`+kappaArt.skin.map(kappaTag).join('');
+const kappaBody=kappaBase(false);
+const kappaShell=Object.entries(art.ivory).filter(([key,s])=>s.id==='kappa-shell').map(([key,s])=>`<path d="${s.d}" fill="${s.fill}" stroke="${s.stroke||'black'}" stroke-width="${s.strokeWidth||1}" stroke-linejoin="round"/>`).join('');
+const kappaHair=kappaArt.hair.map(kappaTag).join('');
+const workerHat=art.worker.hat.map(kappaTag).join('');
+const workerTop=art.worker.sleeves.join('')+art.worker.body;
+const workerPants=stripSvg(widePantsThumbnail('worker-trousers',5.5,wideWidths,'8 108 86 80'));
+const workerBoots=art.worker.boots.join('');
+const workerTuckedPants=art.pants.legs.map((leg,i)=>clippedTube(leg,limbCuff(leg,19),'#f66b19','worker-tucked-'+i,0,true,wideWidths)).join('')+`<path d="${art.pants.fill}" fill="#f66b19"/>`+line(art.pants.sides)+line(art.pants.crotch)+line(art.pants.waist);
+
+const blueWorkerHat=art.worker.hat.map((spec,i)=>kappaTag({...spec,fill:i?'#f4f3ed':spec.fill})).join('');
+const blueWorkerTop=art.worker.blueSleeves.join('')+art.worker.blueBody;
+const blueWorkerBoots=art.worker.blueBoots.join('');
+const blueWorkerPants=workerPants.replaceAll('#f66b19','#1d3b68');
+const blueWorkerTucked=workerTuckedPants.replaceAll('#f66b19','#1d3b68');
+const yellowHead=vm.runInContext('yellowFishHeadContour',context);
+const yellowFish=frogPaths.map((tag,index)=>{
+ if(index===0||index>=12||index===1||index===11)return '';
+ let node=tag.replace(/fill="#C5C5C5"/g,'fill="#FFEE00"');
+ if(!/\bfill=/.test(node))node=node.replace('<path ','<path fill="none" ');
+ if(index===5)node=node.replace(/d="[^"]+"/,`d="${yellowHead}"`);
+ if(index===2)node=node.replace(/26\.1046 56\.4524C25\.612[\s\S]*?67\.7274 55\.0466/,yellowHead.slice(1));
+ return node;
+}).join('')+(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'');
+const topknotHat=art.topknot.hat.map(kappaTag).join('');
+const blazerContent=art.topknot.sleeves.join('')+art.topknot.body;
+const colorblockShoes=art.topknot.shoes.join('');
+const secondaryHat=art.secondary.hat.map(kappaTag).join('');
+const collaredContent=art.shirt.arms.map((arm,i)=>clippedTube(arm,limbCuff(arm,31),'#D9D9D9','collared-sleeve-'+i)+line(vm.runInContext('cuffPath(thumbArm,31)',Object.assign(context,{thumbArm:arm})))).join('')+`<path d="${art.collaredBody}" fill="#D9D9D9"/>`+line(art.shirt.sides)+line(art.collaredNeck)+art.collared;
+const hypnoticBody=hideHorn=>skinBody('#FBD5CA',hideHorn).replace(/<path[^>]*fill="white"[^>]*\/>/,'').replace(/<ellipse\b[^>]*\/>/,'')+art.hypnoticEye.map(kappaTag).join('');
+const darkGrayPants=suitPantsContent.replaceAll(art.colors.suitNavy,'#2B2D2D');
+const secondaryJacket=art.secondary.sleeves.join('')+art.secondary.body;
+const secondaryPants=suitPantsContent.replaceAll(art.colors.suitNavy,'#101011');
+const brownShoes=art.pants.legs.map(leg=>`<path d="${leg.bootFill}" fill="#623813"/>`+line(leg.bootOutline)).join('');
+const studentHat=art.student.hat.map(kappaTag).join('');
+const studentJacket=art.student.sleeves.join('')+art.student.body;
+const studentShortWidths=vm.runInContext('Array.from({length:32},(_,i)=>i<14?wideShortsExtraWidth(i,3,14):0)',context);
+const studentShorts=art.pants.legs.map((leg,i)=>clippedTube(leg,limbCuff(leg,14,3),'#102f68','student-short-'+i,0,true,studentShortWidths)+line(vm.runInContext('cuffPath(thumbLeg,14,3,.5)',Object.assign(context,{thumbLeg:leg})))).join('')+`<path d="${art.pants.fill}" fill="#102f68"/>`+line(art.pants.sides)+line(art.pants.crotch)+line(art.pants.waist);
+const studentShoePicture=start=>art.pants.legs.map((leg,i)=>{
+ const top=vm.runInContext(`limbClipPoints(thumbLeg,${start},true)`,Object.assign(context,{thumbLeg:leg}));
+ const sock=['black','#fffdf8'].map(color=>leg.hose.slice(start).map(({d,width})=>`<path d="${d}" fill="none" stroke="${color}" stroke-width="${width+(color==='black'?2:0)}" stroke-linecap="round"/>`).join('')).join('');
+ const sockLine=vm.runInContext(`cuffPath(thumbLeg,${start},0,.5)`,Object.assign(context,{thumbLeg:leg}));
+ return `<defs><clipPath id="student-sock-${i}-${start}"><polygon points="${top}"/></clipPath><clipPath id="student-ankle-${i}-${start}"><polygon points="${art.student.sockClips[i].bottom}"/></clipPath></defs><g clip-path="url(#student-sock-${i}-${start})"><g clip-path="url(#student-ankle-${i}-${start})">${sock}</g></g>`+line(sockLine)+`<path d="${leg.bootFill}" fill="#111214"/>`+line(leg.bootOutline);
+}).join('');
+const studentShoes=studentShoePicture(24),studentLongSocks=studentShoePicture(20);
 const thumbnails = {
+ 'flesh-6':svg('-2 9 104 188',skinBody('#FBD5CA')),
+ 'topknot-hair':svg('41 7 51 54',topknotHat),
+ 'charcoal-blazer':svg('-3 49 106 81',blazerContent),
+ 'colorblock-shoes':svg('-2 176 104 20',colorblockShoes),
+ 'topknot-suit':svg('-3 4 106 194',skinBody('#FBD5CA',true)+colorblockShoes+darkGrayPants+collaredContent+blazerContent+topknotHat),
+ 'hypnotic':svg('-2 9 104 188',hypnoticBody(false)),
+ 'white-tie-shirt':svg('-3 49 106 68',collaredContent),
+ 'dark-gray-slight-wide-trousers':svg('8 108 86 80',darkGrayPants),
+ 'makima-suit':svg('-3 4 106 194',hypnoticBody(true)+brownShoes+darkGrayPants+collaredContent+art.longHair.map(kappaTag).join('')),
+ 'long-braid-hair':svg('43 8 33 94',art.longHair.map(kappaTag).join('')),
+ 'flesh-5':svg('-2 9 104 188',skinBody('#dda579')),
+ 'secondary-hat':svg('54 10 34 39',secondaryHat),
+ 'secondary-jacket':svg('-3 49 106 81',secondaryJacket),
+ 'black-slight-wide-trousers':svg('8 108 86 80',secondaryPants),
+ 'brown-shoes':svg('-2 176 104 20',brownShoes),
+ 'secondary-suit':svg('-3 4 106 194',secondaryHat+skinBody('#dda579',true)+brownShoes+secondaryPants+secondaryJacket),
+ 'flesh-4':svg('-2 9 104 188',skinBody('#ffc1bf')),
+ 'student-hat':svg('43 4 44 54',studentHat),
+ 'student-jacket':svg('-3 49 106 72',studentJacket),
+ 'student-shorts':svg('11 109 80 56',studentShorts),
+ 'student-shoes':svg('-2 158 104 40',studentShoes),
+ 'student-long-socks-shoes':svg('-2 145 104 53',studentLongSocks),
+ 'student-suit':svg('-3 4 106 194',skinBody('#ffc1bf')+studentShorts+studentLongSocks+studentJacket+studentHat),
+ 'little-yellow-fish':svg('-2 9 104 188',yellowFish),
+ 'white-worker-helmet':svg('25 4 65 56',blueWorkerHat),
+ 'blue-worker-jacket':svg('-5 49 110 79',blueWorkerTop),
+ 'blue-worker-trousers':svg('5 108 95 83',blueWorkerPants),
+ 'gray-worker-boots':svg('-8 148 116 49',blueWorkerBoots),
+ 'blue-worker-suit':svg('-8 4 116 194',skinBody('#f9d4ad')+blueWorkerTucked+blueWorkerBoots+blueWorkerTop+blueWorkerHat),
+ 'flesh-3':svg('-2 9 104 188',skinBody('#f9d4ad')),
+ 'worker-helmet':svg('25 4 65 56',workerHat),
+ 'worker-jacket':svg('-5 49 110 79',workerTop),
+ 'worker-trousers':svg('5 108 95 83',workerPants),
+ 'worker-boots':svg('-8 148 116 49',workerBoots),
+ 'worker-suit':svg('-8 4 116 194',skinBody('#f9d4ad')+workerTuckedPants+workerBoots+workerTop+workerHat),
+ 'kappa':svg('-2 9 104 188',kappaBody),
+ 'kappa-hair':svg('25 9 55 47',kappaHair),
+ 'kappa-suit':svg('-2 9 104 188',kappaShell+kappaBase(true)+kappaHair),
+ 'flesh-2':svg('-2 9 104 188',skinBody('#f4ece6')),
+ 'round-glasses':svg('42 14 30 39',jobsGlasses),
+ 'black-turtleneck-tee':svg('-2 46 104 70',jobsTop),
+ 'gray-sneakers':svg('-3 176 106 25',jobsShoes),
+ 'jobs-suit':svg('-3 8 106 194',skinBody('#f4ece6')+jobsShoes+jobsPants+jobsTop+jobsGlasses),
  'batfish-cowl':svg('23 0 48 54',batCowl),
  'batfish-armor':svg('-2 53 104 63',batTop),
  'batfish-trousers':svg('8 108 86 80',batPants),
@@ -426,6 +577,7 @@ const thumbnails = {
   'black-dress-shoes':svg('-2 176 104 20',dressShoesContent),
   'navy-suit':svg('-2 53 104 144',dressShoesContent+suitPantsContent+suitJacketContent),
   'loose-tee':looseTopThumbnail('loose-tee'),
+  'cinched-long-sleeve':looseTopThumbnail('cinched-long-sleeve'),
   'loose-long-sleeve':looseTopThumbnail('loose-long-sleeve'),
   'milk-frog':svg('-2 9 104 188',frogIcon),
   pochita:svg('-2 9 104 188',pochitaBody),
@@ -435,6 +587,7 @@ const thumbnails = {
   'flesh-skin':svg('-2 9 104 188',skinBody(sharkFlesh)),
   'clown-skin':svg('-2 9 104 188',clownBody),
   'alien-skin':svg('-2 9 104 188',alienBody),
+  cigarette:svg('24 2 20 31',art.cigaretteSpecs.map(({source,fill})=>`<path d="${source}" fill="${fill}" stroke="black" stroke-width=".7" stroke-linejoin="round"/>`).join('')),
   'party-hat':svg('63 31 20 24',partyHatContent),
   'clown-suit':svg('-2 9 104 188',clownBody+partyHatContent),
   'shark-hood':svg('22 2 54 56',sharkHeadContent),
@@ -462,6 +615,8 @@ const thumbnails = {
     line(art.vest.sides),line(art.vest.neck),line(art.vest.top),
     line(art.vest.shoulders),line(art.vest.hem),
   ].join('\n')),
+  'aloha-open-jacket':svg('-2 49 104 67',art.alohaOpen),
+  'aloha-open-long-jacket':svg('-2 49 104 67',art.alohaOpenLong),
   'aloha-long-jacket':svg('-2 49 104 67',art.alohaLong),
   'aloha-jacket':svg('-2 49 104 67',art.aloha),
   'green-vest': svg('24 49 46 66',art.greenVest.map(d=>
@@ -495,6 +650,7 @@ const thumbnails = {
     `<path d="${art.pants.fill}" fill="#526a78"/>`,
     line(art.pants.sides), line(art.pants.crotch,1.5),line(art.pants.waist),
   ].join('\n')),
+  'red-briefs':svg('25 109 44 27',`<path d="${art.briefs}" fill="${art.colors.redShorts}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`),
   'red-shorts': svg('25 109 44 27', [
     `<path d="${art.pants.fill}" fill="#d44a49"/>`,
     line(art.pants.sides),line(art.pants.shortsLower),line(art.pants.waist),
@@ -507,9 +663,9 @@ const thumbnails = {
     `<path d="${art.pants.fill}" fill="#ee31ac"/>`,
     line(art.pants.sides),line(art.pants.crotch),line(art.pants.waist),
   ].join('\n')),
+  ...Object.fromEntries(['slight-wide-shorts','loose-shorts','extra-wide-shorts'].map(id=>[id,flaredShortsThumbnail(id,art.colors.wideShorts,shortFlares[id])])),
   'wide-shorts': flaredShortsThumbnail('wide-shorts',art.colors.wideShorts,
     shortFlares['wide-shorts']),
-  skirt: svg('13 109 69 49',`<path d="${art.skirt}" fill="${art.colors.skirt}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`),
   'orange-shorts': svg('11 109 80 56', [
     ...art.pants.legs.map((leg,index) => clippedTube(leg,
       limbCuff(leg,19),'#eb8135',`orange-leg-${index}`)
@@ -526,8 +682,16 @@ const thumbnails = {
     `<path d="${art.pants.fill}" fill="${art.colors.blackShorts}"/>`,
     line(art.pants.sides),line(art.pants.crotch),line(art.pants.waist),
   ].join('\n')),
-  'red-thong':svg('24 108 47 36',
-    `<path d="${art.redThong}" fill="${art.colors.redThong}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`),
+  ...Object.fromEntries(Object.entries(art.thongVariants).map(([id,item])=>[id,svg('24 108 47 36',
+    `<path d="${art.redThong}" fill="${item.color}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`)])),
+  ...Object.fromEntries(Object.keys(art.denimVariants).map(id=>[id,widePantsThumbnail(id,id==='jobs-gradient-jeans'?3.5:5.5,id==='jobs-gradient-jeans'?jobsWidths:wideWidths,'8 108 86 80')])),
+  ...Object.fromEntries(Object.entries(art.workwearVariants).map(([id,item])=>[id,
+    widePantsThumbnail(id,5.5,wideWidths,'8 53 86 135').replace('</svg>',[
+      `<defs><mask id="workwear-chest"><rect x="-200" y="-200" width="500" height="600" fill="white"/><path d="${art.jumpsuit.chest}" fill="black"/></mask></defs>`,
+      `<path d="${art.jumpsuit.fill}" fill="${item.color}" mask="url(#workwear-chest)"/>`,
+      line(art.jumpsuit.sides),line(art.jumpsuit.chestOutline),line(art.jumpsuit.neck,1.25),line(art.jumpsuit.shoulders,1.1),
+      art.workwearBibs[id],'</svg>',
+    ].join(''))])),
   'wide-pants':widePantsThumbnail('wide-pants',5.5,wideWidths,'8 108 86 80'),
   'loose-wide-pants':widePantsThumbnail('loose-wide-pants',10.5,
     looseWideWidths,'2 108 98 80'),
@@ -554,17 +718,32 @@ const thumbnails = {
 
 const capePalettes=vm.runInContext('capeStyles',context);
 for(const [id,palette] of Object.entries(capePalettes)){
-  thumbnails[id]=svg('2 50 92 137',Object.entries(art.ivory)
+  thumbnails[id]=svg(id==='kappa-shell'?'25 48 57 81':'2 50 92 137',Object.entries(art.ivory)
     .filter(([key,spec])=>spec.category==='cape'&&palette[key])
     .map(([key,spec])=>`<path d="${spec.d}" fill="${palette[key]}"${spec.outline?' stroke="black" stroke-width="1" stroke-linejoin="round"':''}/>`).join(''));
 }
 
 for (const [name, content] of Object.entries(thumbnails)) {
-  const filename=['aloha-long-jacket','aloha-jacket','default-skin','alien-skin','clown-skin','party-hat','clown-suit','flesh-skin','shark-hood','shark-suit','pochita','chainsaw','pochita-suit','batfish-cowl','batfish-armor','batfish-trousers','batfish-boots','batfish-gloves','batfish-suit',...Object.keys(capePalettes),'ivory-tunic','ivory-trousers','silver-collar','crimson-cape','ivory-suit','royal-coat','royal-trousers','royal-shoes','royal-collar','royal-suit','suit-jacket','suit-trousers','black-dress-shoes','navy-suit','blue-vest','green-vest','yellow-hat','crown','yellow-tee',
-    'patched-tee','red-tee','coral-tee','loose-tee','loose-long-sleeve','red-triangle','red-shorts',
+  const filename=art.denimVariants[name]||art.workwearVariants[name]||art.thongVariants[name]||shortFlares[name]?name:['flesh-6','topknot-hair','charcoal-blazer','colorblock-shoes','topknot-suit','hypnotic','white-tie-shirt','dark-gray-slight-wide-trousers','makima-suit','long-braid-hair','flesh-5','secondary-hat','secondary-jacket','black-slight-wide-trousers','brown-shoes','secondary-suit','student-long-socks-shoes','flesh-4','student-hat','student-jacket','student-shorts','student-shoes','student-suit','little-yellow-fish','white-worker-helmet','blue-worker-jacket','blue-worker-trousers','gray-worker-boots','blue-worker-suit','flesh-3','worker-helmet','worker-jacket','worker-trousers','worker-boots','worker-suit','kappa','kappa-hair','kappa-suit','flesh-2','round-glasses','black-turtleneck-tee','gray-sneakers','jobs-suit','cigarette','large-ripped-denim-jeans','denim-jumpsuit','washed-denim-jeans','ripped-denim-jeans','denim-jeans','cinched-long-sleeve','aloha-open-jacket','aloha-open-long-jacket','aloha-long-jacket','aloha-jacket','default-skin','alien-skin','clown-skin','party-hat','clown-suit','flesh-skin','shark-hood','shark-suit','pochita','chainsaw','pochita-suit','batfish-cowl','batfish-armor','batfish-trousers','batfish-boots','batfish-gloves','batfish-suit',...Object.keys(capePalettes),'ivory-tunic','ivory-trousers','silver-collar','crimson-cape','ivory-suit','royal-coat','royal-trousers','royal-shoes','royal-collar','royal-suit','suit-jacket','suit-trousers','black-dress-shoes','navy-suit','blue-vest','green-vest','yellow-hat','crown','yellow-tee',
+    'patched-tee','red-tee','coral-tee','loose-tee','loose-long-sleeve','red-triangle','red-shorts','red-briefs',
     'pink-shorts','orange-shorts','black-shorts','wide-shorts','skirt','milk-frog',
     'red-thong','wide-pants',
     'navy-jumpsuit','loose-wide-pants','brown-boots','dark-boots']
     .includes(name)?name:`decoration-${name}`;
   fs.writeFileSync(path.join(root, `svg/${filename}.svg`), content);
+}
+
+// Basic-style cards use the very same geometry as their first catalog variant.
+const styleGroups=vm.runInContext('decorationStyleGroups',context);
+const catalog=vm.runInContext('decorationCatalog',context);
+for(const [category,groups] of Object.entries(styleGroups))for(const [key,,ids] of groups){
+ const item=catalog[category].find(item=>item.id===ids[0]);
+ const source=fs.readFileSync(path.join(root,item.icon.replace(/^\.\//,'')),'utf8');
+ // Mask luminance controls opacity, not garment color. Preserve white
+ // mask backings so the garment does not become translucent and look pale.
+ const masks=[];
+ const paintSource=source.replace(/<mask\b[\s\S]*?<\/mask>/g,mask=>{masks.push(mask);return `__BASE_MASK_${masks.length-1}__`;});
+ const gray=paintSource.replace(/(fill|stroke|stop-color)="([^"\n]+)"/g,(all,attr,color)=>
+  /^(none|black|#000|#000000|transparent)$/i.test(color)||color.startsWith('url(')?all:`${attr}="#a6a6a6"`);
+ fs.writeFileSync(path.join(root,`svg/base-${category}-${key}.svg`),gray.replace(/__BASE_MASK_(\d+)__/g,(_,index)=>masks[Number(index)]));
 }
