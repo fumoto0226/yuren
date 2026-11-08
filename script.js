@@ -95,11 +95,19 @@ const topknotVariants={
 const workerHelmetColors={'worker-helmet':'#FBC723','white-worker-helmet':'#f4f3ed'};
 const isWorkerJacket=(id=selectedDecorations.outerwear)=>!!workerJacketVariants[id];
 const hasLongOuterwear=(id=selectedDecorations.outerwear)=>!!alohaSleeveStyles[id]?.longHem;
+const muscleSkinVariants={
+ 'muscle-tan':{name:'肉色5肌肉皮肤',color:'#dda579'},
+ 'muscle-white':{name:'白皙肌肉皮肤',color:'#FFEADD'},
+ 'muscle-gray':{name:'灰色肌肉皮肤',color:'#C5C5C5'},
+ muscle:{name:'肉色肌肉皮肤',color:'#FBD5CA'},
+};
+const disabledSuitIds=['batfish-suit','pochita-suit','makima-suit'];
+const POCHITA_TAIL_VISIBLE=false; // Keep the tail artwork and motion available for later restoration.
 const decorationCatalog = {
-  skin: [{id:'flesh-6',name:'肉色皮肤6',icon:'./svg/flesh-6.svg'},{id:'hypnotic',name:'迷幻眼皮肤',icon:'./svg/hypnotic.svg'},{id:'flesh-5',name:'肉色皮肤5',icon:'./svg/flesh-5.svg'},{id:'flesh-4',name:'肉色皮肤4',icon:'./svg/flesh-4.svg'},{id:'little-yellow-fish',name:'小黄鱼皮肤',icon:'./svg/little-yellow-fish.svg'},{id:'flesh-3',name:'肉色皮肤3',icon:'./svg/flesh-3.svg'},{id:'kappa',name:'河童皮肤',icon:'./svg/kappa.svg'},{id:'flesh-2',name:'肉色皮肤2',icon:'./svg/flesh-2.svg'},
+  skin: [{id:'flesh-7',name:'肉色皮肤7',icon:'./svg/flesh-7.svg'},...Object.entries(muscleSkinVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+(id==='muscle'?'muscle-skin':id)+'.svg'})),{id:'flesh-6',name:'肉色皮肤6',icon:'./svg/flesh-6.svg'},{id:'hypnotic',name:'迷幻眼皮肤',icon:'./svg/hypnotic.svg'},{id:'flesh-5',name:'肉色皮肤5',icon:'./svg/flesh-5.svg'},{id:'flesh-4',name:'肉色皮肤4',icon:'./svg/flesh-4.svg'},{id:'little-yellow-fish',name:'小黄鱼皮肤',icon:'./svg/little-yellow-fish.svg'},{id:'flesh-3',name:'肉色皮肤3',icon:'./svg/flesh-3.svg'},{id:'kappa',name:'河童皮肤',icon:'./svg/kappa.svg'},{id:'flesh-2',name:'肉色皮肤2',icon:'./svg/flesh-2.svg'},
     { id: 'milk-frog', name: '奶鱼', icon: './svg/milk-frog.svg' },
-    { id: 'pochita', name: '波吉塔皮肤', icon: './svg/pochita.svg' },
-    { id: 'flesh', name: '肉色皮肤', icon: './svg/flesh-skin.svg' },
+    { id: 'pochita', name: '大眼睛皮肤', icon: './svg/pochita.svg' },
+    { id: 'flesh', name: '肉色皮肤1', icon: './svg/flesh-skin.svg' },
     { id: 'clown', name: '小丑皮肤', icon: './svg/clown-skin.svg' },
     { id: 'alien', name: '外星皮肤', icon: './svg/alien-skin.svg' }],
   suit: [{id:'astronaut-suit',name:'宇航员套装',icon:'./svg/astronaut-suit.svg',pieces:{helmet:'space-helmet',outerwear:'space-shirt',pants:'space-trousers',shoes:'orange-shoes',gloves:'space-gloves'}},{id:'topknot-suit',name:'小辫子男套装',icon:'./svg/topknot-suit.svg',pieces:{skin:'flesh-6',helmet:'topknot-hair',shirt:'white-tie-shirt',outerwear:'charcoal-blazer',pants:'dark-gray-slight-wide-trousers',shoes:'colorblock-shoes'}},{id:'makima-suit',name:'马奇马套装',icon:'./svg/makima-suit.svg',pieces:{skin:'hypnotic',helmet:'long-braid-hair',shirt:'white-tie-shirt',pants:'dark-gray-slight-wide-trousers',shoes:'brown-shoes'}},{id:'secondary-suit',name:'中学生套装',icon:'./svg/secondary-suit.svg',pieces:{skin:'flesh-5',helmet:'secondary-hat',outerwear:'secondary-jacket',pants:'black-slight-wide-trousers',shoes:'brown-shoes'}},{id:'student-suit',name:'小学生套装',icon:'./svg/student-suit.svg',pieces:{skin:'flesh-4',helmet:'student-hat',outerwear:'student-jacket',pants:'student-shorts',shoes:'student-long-socks-shoes'}},{id:'blue-worker-suit',name:'蓝色工人套装',icon:'./svg/blue-worker-suit.svg',pieces:{skin:'flesh-3',helmet:'white-worker-helmet',outerwear:'blue-worker-jacket',pants:'blue-worker-trousers',shoes:'gray-worker-boots'}},{id:'worker-suit',name:'橙色工人套装',icon:'./svg/worker-suit.svg',pieces:{skin:'flesh-3',helmet:'worker-helmet',outerwear:'worker-jacket',pants:'worker-trousers',shoes:'worker-boots'}},{id:'kappa-suit',name:'河童套装',icon:'./svg/kappa-suit.svg',pieces:{skin:'kappa',helmet:'kappa-hair',cape:'kappa-shell'}},{id:'jobs-suit',name:'乔布斯套装',icon:'./svg/jobs-suit.svg',pieces:{skin:'flesh-2',helmet:'round-glasses',shirt:'black-turtleneck-tee',pants:'jobs-gradient-jeans',shoes:'gray-sneakers'}},{id:'clown-suit',name:'小丑鱼人套装',icon:'./svg/clown-suit.svg',
@@ -175,7 +183,7 @@ const decorationCatalog = {
     {id:'aloha-open-long-jacket',name:'藏蓝敞胸长袖外套',icon:'./svg/aloha-open-long-jacket.svg'},
     { id: 'green-vest', name: '绿色开襟外套', icon: './svg/green-vest.svg', sleeveless: true },
   ],
-  shoes: [{id:'navy-sandals',name:'深蓝色凉鞋',icon:'./svg/navy-sandals.svg'},{id:'orange-shoes',name:'橙色普通鞋',icon:'./svg/orange-shoes.svg'},{id:'colorblock-shoes',name:'灰蓝拼色鞋',icon:'./svg/colorblock-shoes.svg'},{id:'brown-shoes',name:'棕色普通鞋',icon:'./svg/brown-shoes.svg'},{id:'student-long-socks-shoes',name:'黑鞋长白袜',icon:'./svg/student-long-socks-shoes.svg'},{id:'student-shoes',name:'黑鞋短白袜',icon:'./svg/student-shoes.svg'},{id:'gray-worker-boots',name:'灰色宽筒工地靴',icon:'./svg/gray-worker-boots.svg'},{id:'worker-boots',name:'黄色宽筒工地靴',icon:'./svg/worker-boots.svg'},{id:'gray-sneakers',name:'灰色系带休闲鞋',icon:'./svg/gray-sneakers.svg'},{id:'batfish-boots',name:'黑色战靴',icon:'./svg/batfish-boots.svg'},{id:'royal-shoes',name:'金扣礼鞋',icon:'./svg/royal-shoes.svg'},
+  shoes: [{id:'navy-sandals',name:'深蓝色凉鞋',icon:'./svg/navy-sandals.svg'},{id:'orange-shoes',name:'橙色普通鞋',icon:'./svg/orange-shoes.svg'},{id:'colorblock-shoes',name:'灰蓝拼色鞋',icon:'./svg/colorblock-shoes.svg'},{id:'brown-shoes',name:'棕色普通鞋',icon:'./svg/brown-shoes.svg'},{id:'student-long-socks-shoes',name:'黑鞋长白袜',icon:'./svg/student-long-socks-shoes.svg'},{id:'student-shoes',name:'黑鞋短白袜',icon:'./svg/student-shoes.svg'},{id:'black-worker-boots',name:'黑色宽筒长靴',icon:'./svg/black-worker-boots.svg'},{id:'blue-worker-boots',name:'蓝色宽筒长靴',icon:'./svg/blue-worker-boots.svg'},{id:'gray-worker-boots',name:'灰色宽筒长靴',icon:'./svg/gray-worker-boots.svg'},{id:'worker-boots',name:'黄色宽筒长靴',icon:'./svg/worker-boots.svg'},{id:'gray-sneakers',name:'灰色系带休闲鞋',icon:'./svg/gray-sneakers.svg'},{id:'batfish-boots',name:'黑色战靴',icon:'./svg/batfish-boots.svg'},{id:'royal-shoes',name:'金扣礼鞋',icon:'./svg/royal-shoes.svg'},
     {id:'black-dress-shoes', name:'黑皮鞋', icon:'./svg/black-dress-shoes.svg'},
     { id: 'plain', name: '普通鞋子', icon: './svg/decoration-shoes.svg' },
     { id: 'brown-boots', name: '棕色长靴', icon: './svg/brown-boots.svg' },
@@ -192,6 +200,7 @@ const decorationCatalog = {
 // Catalog IDs stay stable for suits and saved selections; these are UI families.
 const specialShirtIds=['batfish-armor','ivory-tunic','royal-coat'];
 const decorationStyleGroups={
+ skin:[['muscle','肌肉皮肤',Object.keys(muscleSkinVariants)],['flesh','肉色皮肤',['flesh','flesh-2','flesh-3','flesh-4','flesh-5','flesh-6','flesh-7']],...decorationCatalog.skin.filter(item=>!muscleSkinVariants[item.id]&&!['flesh','flesh-2','flesh-3','flesh-4','flesh-5','flesh-6','flesh-7'].includes(item.id)).map(item=>[item.id,item.name,[item.id]])],
  helmet:[['spiky-hair','刺猬头',Object.keys(spikyHairVariants)],['worker-helmet','工人安全帽',Object.keys(workerHelmetColors)],['topknot-hair','小辫头',Object.keys(topknotVariants)],['long-braid-hair','长辫发',Object.keys(longBraidVariants)],...decorationCatalog.helmet.filter(item=>!spikyHairVariants[item.id]&&!workerHelmetColors[item.id]&&!topknotVariants[item.id]&&!longBraidVariants[item.id]).map(item=>[item.id,item.name,[item.id]])],
  shirt:[
   ['collared','衬衫',['white-tie-shirt']],
@@ -215,7 +224,7 @@ const decorationStyleGroups={
  outerwear:[['space','宽松卫衣',['space-shirt']],['blazer','西装外套',['charcoal-blazer']],['secondary','中学生外套',['secondary-jacket']],['student','小学生外套',['student-jacket']],['worker','工人外套',['worker-jacket','blue-worker-jacket']],['suit','西装上衣',['suit-jacket']],['short','短袖外套',['aloha-jacket']],['long','长袖外套',['aloha-long-jacket']],
   ['open-short','敞胸短袖外套',['aloha-open-jacket']],['open-long','敞胸长袖外套',['aloha-open-long-jacket']],
   ['vest','无袖开襟外套',['green-vest']]],
- shoes:[['sandals','凉鞋',['navy-sandals']],['colorblock-shoes','拼色鞋子',['colorblock-shoes']],['short-sock-shoes','短袜鞋',['student-shoes']],['long-sock-shoes','长袜鞋',['student-long-socks-shoes']],['work-boots','宽筒工地靴',['worker-boots','gray-worker-boots']],['sneakers','系带休闲鞋',['gray-sneakers']],['shoes','鞋子',['plain','black-dress-shoes','brown-shoes','orange-shoes']],['boots','长靴',['brown-boots','dark-boots','batfish-boots']],
+ shoes:[['sandals','凉鞋',['navy-sandals']],['colorblock-shoes','拼色鞋子',['colorblock-shoes']],['short-sock-shoes','短袜鞋',['student-shoes']],['long-sock-shoes','长袜鞋',['student-long-socks-shoes']],['work-boots','宽筒长靴',['worker-boots','gray-worker-boots','black-worker-boots','blue-worker-boots']],['sneakers','系带休闲鞋',['gray-sneakers']],['shoes','鞋子',['plain','black-dress-shoes','brown-shoes','orange-shoes']],['boots','长靴',['brown-boots','dark-boots','batfish-boots']],
   ['buckle','搭扣礼鞋',['royal-shoes']]],
  gloves:[['gloves','手套',['plain','space-gloves']],['guards','护腕手套',['batfish-gloves']]],
  cape:[['dual-swords','双刀',['dual-swords']],['greatsword','大剑',['greatsword']],['shell','龟壳',['kappa-shell']],['cape','披风',['crimson-cape','charcoal-cape','azure-cape','solid-red-cape','solid-blue-cape','solid-black-cape']]],
@@ -430,6 +439,7 @@ function hornHidden(helmet = selectedDecorations.helmet) {
 let skinTraits;
 function skinTrait(name) {
   skinTraits ||= {
+    ...Object.fromEntries(Object.entries(muscleSkinVariants).map(([id,v])=>[id,{color:v.color}])),
     'little-yellow-fish':{color:'#FFEE00',headContour:yellowFishHeadContour},
     kappa:{color:'#89CD71',eyeWhite:kappaEyeWhite,pupil:{rx:1.31738,ry:1.18774,dx:-2.2119,dy:3.9096},kappaDetails:true},
     'milk-frog': {color: milkFrogColors.skin, eye: milkFrogColors.eye, belly: true},
@@ -438,6 +448,7 @@ function skinTrait(name) {
     hypnotic:{color:'#FBD5CA',eye:'#EB8E15',eyeWhite:hypnoticEyeSource,pupil:{rx:0,ry:0},eyeRings:true},
     flesh: {color: decorationColors.fleshSkin},
     'flesh-2':{color:'#f4ece6'},
+    'flesh-7':{color:'#FFEADD'},
     'flesh-3':{color:'#f9d4ad'},
     'flesh-6':{color:'#FBD5CA'},
     'flesh-5':{color:'#dda579'},
@@ -1957,6 +1968,8 @@ let hatPaths=[];
 let batCowlPaths=[];
 let sharkToothPaths=[];
 let clownMarkPaths=[];
+let muscleLinesNode;
+const muscleLinesSource=transformPath("M34.6108 68.9319C34.9135 72.1602 36.0237 75.3883 37.335 76.8008C38.384 77.9308 44.9012 77.608 48.0286 77.3053M68.7261 68.9319C68.4234 72.1602 67.3132 75.3883 66.002 76.8008C64.9529 77.9308 58.4358 77.608 55.3083 77.3053M49.7969 82.7207C49.2924 86.2517 47.7788 86.2518 43.9453 86.2517M49.7969 88.8228C49.2924 92.3538 47.7788 92.3539 43.9453 92.3538M53.2959 82.7207C53.8004 86.2517 55.314 86.2518 59.1475 86.2517M53.2959 88.8228C53.8004 92.3538 55.314 92.3539 59.1475 92.3538M49.7969 94.9248C49.2924 98.4558 47.7788 98.4559 43.9453 98.4558M53.2959 94.9248C53.8004 98.4558 55.314 98.4559 59.1475 98.4558",(x,y)=>({x:x-4.396,y:y+1.0403}));
 let alienAntennaPath;
 let partyHatPaths=[];
 let batCowlClipPath;
@@ -1968,6 +1981,7 @@ let headFillNode;
 let chainsawPaths=[];
 let cigarettePaths=[];
 let jobsGlassesPaths=[];
+let kappaMouthClipPath;
 let kappaHairPaths=[],kappaSkinPaths=[],workerHatPaths=[],studentHatPaths=[],secondaryHatPaths=[],topknotHairPaths=[],yellowSpikyHairPaths=[];
 let pochitaCordPaths=[];
 let crownPaths=[];
@@ -2252,7 +2266,7 @@ function workerSleeveMarkup(shape,id,style){
   return `<path d="M${pts.join('L')}Z" fill="${color}"/>`;};
  return basic+band(19,24,'#ddf29a')+band(21,22,'#d6e4d9');
 }
-const bootProfiles={'worker-boots':{extra:2,color:'#ffcb28',tuckPants:true},'gray-worker-boots':{extra:2,color:'#81868b',tuckPants:true}};
+const bootProfiles={'black-worker-boots':{extra:2,color:'#25272B',tuckPants:true},'blue-worker-boots':{extra:2,color:'#315D9A',tuckPants:true},'worker-boots':{extra:2,color:'#ffcb28',tuckPants:true},'gray-worker-boots':{extra:2,color:'#81868b',tuckPants:true}};
 function bootCoversPants(shape,pantsFlare,shoes=selectedDecorations.shoes){
  const profile=bootProfiles[shoes];
  if(!profile)return false;
@@ -4769,6 +4783,7 @@ function update() {
       return applyDragPose(point, x, y, pointRole==='cigarette'?'head':pointRole, warp);
     });
     node.setAttribute('d', transformed);
+    if(index===9||index===10)node.style.display=!!muscleSkinVariants[selectedDecorations.skin]?'none':'';
     if(index===1||index===-1&&node.getAttribute('stroke')==='none')
       node.setAttribute('fill',skinColor());
     if(index===8){
@@ -4785,10 +4800,12 @@ function update() {
       pupilClipGroup.setAttribute('clip-path','url(#shark-eye-clip)');
     else pupilClipGroup.removeAttribute('clip-path');
   }
-  pochitaCordPaths.forEach(node=>{node.style.display=pochita?'':'none';});
+  if(muscleLinesNode)muscleLinesNode.style.display=!!muscleSkinVariants[selectedDecorations.skin]?'':'none';
+  pochitaCordPaths.forEach(node=>{node.style.display=pochita&&POCHITA_TAIL_VISIBLE?'':'none';});
   paths.filter(path=>path.index===1||path.index===11).forEach(({node})=>{
     node.style.display=hornHidden()?'none':'';
   });
+  if(kappaMouthClipPath&&headFillNode)kappaMouthClipPath.setAttribute('d',headFillNode.getAttribute('d'));
   kappaSkinPaths.forEach((node,i)=>{node.style.display=(kappaSkinSpecs[i].role==='body'?selectedDecorations.skin==='kappa':skinTrait('kappaDetails'))?'':'none';});
   hypnoticEyePaths.forEach(node=>{node.style.display=skinTrait('eyeRings')?'':'none';});
   clownMarkPaths.forEach(node=>{node.style.display=skinTrait('marks')?'':'none';});
@@ -4902,6 +4919,7 @@ function update() {
     // A wide trouser keeps its full width and fabric over the boot shaft.
     // Other trousers tuck into the boot, which replaces the lower leg.
     const tallBoots=wideBoots||wearingTallBoots&&!widePants;
+    const spaceCuff=selectedDecorations.pants==='space-trousers'&&!tallBoots;
     // The boot owns all material below the cuff, including denim details.
     for(const nodes of [jeansSkin,jeansTextures])nodes.forEach((node,part)=>{node.style.display=tallBoots&&part===1?'none':'';});
     if(tallBoots)jeansSeams[1].style.display='none';
@@ -5001,7 +5019,7 @@ function update() {
         if(clip) node.setAttribute('clip-path',clip);
         else node.removeAttribute('clip-path');
       }
-      if((studentSockVisible(sockStart)&&i>=sockStart-1)||(selectedDecorations.pants==='space-trousers'&&i>=24))front.setAttribute('clip-path',`url(#${side}-sock-${i<sockStart?'top':'bottom'}-hem-clip)`);
+      if((studentSockVisible(sockStart)&&i>=sockStart-1)||(spaceCuff&&i>=24))front.setAttribute('clip-path',`url(#${side}-sock-${i<sockStart?'top':'bottom'}-hem-clip)`);
       // The fill covers the middle of the black stroke, so it needs two
       // extra units to leave a one-unit outline on each side like the SVG.
       // The body fill masks part of the black underside near a folded hip.
@@ -5024,7 +5042,7 @@ function update() {
       back.setAttribute('stroke-width',shape.hose[i].width+2+roundedHipInk+wideExtra+bootMouth);
       front.setAttribute('d',segmentPath);
       front.setAttribute('stroke-width',shape.hose[i].width+wideExtra+bootMouth);
-      const legColor=selectedDecorations.pants==='space-trousers'&&i>=28?'#10C9E9':tallBoots&&i>=19
+      const legColor=spaceCuff&&i>=28?'#10C9E9':tallBoots&&i>=19
         ? bootColor
         : wearingJumpsuit()
           ? workwearVariants[selectedDecorations.pants]?denimColor():selectedDecorations.pants==='navy-jumpsuit'
@@ -5101,7 +5119,7 @@ function update() {
     // The sock's own cuff: the same transverse line the shorts get, so the
     // white ends on a drawn edge instead of a bare colour change.
     sockTop.setAttribute('d',cuffPath(shape,sockStart,selectedDecorations.pants==='space-trousers'&&widePants?wideLegExtraWidth(sockStart,wideFlare):0,.5));
-    sockTop.style.display=studentSockVisible(sockStart)||selectedDecorations.pants==='space-trousers'?'':'none';
+    sockTop.style.display=studentSockVisible(sockStart)||spaceCuff?'':'none';
     bootTop.setAttribute('d',cuffPath(shape,19,wideBoots?workerBootExtra(19):0));
     bootTop.style.display=tallBoots?'':'none';
     wideHem.setAttribute('d',wideLegHemPath(shape,wideFlare||5.5,config.legs));
@@ -5578,7 +5596,7 @@ function syncDecorationVariantMenu(){
 // Outfits have their own count because their pieces are already counted elsewhere.
 function decorationCounts(){
  const categories=Object.fromEntries(Object.entries(decorationCatalog).map(([category,items])=>
-  [category,new Set(items.map(item=>item.id)).size]));
+  [category,new Set(items.filter(item=>category!=='suit'||!disabledSuitIds.includes(item.id)).map(item=>item.id)).size]));
  return {categories,total:Object.entries(categories).reduce((sum,[category,count])=>sum+(category==='suit'?0:count),0)};
 }
 function renderDecorationCounts(){
@@ -5597,12 +5615,18 @@ function renderDecorationOptions() {
  const itemButton=({id,name,icon})=>`<button type="button" class="decoration-option" data-option="${id}" aria-pressed="${selected===id&&!baseDecorationSelections[category]}"><img src="${icon}" alt=""/><span>${name}</span></button>`;
  const none=`<button type="button" class="decoration-option" data-option="none" aria-pressed="${!selected}">${category==='skin'?'<img src="./svg/default-skin.svg" alt="" />':'<span class="empty-icon" aria-hidden="true">—</span>'}<span>${category==='suit'?'不使用套装':category==='skin'?'默认肤色':'不穿戴'}</span></button>`;
  const groups=decorationStyleGroups[category];
+ if(category==='suit'){
+  const allowed=decorationCatalog.suit.filter(item=>!disabledSuitIds.includes(item.id));
+  const disabled=disabledSuitIds.map(id=>decorationCatalog.suit.find(item=>item.id===id)).filter(Boolean);
+  decorationOptions.innerHTML=none+allowed.map(itemButton).join('')+'<div class="decoration-group-label decoration-disabled-label">禁用</div>'+disabled.map(itemButton).join('');
+  syncDecorationVariantMenu();return;
+ }
  if(!groups){decorationOptions.innerHTML=none+decorationCatalog[category].map(itemButton).join('');
   syncDecorationVariantMenu();return;}
  const cards=groups.map(([key,name,ids])=>{
   const active=ids.includes(selected);
   const first=decorationCatalog[category].find(item=>item.id===ids[0]);
-  if(category==='helmet'&&ids.length===1)return itemButton(first);
+  if(['helmet','skin'].includes(category)&&ids.length===1)return itemButton(first);
   return `<div class="decoration-style-card${active?' is-selected':''}"><button type="button" class="decoration-option" data-base-style="${key}" aria-pressed="${active}"><img src="${first.icon}" alt=""/><span>${name}</span></button><span class="style-color-count" aria-label="${ids.length}种颜色或花纹">${ids.length}</span><button type="button" class="style-expand" data-expand-style="${key}" aria-expanded="false" aria-haspopup="dialog" aria-label="展开${name}的颜色和花纹"><span aria-hidden="true">▸</span></button></div>`;
  }).join('');
  const special=category==='shirt'?'<div class="decoration-group-label">特殊款</div>'+decorationCatalog.shirt.filter(item=>specialShirtIds.includes(item.id)).map(itemButton).join(''):'';
@@ -5878,6 +5902,9 @@ fetch('./svg/参考.svg')
     bellyPatch.setAttribute('pointer-events','none');
     bellyPatch.setAttribute('clip-path','url(#milk-frog-belly-clip)');
     partLayers.body.appendChild(bellyPatch);
+    muscleLinesNode=addPath(muscleLinesSource,'body',false,'body');
+    muscleLinesNode.setAttribute('stroke-width','1');
+    muscleLinesNode.style.display='none';
     torsoSideOutline=addPath(leftEdge+rightEdge,'body',false,'mixed');
     bodyCrotchOutline=addPath(crotch,'body',false,'mixed');
     buttOutlines=[{side:'right',node:addPath(rightButt,'body',false,'mixed')},
@@ -6027,6 +6054,13 @@ fetch('./svg/参考.svg')
     });
     hypnoticEyePaths=kappaNodes(hypnoticEyeSpecs,false);
     kappaSkinPaths=kappaNodes(kappaSkinSpecs,false);
+    // Mouth coloration belongs inside the live head silhouette, including during speech.
+    const mouthDefs=document.createElementNS(SVG_NS,'defs');
+    const mouthClip=document.createElementNS(SVG_NS,'clipPath');
+    mouthClip.id='kappa-mouth-clip';mouthClip.setAttribute('clipPathUnits','userSpaceOnUse');
+    kappaMouthClipPath=document.createElementNS(SVG_NS,'path');
+    mouthClip.appendChild(kappaMouthClipPath);mouthDefs.appendChild(mouthClip);svg.appendChild(mouthDefs);
+    kappaSkinPaths.slice(-kappaMouthSpecs.length).forEach(node=>node.setAttribute('clip-path','url(#kappa-mouth-clip)'));
     kappaHairPaths=kappaNodes(kappaHairSpecs,true);
     workerHatPaths=kappaNodes(workerHatSpecs,true);
     studentHatPaths=kappaNodes(studentHatSpecs,true);

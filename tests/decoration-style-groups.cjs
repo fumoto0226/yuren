@@ -21,7 +21,7 @@ for(const [category,groups] of Object.entries(data.groups)){
  const expected=data.catalog[category].map(item=>item.id).filter(id=>category!=='shirt'||!data.special.includes(id));
  assert.deepEqual([...ids].sort(),[...expected].sort(),`${category}: every existing variant is reachable`);
 }
-assert.ok(!data.groups.skin&&!data.groups.suit&&data.groups.helmet&&!data.groups.neck);
+assert.ok(data.groups.skin&&!data.groups.suit&&data.groups.helmet&&!data.groups.neck);
 const state=vm.runInContext(`(()=>{
  baseDecorationSelections.shirt='tee';baseDecorationSelections.pants='shorts';
  applyDecorationSelection('skin','milk-frog');
