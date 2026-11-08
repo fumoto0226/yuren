@@ -81,3 +81,13 @@ const inwardLayers=vm.runInContext(`(()=>{
 })()`,c);
 for(const row of inwardLayers)assert.equal(row.front,row.angle>=10,'Inward sweatpant thigh waits until above horizontal, held or released');
 console.log('Sweatpants inward promotion waits until the thigh rises about 8 degrees above horizontal on both sides.');
+const crotchMaskCases=vm.runInContext(`(()=>{
+ const rows=[];selectedDecorations.pants='space-trousers';
+ for(const side of ['left','right'])for(const direction of [0,1,-1]){
+  dragPoses.length=0;if(direction)dragPoses.push(Object.assign(createDragPose(side+'Leg'),{x:(side==='left'?1:-1)*direction*65,y:-15}));
+  const warp=buildWarp({body:100,width:100,arms:100,legs:100,head:100});
+  rows.push({direction,mask:spaceCrotchOccluders({left:legGeometry('left',warp),right:legGeometry('right',warp)},warp)});
+ }
+ return rows;
+})()`,c);
+for(const row of crotchMaskCases){assert.equal(!!row.mask,row.direction===1,'Only an inward crossing leg masks the pelvis line');assert.ok(!/NaN|Infinity|undefined/.test(row.mask));}

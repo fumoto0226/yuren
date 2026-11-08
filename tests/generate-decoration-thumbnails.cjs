@@ -476,15 +476,15 @@ const jobsGlasses=art.jobsGlasses.map(({d,fill,opacity,strokeWidth})=>`<path d="
 const jobsTop=stripSvg(teeThumbnail('#101010',23,2.5,'black-turtleneck-tee'))+`<path d="${art.jobsCollar}" fill="#101010"/>`+line(art.jobsCollarEdge);
 const jobsShoes=art.jobsShoes.map(({paths,details})=>`<path d="${paths.fill}" fill="#bfbfbf"/><path d="${paths.outline}" fill="none" stroke="black" stroke-width="1"/>`+details).join('');
 const jobsPants=stripSvg(widePantsThumbnail('jobs-gradient-jeans',3.5,jobsWidths,'8 108 86 80'));
-const kappaArt=vm.runInContext('({hair:kappaHairSpecs,skin:kappaSkinSpecs,eye:kappaEyeWhite})',context);
+const kappaArt=vm.runInContext('({hair:kappaHairSpecs,skin:kappaSkinSpecs,eye:kappaEyeWhite,mouthCount:kappaMouthSpecs.length})',context);
 const kappaTag=s=>`<path d="${s.source}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="${s.strokeWidth||1}" stroke-linecap="round" stroke-linejoin="round"/>`;
 const kappaBase=hideTriangle=>frogPaths.map((tag,index)=>{
- if(index===0||index>=12||hideTriangle&&(index===1||index===11))return '';
+ if(index===0||index===5||index>=12||hideTriangle&&(index===1||index===11))return '';
  let node=tag.replace(/fill="#C5C5C5"/g,'fill="#89CD71"');
  if(!/\bfill=/.test(node))node=node.replace('<path ','<path fill="none" ');
  if(index===8)node=node.replace(/d="[^"]+"/,`d="${kappaArt.eye}"`);
  return node;
-}).join('')+`<ellipse cx="53.1431" cy="38.40106" rx="1.31738" ry="1.18774" transform="rotate(-14.9815 53.1431 38.40106)" fill="black"/>`+'<defs><clipPath id="kappa-mouth-thumb"><path d="'+originalPaths[5][1]+'Z"/></clipPath></defs>'+kappaArt.skin.map((spec,i)=>i>=kappaArt.skin.length-2?'<g clip-path="url(#kappa-mouth-thumb)">'+kappaTag(spec)+'</g>':kappaTag(spec)).join('');
+}).join('')+`<ellipse cx="53.1431" cy="38.40106" rx="1.31738" ry="1.18774" transform="rotate(-14.9815 53.1431 38.40106)" fill="black"/>`+'<defs><clipPath id="kappa-mouth-thumb"><path d="'+originalPaths[5][1]+'Z"/></clipPath></defs>'+kappaArt.skin.map((spec,i)=>i>=kappaArt.skin.length-kappaArt.mouthCount?'<g clip-path="url(#kappa-mouth-thumb)">'+kappaTag(spec)+'</g>':kappaTag(spec)).join('')+`<path d="${originalPaths[5][1]}" fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>`;
 const kappaBody=kappaBase(false);
 const kappaShell=backDetails('kappa-shell');
 const kappaHair=kappaArt.hair.map(kappaTag).join('');

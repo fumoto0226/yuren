@@ -1962,7 +1962,7 @@ let partLayers = {};
 let legParts = [];
 let hipMasks = [];
 let shoulderMasks = [];
-let torsoSideOutline,bodyCrotchOutline;
+let torsoSideOutline,bodyCrotchOutline,spaceCrotchMask;
 let helmetBase;
 let hatPaths=[];
 let batCowlPaths=[];
@@ -2059,6 +2059,18 @@ function spacePantsGeometry(warp,coveredWaist=selectedDecorations.outerwear==='s
  });
  const sides=['left','right'].map(side=>visiblePantsSide(side,legs[side],warp,true,coveredWaist)).join('');
  return {fill:fit(spacePelvisSource),sides,edges:sides+fit(spaceCrotchSource),crotch:fit(spaceCrotchSource)};
+}
+// The pelvis line sits behind a crossing trouser leg even while that leg stays behind a coat.
+function spaceCrotchOccluders(shapes,warp){
+ const a=applyDragPose(warp(47,95,'body'),47,95,'body',warp);
+ const b=applyDragPose(warp(47,115,'body'),47,115,'body',warp);
+ const length=Math.hypot(b.x-a.x,b.y-a.y)||1,right={x:(b.y-a.y)/length,y:-(b.x-a.x)/length};
+ return ['left','right'].map(side=>{
+  const sign=side==='left'?-1:1;
+  const crossing=dragPoses.some(p=>p.part===side+'Leg'&&sign*(p.x*right.x+p.y*right.y)<-1);
+  if(!crossing)return '';
+  return shapes[side].hose.slice(2).map(({d,width},j)=>`<path d="${d}" fill="none" stroke="black" stroke-width="${width+wideLegExtraWidth(j+2,9.25)}" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+ }).join('');
 }
 function spaceWaistMarkup(warp){
  const path=source=>garmentPath(transformPath(source,spacePantsFit),warp);
@@ -2819,7 +2831,10 @@ const kappaSourcePath=d=>transformPath(d,(x,y)=>({x,y:y+10.26956}));
 const kappaEyeWhite=kappaSourcePath("M48.3525 32.1096C46.5365 30.1183 46.8592 27.0241 49.7967 24.7782C52.1506 22.9981 56.9441 22.5559 58.6871 26.4246C60.4301 30.2932 56.1411 32.945 54.7818 33.4857C53.4225 34.0264 50.1685 34.1009 48.3525 32.1096Z");
 const kappaHairSpecs=[{"source": "M 28.0274 23.7153 C 47.2274 37.3153 51.3604 16.2153 50.527 3.71533 L 44.027 0.715332 L 40.027 19.2153 L 32.5273 13.2153 C 28.9273 18.0153 27.694 22.2153 28.0274 23.7153 Z", "fill": "#E5E287", "stroke": "black", "role": "head"}, {"source": "M 59.5815 12.4006 C 60.562 20.3424 64.024 36.793 70.029 39.0617 C 71.2149 34.6152 70.7856 23.0579 59.5815 12.4006 Z", "fill": "#E2FFD3", "stroke": "black", "role": "head"}, {"source": "M 70.5273 34.2153 C 71.194 35.0487 73.2273 36.6153 76.0273 36.2153 L 71.5273 38.2153 L 73.0273 42.7153 L 68.0273 38.2153 L 68.0273 42.7153 L 64.0273 35.7153 C 63.5273 36.7153 61.8273 38.6153 59.0273 38.2153 C 60.0273 37.0487 62.0273 34.1153 62.0273 31.7153 C 61.5273 32.5487 60.0273 34.2153 58.0273 34.2153 C 59.0273 32.882 61.0273 29.5153 61.0273 26.7153 C 61.0273 23.9153 57.0273 21.2153 55.0273 20.2153 L 59.0273 20.2153 L 54.0273 15.2153 L 58.0273 15.2153 C 58.0273 13.9994 57.5284 11.4251 55.6203 10.0711 L 55.0273 9.71533 C 55.2387 9.82099 55.436 9.94035 55.6203 10.0711 L 60.0273 12.7153 C 61.8607 23.382 66.4273 42.3153 70.0273 36.7153 L 70.5273 34.2153 Z", "fill": "#277137", "stroke": "black", "role": "head"}, {"source": "M 48.0273 8.21533 L 46.5273 5.21533", "fill": "none", "stroke": "black", "role": "head"}].map(s=>({...s,source:kappaSourcePath(s.source)}));
 const kappaSkinSpecs=[{"source": "M 76.5273 76.7153 C 73.7273 59.1153 69.0273 48.0487 67.0273 44.7153 L 67.0273 110.215 C 71.3607 106.382 79.3273 94.3153 76.5273 76.7153 Z", "fill": "#373D38", "stroke": "black", "role": "body"}, {"source": "M 36.5273 88.7153 C 39.8607 85.382 48.5273 80.7153 56.5273 88.7153", "fill": "none", "stroke": "black", "role": "body"}, {"source": "M 44.5273 94.7153 L 49.0273 97.7153", "fill": "none", "stroke": "black", "role": "body"}, {"source": "M 48.5273 94.2153 L 46.0273 98.2153", "fill": "none", "stroke": "black", "role": "body"}, {"source": "M 43.0273 29.2153 L 45.0273 30.2153", "fill": "none", "stroke": "#E76F6F", "role": "head"}, {"source": "M 43.0273 31.2153 L 45.0273 32.2153 M 43.0273 33.2153 L 45.0273 34.2153", "fill": "none", "stroke": "#E76F6F", "role": "head"}].map(s=>({...s,source:kappaSourcePath(s.source)}));
-const kappaMouthSpecs=[kappaHairSpecs.shift(),kappaHairSpecs.pop()];
+const kappaMouthFill={...kappaHairSpecs.shift(),stroke:'none'};
+const kappaMouthSpecs=[kappaMouthFill,
+ {source:kappaSourcePath('M28.0274 23.7153C47.2274 37.3153 51.3604 16.2153 50.527 3.71533'),fill:'none',stroke:'black',role:'head'},
+ kappaHairSpecs.pop()];
 kappaSkinSpecs.shift();
 kappaSkinSpecs.push(...kappaMouthSpecs);
 const jobsGlassesCenter={x:54.7,y:34.8},jobsGlassesRadii={x:9.05,y:10.5};
@@ -5142,6 +5157,9 @@ function update() {
   garmentPaths.jeansDetails.innerHTML=selectedDecorations.pants==='space-trousers'?spaceWaistMarkup(warp):denimJeansIds.includes(selectedDecorations.pants)?(workwearVariants[selectedDecorations.pants]?denimBibMarkup(warp):jeansDetailsMarkup(warp)):'';
   garmentPaths.jeansDetails.style.display=selectedDecorations.pants==='space-trousers'||denimJeansIds.includes(selectedDecorations.pants)?'':'none';
   const spaceFit=selectedDecorations.pants==='space-trousers'?spacePantsGeometry(warp):null;
+  if(spaceCrotchMask)spaceCrotchMask.innerHTML='<rect x="-1000" y="-1000" width="2000" height="2000" fill="white"/>'+(spaceFit?spaceCrotchOccluders(legShapes,warp):'');
+  if(spaceFit)garmentPaths.pantsCrotch.setAttribute('mask','url(#space-crotch-occlusion)');
+  else garmentPaths.pantsCrotch.removeAttribute('mask');
   if(spaceCollarOverlay)spaceCollarOverlay.innerHTML=selectedDecorations.outerwear==='space-shirt'?spaceCollarMarkup(warp):'';
   garmentPaths.pants.setAttribute('d',spaceFit?spaceFit.fill:garmentPath(pantsSource,warp));
   garmentPaths.pants.setAttribute('fill',widePants?widePantsPaint():selectedDecorations.pants==='batfish-trousers'?decorationColors.batArmor:decorationColors.pants);
@@ -6060,7 +6078,11 @@ fetch('./svg/参考.svg')
     mouthClip.id='kappa-mouth-clip';mouthClip.setAttribute('clipPathUnits','userSpaceOnUse');
     kappaMouthClipPath=document.createElementNS(SVG_NS,'path');
     mouthClip.appendChild(kappaMouthClipPath);mouthDefs.appendChild(mouthClip);svg.appendChild(mouthDefs);
-    kappaSkinPaths.slice(-kappaMouthSpecs.length).forEach(node=>node.setAttribute('clip-path','url(#kappa-mouth-clip)'));
+    const sharedHeadOutline=paths.find(path=>path.index===5)?.node;
+    kappaSkinPaths.slice(-kappaMouthSpecs.length).forEach(node=>{
+      node.setAttribute('clip-path','url(#kappa-mouth-clip)');
+      if(sharedHeadOutline)partLayers.head.insertBefore(node,sharedHeadOutline);
+    });
     kappaHairPaths=kappaNodes(kappaHairSpecs,true);
     workerHatPaths=kappaNodes(workerHatSpecs,true);
     studentHatPaths=kappaNodes(studentHatSpecs,true);
@@ -6256,6 +6278,10 @@ fetch('./svg/参考.svg')
     garmentPaths.jeansDetails.setAttribute('pointer-events','none');
     outfitOverlay.appendChild(garmentPaths.jeansDetails);
     const defs=document.createElementNS(SVG_NS,'defs');
+    spaceCrotchMask=document.createElementNS(SVG_NS,'mask');
+    spaceCrotchMask.id='space-crotch-occlusion';spaceCrotchMask.setAttribute('maskUnits','userSpaceOnUse');
+    for(const [key,value] of Object.entries({x:-1000,y:-1000,width:2000,height:2000}))spaceCrotchMask.setAttribute(key,value);
+    defs.appendChild(spaceCrotchMask);
     svg.prepend(defs);
     jobsPelvisGradient=document.createElementNS(SVG_NS,'linearGradient');
     jobsPelvisGradient.id='jobs-pelvis-gradient';jobsPelvisGradient.setAttribute('gradientUnits','userSpaceOnUse');
