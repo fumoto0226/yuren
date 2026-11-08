@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><base href="http://localhost:8765/">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#6a6a6a" />
+    <title>鱼人 · 路径变形</title>
+    <link rel="icon" type="image/svg+xml" href="./svg/favicon.svg" />
+    <link rel="stylesheet" href="./style.css?v=wardrobe-workwear-5" />
+  </head>
+  <body>
+    <main>
+      <aside class="wardrobe" aria-label="装饰列表">
+        <h1>装饰 <span class="wardrobe-total-count" data-decoration-total></span></h1>
+        <div class="wardrobe-tabs" role="tablist" aria-label="装饰分类">
+          <button type="button" role="tab" aria-selected="true" data-category="skin">皮肤</button>
+          <button type="button" role="tab" aria-selected="false" data-category="suit">套装</button>
+          <button type="button" role="tab" aria-selected="false" data-category="helmet">头部</button>
+          <button type="button" role="tab" aria-selected="false" data-category="neck">颈部</button>
+          <button type="button" role="tab" aria-selected="false" data-category="shirt">衣服</button>
+          <button type="button" role="tab" aria-selected="false" data-category="pants">裤子</button>
+          <button type="button" role="tab" aria-selected="false" data-category="outerwear">外套</button>
+          <button type="button" role="tab" aria-selected="false" data-category="cape">背部</button>
+          <button type="button" role="tab" aria-selected="false" data-category="shoes">鞋子</button>
+          <button type="button" role="tab" aria-selected="false" data-category="gloves">手部</button>
+        </div>
+        <section class="wardrobe-panel" role="tabpanel" aria-label="装饰选项">
+          <div class="decoration-options" data-decoration-options></div>
+        </section>
+      </aside>
+      <section class="preview" aria-label="SVG 路径变形预览">
+        <div id="character"></div>
+      </section>
+
+      <aside class="controls" aria-label="角色形变控制">
+        <section class="motion-library" aria-label="动作">
+          <div class="motion-tabs" role="tablist" aria-label="动作分类">
+            <button type="button" role="tab" aria-selected="true" data-motion-tab="library">动作库</button>
+            <button type="button" role="tab" aria-selected="false" data-motion-tab="recorder">录制动作</button>
+          </div>
+          <div class="motion-pane" role="tabpanel" data-motion-pane="library">
+            <div class="motion-list" data-motions></div>
+          </div>
+          <div class="motion-pane" role="tabpanel" data-motion-pane="recorder" hidden>
+            <div class="motion-recorder">
+              <button type="button" data-action="record">开始录制</button>
+              <button type="button" data-action="save-motion" disabled>保存</button>
+            </div>
+            <div class="motion-list" data-recorded-motions></div>
+            <p class="motion-hint" data-motion-hint></p>
+          </div>
+        </section>
+        <div class="control-stack">
+        <label><span>身体高度</span><input data-control="body" type="range" min="15" max="220" value="100" /></label>
+        <label><span>身体胖瘦</span><input data-control="width" type="range" min="60" max="150" value="100" /></label>
+        <label><span>手臂长度</span><input data-control="arms" type="range" min="55" max="240" value="100" /></label>
+        <label><span>腿部长度</span><input data-control="legs" type="range" min="50" max="180" value="100" /></label>
+        <label><span>鱼头大小</span><input data-control="head" type="range" min="70" max="140" value="100" /></label>
+        <div class="actions" aria-label="编辑操作">
+          <button type="button" data-action="reset">复原</button>
+          <button type="button" data-action="randomize">随机</button>
+          <button type="button" data-action="helmet" aria-pressed="false">隐藏帽子</button>
+          <button type="button" data-action="export" disabled>导出 SVG</button>
+        </div>
+        </div>
+      </aside>
+    </main>
+    <script src="./script.js"></script>
+  <script>window.addEventListener('load',()=>setTimeout(()=>{applyDecorationSelection('suit','astronaut-suit');applyDecorationSelection('helmet',null);applyDecorationSelection('skin','flesh-6');applyDecorationSelection('shirt','plain');update();garmentPaths.shirtTop.style.display='';},200));</script></body>
+</html>

@@ -9,7 +9,7 @@ const rows=JSON.parse(vm.runInContext(`JSON.stringify((()=>{
  outfitOverlay={name:'outfit'};neckOverlay={name:'neck'};
  selectedDecorations.shirt=null;selectedDecorations.outerwear='worker-jacket';
  const warp=buildWarp({body:100,width:100,arms:100,legs:100,head:100});
- for(const outerwear of ['worker-jacket','blue-worker-jacket','charcoal-blazer','secondary-jacket','student-jacket'])for(const pants of ['worker-trousers','jobs-gradient-jeans','wide-pants','loose-wide-pants','plain','jumpsuit',null])for(const held of [false,true])for(const side of ['left','right'])for(const angle of [-70,-30,0,15,25,45,80]){
+ for(const outerwear of ['worker-jacket','blue-worker-jacket','charcoal-blazer','secondary-jacket','student-jacket','space-shirt'])for(const pants of ['worker-trousers','jobs-gradient-jeans','wide-pants','loose-wide-pants','plain','jumpsuit',null])for(const held of [false,true])for(const side of ['left','right'])for(const angle of [-70,-30,0,15,25,45,80]){
   selectedDecorations.outerwear=outerwear;selectedDecorations.pants=pants;
   dragPoses.length=0;
   const pose=Object.assign(createDragPose(side+'Leg'),{x:side==='left'?-10:10,y:0});
@@ -31,7 +31,7 @@ const coatOrder=vm.runInContext(`(()=>{
  garmentPaths={pants,alohaBody:coat};legParts=[{calfOverlay:left},{calfOverlay:right}];
  outfitOverlay.appendChild(pants);neckOverlay.appendChild(coat);
  const orders=[];
- for(const id of ['worker-jacket','blue-worker-jacket','charcoal-blazer','secondary-jacket','student-jacket']){
+ for(const id of ['worker-jacket','blue-worker-jacket','charcoal-blazer','secondary-jacket','student-jacket','space-shirt']){
   neckOverlay.appendChild(coat);selectedDecorations.outerwear=id;updateGarmentOrder();
   orders.push({id,names:outfitOverlay.children.map(n=>n.name)});
  }

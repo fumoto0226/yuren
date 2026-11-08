@@ -20,7 +20,7 @@ const result=JSON.parse(vm.runInContext(`JSON.stringify((()=>{
   return {full,pieces,registered,covered,paint,noTie,cleared,individual};
 })())`,context));
 assert.equal(result.full.suit,'navy-suit');
-assert.equal(result.full.skin,'milk-frog');
+assert.equal(result.full.skin,'flesh');
 assert.equal(result.full.helmet,null);assert.equal(result.full.outerwear,'suit-jacket');assert.equal(result.full.shirt,null);assert.equal(result.full.gloves,null);
 assert.ok(result.registered,'Every suit item is also individually selectable');
 assert.equal(result.full.neck,null,'The suit leaves the neck slot free');
@@ -30,14 +30,14 @@ assert.equal(result.paint,'#454963');
 assert.equal(result.noTie.suit,null,'An individual change exits the preset');
 assert.equal(result.noTie.neck,null);
 for(const key of ['outerwear','pants','shoes'])assert.equal(result.noTie[key],result.pieces[key],'Changing neckwear keeps the suit pieces');
-for(const [key,value] of Object.entries(result.cleared))assert.equal(value,key==='skin'?'milk-frog':null);
+for(const [key,value] of Object.entries(result.cleared))assert.equal(value,key==='skin'?'flesh':null);
 for(const [key,id] of Object.entries(result.pieces))assert.equal(result.individual[key],id);
 assert.equal(result.individual.suit,null);
 for(const filename of ['navy-suit','suit-jacket','suit-trousers','black-dress-shoes']){
  const icon=fs.readFileSync(path.join(__dirname,'../svg',filename+'.svg'),'utf8');
  assert.ok(icon.includes('<svg')&&!/NaN|Infinity/.test(icon),'Generated suit thumbnails contain finite SVG');
 }
-console.log('Navy suit: three registered pieces with the tie integrated into the jacket, preserved skin, cleared conflicts, independent selection/removal and valid thumbnails.');
+console.log('Navy suit: four registered pieces with flesh skin and the tie integrated into the jacket, cleared conflicts, independent selection/removal and valid thumbnails.');
 // All current and future presets must only combine catalog items that can
 // also be selected independently. A preset may not hide exclusive pieces.
 const presets=JSON.parse(vm.runInContext(`JSON.stringify(decorationCatalog.suit.map(suit=>{
@@ -69,12 +69,12 @@ for(const preset of presets){
 }
 const king=presets.find(preset=>preset.id==='royal-suit');
 assert.equal(king.applied.helmet,'crown');assert.equal(king.applied.neck,'royal-collar');
-assert.equal(king.applied.skin,'milk-frog');
+assert.equal(king.applied.skin,'flesh');
 // A preset may also bring a skin of its own, and then it replaces it.
 const pochita=presets.find(preset=>preset.id==='pochita-suit');
 assert.equal(pochita.applied.skin,'pochita');
 assert.equal(pochita.applied.helmet,'chainsaw');
-console.log('Every suit is a combination of independently selectable catalog items; royal suit includes five pieces and preserves skin.');
+console.log('Every suit is a combination of independently selectable catalog items; royal suit includes the unnumbered flesh skin.');
 
 const layered=vm.runInContext(`(()=>{
  applyDecorationSelection('shirt','loose-tee');
@@ -84,3 +84,6 @@ const layered=vm.runInContext(`(()=>{
  return worn&&selectedDecorations.shirt==='loose-tee'&&selectedDecorations.outerwear===null;
 })()`,context);
 assert.ok(layered,'Suit jacket occupies outerwear and preserves its inner shirt on selection/removal');
+for(const id of ['ivory-suit','royal-suit','navy-suit','batfish-suit'])assert.equal(presets.find(p=>p.id===id).applied.skin,'flesh',id+' includes the unnumbered flesh skin');
+const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+assert.equal([...html.matchAll(/data-category="([^"]+)"/g)][0][1],'suit','Suit tab is first');

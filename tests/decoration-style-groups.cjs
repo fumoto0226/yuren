@@ -11,7 +11,7 @@ for(const [category,groups] of Object.entries(data.groups)){
   const item=data.catalog[category].find(item=>item.id===variants[0]);
   const original=fs.readFileSync(path.join(root,item.icon),'utf8');
   const basic=fs.readFileSync(path.join(root,`svg/base-${category}-${key}.svg`),'utf8');
-  assert.deepEqual(basic.match(/<mask\b[\s\S]*?<\/mask>/g),original.match(/<mask\b[\s\S]*?<\/mask>/g),'Basic thumbnails preserve mask luminance');
+  assert.equal(basic,original,'Style thumbnail mirrors its first real color exactly');
   for(const id of variants){
    assert.ok(data.catalog[category].some(item=>item.id===id),`${category}/${id} is registered`);
    ids.push(id);
@@ -21,7 +21,7 @@ for(const [category,groups] of Object.entries(data.groups)){
  const expected=data.catalog[category].map(item=>item.id).filter(id=>category!=='shirt'||!data.special.includes(id));
  assert.deepEqual([...ids].sort(),[...expected].sort(),`${category}: every existing variant is reachable`);
 }
-assert.ok(!data.groups.skin&&!data.groups.suit&&!data.groups.helmet&&!data.groups.neck);
+assert.ok(!data.groups.skin&&!data.groups.suit&&data.groups.helmet&&!data.groups.neck);
 const state=vm.runInContext(`(()=>{
  baseDecorationSelections.shirt='tee';baseDecorationSelections.pants='shorts';
  applyDecorationSelection('skin','milk-frog');
@@ -51,3 +51,12 @@ const toggles=vm.runInContext(`Object.entries(decorationCatalog).map(([category,
 })`,context);
 for(const result of toggles){assert.ok(result.selected,result.category);assert.ok(result.cleared,result.category);}
 console.log('Every decoration category supports selecting and then clicking again to cancel.');
+
+const defaults=vm.runInContext(`Object.entries(decorationStyleGroups).flatMap(([category,groups])=>groups.map(([key,,ids])=>{
+ applyDecorationSelection(category,ids[ids.length-1]);selectBaseDecoration(category,key);
+ const first=selectedDecorations[category]===ids[0]&&!baseDecorationSelections[category];
+ selectBaseDecoration(category,key);
+ return first&&selectedDecorations[category]===ids[0]&&!baseDecorationSelections[category];
+}))`,context);
+assert.ok(defaults.every(Boolean),'Every style click selects its first actual color, including when already selected');
+console.log(defaults.length+' style cards select their first real color; every style has at least one registered color.');
