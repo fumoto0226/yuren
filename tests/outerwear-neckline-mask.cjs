@@ -20,3 +20,5 @@ for(const rgba of [[1,1,1,1],[1,.5,0,1],[.1,.2,.5,1],[1,0,0,.5],[0,0,0,0]]){
  assert.deepEqual(out,[0,0,0,rgba[3]],'Painted cloth becomes black occlusion with unchanged alpha; open/transparent areas remain open');
 }
 console.log('Outerwear neckline mask references live coat/vest artwork and preserves alpha: lapels cover inner collars, while openings and transparent areas stay visible.');
+
+assert.ok(data.filter.children.some(n=>n.tag==='feMorphology'&&n.attrs.operator==='erode'&&Number(n.attrs.radius)>0),'Collar keeps a small overlap beneath antialiased coat edges');

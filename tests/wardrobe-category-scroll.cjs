@@ -1,0 +1,14 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync('script.js','utf8');
+const panel={scrollTop:120,clientHeight:400,getBoundingClientRect:()=>({top:80})};
+const card={getBoundingClientRect:()=>({top:700,height:160})};
+let selected={closest:()=>card};
+const c=vm.createContext({document:{querySelector:()=>panel},decorationOptions:{querySelector:()=>selected}});
+vm.runInContext(source.slice(source.indexOf('function revealEquippedDecoration()'),source.indexOf("decorationTabs.forEach(tab => tab.addEventListener('click'")),c);
+vm.runInContext('revealEquippedDecoration()',c);
+assert.equal(panel.scrollTop,620,'Grouped selected variant is centered synchronously before the handler returns');
+selected=null;vm.runInContext('revealEquippedDecoration()',c);assert.equal(panel.scrollTop,0);
+const handler=source.slice(source.indexOf("decorationTabs.forEach(tab => tab.addEventListener('click'"),source.indexOf('clearDecorationsButton.addEventListener'));
+assert.ok(handler.indexOf('renderDecorationOptions();')<handler.indexOf('revealEquippedDecoration();'));
+assert.doesNotMatch(handler,/requestAnimationFrame|setTimeout|smooth/);
+console.log('Category switch reveals selected style synchronously, including grouped variants; empty category starts at top.');

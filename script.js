@@ -195,9 +195,7 @@ const decorationCatalog = {
     { id: 'orange-shorts', name: '橙色短裤', icon: './svg/orange-shorts.svg' },
     { id: 'black-shorts', name: '黑色短裤', icon: './svg/black-shorts.svg' },
     {id:'slight-wide-shorts',name:'灰青色微阔短裤',icon:'./svg/slight-wide-shorts.svg'},
-    {id:'loose-shorts',name:'灰青色宽松短裤',icon:'./svg/loose-shorts.svg'},
     {id:'extra-wide-shorts',name:'灰青色阔腿短裤',icon:'./svg/extra-wide-shorts.svg'},
-    { id: 'wide-shorts', name: '灰青色超阔短裤', icon: './svg/wide-shorts.svg' },
     ...Object.entries(thongVariants).map(([id,item])=>({id,name:item.name,icon:`./svg/${id}.svg`})),
     ...Object.entries(denimVariants).map(([id,variant])=>({id,name:variant.name,icon:`./svg/${id}.svg`})),
     ...Object.entries(workwearVariants).map(([id,item])=>({id,name:item.name,icon:`./svg/${id}.svg`,sleeveless:true})),
@@ -257,9 +255,7 @@ const decorationStyleGroups={
   ['denim-jumpsuit','连体工装裤',Object.keys(workwearVariants)],['jumpsuit','连体裤',['jumpsuit','navy-jumpsuit']],['briefs','四角内裤',Object.keys(boxerVariants)],['triangle-briefs','三角内裤',Object.keys(briefVariants)],['thong','丁字裤',Object.keys(thongVariants)],
   ['shorts','紧身短裤',['pink-shorts','orange-shorts','black-shorts']],['slight-wide-ultra-shorts','微阔超短裤',['student-shorts','green-ultra-shorts']],
   ['slight-wide-shorts','微阔短裤',['slight-wide-shorts']],
-  ['loose-shorts','宽松短裤',['loose-shorts']],
-  ['extra-wide-shorts','阔腿短裤',['extra-wide-shorts']],
-  ['wide-shorts','超阔短裤',['wide-shorts']]],
+  ['extra-wide-shorts','阔腿短裤',['extra-wide-shorts']]],
  outerwear:[['swim-ring','游泳圈',Object.keys(swimRingVariants)],['space','宽松卫衣',['space-shirt']],['blazer','西装外套',['charcoal-blazer']],['secondary','中学生外套',['secondary-jacket']],['student','小学生外套',['student-jacket']],['worker','工人外套',['worker-jacket','blue-worker-jacket']],['suit','西装上衣',['suit-jacket']],['short','短袖外套',['aloha-jacket']],['long','长袖外套',['aloha-long-jacket']],
   ['open-short','敞胸短袖外套',['aloha-open-jacket']],['open-long','敞胸长袖外套',['aloha-open-long-jacket']],
   ['vest','无袖开襟外套',['green-vest']]],
@@ -314,7 +310,7 @@ function applyBaseGarmentPaint(){
   leg.segments.forEach(({front},i)=>{
    if(tall&&i>=19){if(base.shoes)grayGarmentNode(front);return;}
    if(base.pants&&(wearingJumpsuit()||['plain','batfish-trousers'].includes(selectedDecorations.pants)||widePantFlares[selectedDecorations.pants]
-      ||['green-ultra-shorts','student-shorts','pink-shorts','orange-shorts','black-shorts','slight-wide-shorts','loose-shorts','extra-wide-shorts','wide-shorts'].includes(selectedDecorations.pants)&&i<shortsHemIndex()))grayGarmentNode(front);
+      ||['green-ultra-shorts','student-shorts','pink-shorts','orange-shorts','black-shorts','slight-wide-shorts','extra-wide-shorts'].includes(selectedDecorations.pants)&&i<shortsHemIndex()))grayGarmentNode(front);
   });
   if(base.pants)leg.fabricLayers.forEach(({group})=>grayGarmentNode(group));
   if(base.shoes){grayGarmentNode(leg.sneakerDetails);grayGarmentNode(leg.bootFill);}
@@ -2033,7 +2029,7 @@ function swimRingMarkup(warp,id=selectedDecorations.outerwear,front=false,prefix
  const duck=id==='duck-swim-ring',clip=prefix+(front?'-front':'-back');
  const shell=path(duck&&!front?duckRingSource:swimRingSource);
  const tag=(d,fill,stroke='none',width=1)=>`<path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round"/>`;
- const frontClip=path('M26.0527 94.6316L68.5557 94.6316L68.5557 116.7616L26.0527 116.7616Z');
+ const frontClip=path('M-1000 94.6316L1000 94.6316L1000 116.7616L-1000 116.7616Z');
  let markup=`<defs><clipPath id="${clip}-shell"><path d="${shell}"/></clipPath>${front?`<clipPath id="${clip}-region"><path d="${frontClip}"/></clipPath>`:''}</defs>`;
  markup+=front?`<g clip-path="url(#${clip}-region)">`:'';
  markup+=tag(shell,variant.fill);
@@ -3245,8 +3241,8 @@ function updateTorsoMaterial(node,warp) {
   const colors={'black-gray-sweatpants':'#373737','white-loose-wide-trousers':'#FAFAF7','space-trousers':'#FF8215',...Object.fromEntries(Object.entries(boxerVariants).map(([id,item])=>[id,item.color])),'dark-gray-slight-wide-trousers':'#2B2D2D','black-slight-wide-trousers':'#101011',...workerPantsColors,'batfish-trousers':decorationColors.batArmor,'ivory-trousers':decorationColors.royalWhite,'royal-trousers':decorationColors.royalWhite,plain:decorationColors.pants,'suit-trousers':decorationColors.suitNavy,
     'denim-jumpsuit':decorationColors.denimBlue,'large-ripped-denim-jeans':decorationColors.denimBlue,'washed-denim-jeans':decorationColors.denimBlue,'ripped-denim-jeans':decorationColors.denimBlue,'denim-jeans':decorationColors.denimBlue,'wide-pants':decorationColors.widePants,'loose-wide-pants':decorationColors.widePants,
     'green-ultra-shorts':'#264F02','student-shorts':'#102f68','pink-shorts':decorationColors.pinkShorts,'orange-shorts':decorationColors.orangeShorts,
-    'black-shorts':decorationColors.blackShorts,'wide-shorts':decorationColors.wideShorts,
-    'slight-wide-shorts':decorationColors.wideShorts,'loose-shorts':decorationColors.wideShorts,'extra-wide-shorts':decorationColors.wideShorts,
+    'black-shorts':decorationColors.blackShorts,
+    'slight-wide-shorts':decorationColors.wideShorts,'extra-wide-shorts':decorationColors.wideShorts,
     'red-shorts':decorationColors.redShorts,
     jumpsuit:decorationColors.jumpsuit,'navy-jumpsuit':decorationColors.navyJumpsuit};
   const color=denimVariants[selectedDecorations.pants]?.color||workwearVariants[selectedDecorations.pants]?.color||colors[selectedDecorations.pants];
@@ -3325,7 +3321,7 @@ function wearingJumpsuit() {
 const widePantFlares = {'black-gray-sweatpants':9.25,'white-loose-wide-trousers':10.5,'space-trousers':9.25,'dark-gray-slight-wide-trousers':3.5,'black-slight-wide-trousers':3.5,'worker-trousers':5.5,'blue-worker-trousers':5.5,...Object.fromEntries([...Object.keys(denimVariants),...Object.keys(workwearVariants)].map(id=>[id,5.5])),'jobs-gradient-jeans':3.5,'denim-jumpsuit':5.5,'large-ripped-denim-jeans':5.5,'washed-denim-jeans':5.5,'ripped-denim-jeans':5.5,'denim-jeans':5.5,'ivory-trousers':8,'royal-trousers':3,'suit-trousers':3.5,'wide-pants':5.5,'loose-wide-pants':10.5};
 // Same knee-length cut as the fitted shorts, widening toward its open hem.
 // How much each flared knee cut widens towards its hem.
-const kneeShortFlares={'green-ultra-shorts':3,'student-shorts':3,'slight-wide-shorts':3,'loose-shorts':5.5,'extra-wide-shorts':8,'wide-shorts':10};
+const kneeShortFlares={'green-ultra-shorts':3,'student-shorts':3,'slight-wide-shorts':3,'extra-wide-shorts':8};
 // How far down the leg a pair of shorts ends. The ultra shorts stop at 11
 // rather than nearer the knee: a hem that ends close to 19 is within reach
 // of the calf once the knee folds, and its cut edge then crosses the bare
@@ -3625,7 +3621,12 @@ function createOuterwearNecklineOcclusion(defs,necklineMask) {
   const black=document.createElementNS(SVG_NS,'feColorMatrix');
   black.setAttribute('type','matrix');
   black.setAttribute('values','0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0');
-  silhouette.appendChild(black);defs.appendChild(silhouette);
+  silhouette.appendChild(black);
+  // Retain a subpixel overlap under the real coat edge: cutting both layers
+  // at the same antialiased boundary exposes a light seam between them.
+  const overlap=document.createElementNS(SVG_NS,'feMorphology');
+  overlap.setAttribute('operator','erode');overlap.setAttribute('radius','0.35');
+  silhouette.appendChild(overlap);defs.appendChild(silhouette);
   const outerwearOcclusion=document.createElementNS(SVG_NS,'g');
   outerwearOcclusion.setAttribute('filter','url(#neckline-outerwear-silhouette)');
   outerwearOcclusion.setAttribute('data-neckline-outerwear-occlusion','');
@@ -3671,7 +3672,7 @@ function placeOuterwearOverNeckline() {
 function wearingUnderwear(){return !!thongVariants[selectedDecorations.pants]||!!briefVariants[selectedDecorations.pants]||!!boxerVariants[selectedDecorations.pants];}
 function pantsCoverThigh() {
   return wearingJumpsuit()||!!widePantFlares[selectedDecorations.pants]
-    ||['plain','batfish-trousers','green-ultra-shorts','student-shorts','pink-shorts','orange-shorts','black-shorts','slight-wide-shorts','loose-shorts','extra-wide-shorts','wide-shorts'].includes(selectedDecorations.pants);
+    ||['plain','batfish-trousers','green-ultra-shorts','student-shorts','pink-shorts','orange-shorts','black-shorts','slight-wide-shorts','extra-wide-shorts'].includes(selectedDecorations.pants);
 }
 function buttOutlineOpacity(side) {
   // The raised trouser or shorts leg supplies this hip contour itself. The
@@ -5218,8 +5219,8 @@ function update() {
     'green-ultra-shorts':'#264F02','student-shorts':'#102f68','pink-shorts':decorationColors.pinkShorts,
     'orange-shorts':decorationColors.orangeShorts,
     'black-shorts':decorationColors.blackShorts,
-    'wide-shorts':decorationColors.wideShorts,
-    'slight-wide-shorts':decorationColors.wideShorts,'loose-shorts':decorationColors.wideShorts,'extra-wide-shorts':decorationColors.wideShorts,
+
+    'slight-wide-shorts':decorationColors.wideShorts,'extra-wide-shorts':decorationColors.wideShorts,
   };
   legParts.forEach(({segments,bootFill,bootOutline,sneakerDetails,shoeClip,
       shoeCuff,shortHem,bootTop,wideHem,shortsClip,skinClip,ultraShortsClip,exposedThighClip,wideClip,ankleClip,
@@ -6240,11 +6241,23 @@ decorationTabs.forEach(tab=>{
  remove.addEventListener('click',event=>{event.stopPropagation();selectDecoration(category,null);});
  wrapper.appendChild(remove);tab.removeDecorationButton=remove;
 });
+function revealEquippedDecoration() {
+  const panel=document.querySelector('.wardrobe-panel');
+  if(!panel)return;
+  const selected=decorationOptions.querySelector('[aria-pressed="true"]');
+  const card=selected?.closest('.decoration-style-card')||selected;
+  if(!card){panel.scrollTop=0;return;}
+  const bounds=card.getBoundingClientRect(),viewport=panel.getBoundingClientRect();
+  // Set before the click handler returns, so the first painted frame already
+  // shows the selected style (including the base card of a selected variant).
+  panel.scrollTop=Math.max(0,panel.scrollTop+bounds.top-viewport.top-(panel.clientHeight-bounds.height)/2);
+}
 decorationTabs.forEach(tab => tab.addEventListener('click', () => {
   activeDecorationCategory = tab.dataset.category;
   decorationTabs.forEach(button => button.setAttribute('aria-selected',
     String(button === tab)));
   renderDecorationOptions();
+  revealEquippedDecoration();
 }));
 clearDecorationsButton.addEventListener('click',clearAllDecorations);
 decorationOptions.addEventListener('click', event => {

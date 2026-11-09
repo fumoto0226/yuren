@@ -724,9 +724,7 @@ const thumbnails = {
     `<path d="${art.pants.fill}" fill="#ee31ac"/>`,
     line(art.pants.sides),line(art.pants.crotch),line(art.pants.waist),
   ].join('\n')),
-  ...Object.fromEntries(['slight-wide-shorts','loose-shorts','extra-wide-shorts'].map(id=>[id,flaredShortsThumbnail(id,art.colors.wideShorts,shortFlares[id])])),
-  'wide-shorts': flaredShortsThumbnail('wide-shorts',art.colors.wideShorts,
-    shortFlares['wide-shorts']),
+  ...Object.fromEntries(['slight-wide-shorts','extra-wide-shorts'].map(id=>[id,flaredShortsThumbnail(id,art.colors.wideShorts,shortFlares[id])])),
   'orange-shorts': svg('11 109 80 56', [
     ...art.pants.legs.map((leg,index) => clippedTube(leg,
       limbCuff(leg,19),'#eb8135',`orange-leg-${index}`)
@@ -799,7 +797,7 @@ for(const id of Object.keys(capePalettes)){
 for (const [name, content] of Object.entries(thumbnails)) {
   const filename=art.coloredSkinVariants[name]||art.swim.caps[name]||art.swim.goggles[name]||art.swim.rings[name]||art.reference595.bandVariants[name]||art.angel.wingVariants[name]||art.worker.extraBoots[name]||art.muscleVariants[name]||art.narutoItems.longVariants[name]||art.narutoItems.topknotVariants[name]||art.narutoItems.hairVariants[name]||art.denimVariants[name]||art.workwearVariants[name]||art.boxerVariants[name]||art.briefVariants[name]||art.thongVariants[name]||shortFlares[name]?name:['sponge-skin','fish-god-suit','farmer-suit','fisher-suit','working-fish-suit','red-cropped-tee-2','large-party-hat','blue-eye-band','gourd','navy-slippers','scar','teardrop-earrings','paired-swords','black-gray-sweatpants','beach-suit','shell-top','seaweed-pants','lipstick-fish','pink-ribbon-hair','mosaic-top','mosaic-pants','streaker-suit','angel-suit','angel-halo','angel-wings','angel-vest','white-loose-wide-trousers','flesh-8','flesh-7','muscle-skin','yellow-spiky-hair','navy-sandals','space-helmet','space-shirt','space-trousers','orange-shoes','space-gloves','astronaut-suit','flesh-6','topknot-hair','charcoal-blazer','colorblock-shoes','topknot-suit','hypnotic','white-tie-shirt','dark-gray-slight-wide-trousers','makima-suit','long-braid-hair','flesh-5','secondary-hat','secondary-jacket','black-slight-wide-trousers','brown-shoes','secondary-suit','student-long-socks-shoes','flesh-4','student-hat','student-jacket','student-shorts','student-shoes','student-suit','little-yellow-fish','white-worker-helmet','blue-worker-jacket','blue-worker-trousers','gray-worker-boots','blue-worker-suit','flesh-3','worker-helmet','worker-jacket','worker-trousers','worker-boots','worker-suit','kappa','kappa-hair','kappa-suit','flesh-2','round-glasses','black-turtleneck-tee','gray-sneakers','jobs-suit','cigarette','large-ripped-denim-jeans','denim-jumpsuit','washed-denim-jeans','ripped-denim-jeans','denim-jeans','cinched-long-sleeve','aloha-open-jacket','aloha-open-long-jacket','aloha-long-jacket','aloha-jacket','default-skin','alien-skin','clown-skin','party-hat','clown-suit','flesh-skin','shark-hood','shark-suit','pochita','chainsaw','pochita-suit','batfish-cowl','batfish-armor','batfish-trousers','batfish-boots','batfish-gloves','batfish-suit',...Object.keys(capePalettes),'ivory-tunic','ivory-trousers','crimson-cape','ivory-suit','royal-trousers','suit-jacket','suit-trousers','black-dress-shoes','navy-suit','blue-vest','green-vest','yellow-hat','crown','yellow-tee',
     'patched-tee','gray-scoop-tee','black-cropped-tee','coral-tee','loose-tee','loose-long-sleeve','red-triangle','red-shorts','red-briefs',
-    'pink-shorts','orange-shorts','black-shorts','wide-shorts','skirt','milk-frog',
+    'pink-shorts','orange-shorts','black-shorts','skirt','milk-frog',
     'red-thong','wide-pants',
     'navy-jumpsuit','loose-wide-pants','brown-boots','dark-boots']
     .includes(name)?name:`decoration-${name}`;

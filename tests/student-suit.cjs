@@ -4,7 +4,7 @@ const c=vm.createContext({document:{querySelector:()=>({setAttribute(){}}),query
 vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../script.js'),'utf8').split('resetButton.addEventListener')[0],c);
 const r=vm.runInContext(`(()=>{
  applyDecorationSelection('suit','student-suit');const selected={...selectedDecorations};
- const socks=[];for(const pants of [null,'student-shorts','pink-shorts','wide-shorts','plain','wide-pants','jobs-gradient-jeans','worker-trousers','jumpsuit','denim-jumpsuit'])for(const i of [19,23,24,31])socks.push({pants,i,show:studentSockVisible(i,pants,'student-shoes')});
+ const socks=[];for(const pants of [null,'student-shorts','pink-shorts','extra-wide-shorts','plain','wide-pants','jobs-gradient-jeans','worker-trousers','jumpsuit','denim-jumpsuit'])for(const i of [19,23,24,31])socks.push({pants,i,show:studentSockVisible(i,pants,'student-shoes')});
  const paths=[];for(const size of [60,100,150])for(const part of ['head','leftHand','rightHand','leftLeg']){
   dragPoses.length=0;dragPoses.push(Object.assign(createDragPose(part),{x:35,y:part==='head'?40:-60}));
   const warp=buildWarp({body:100,width:size,arms:size,legs:size,head:100});
@@ -14,7 +14,7 @@ const r=vm.runInContext(`(()=>{
  return {selected,socks,paths,color:skinColor(),group:decorationStyleGroups.pants.find(g=>g[0]==='slight-wide-ultra-shorts')[2],shortEnd:shortsHemIndex('student-shorts'),newFlare:kneeShortFlares['student-shorts'],collars:studentCollars};
 })()`,c);
 assert.equal(r.selected.skin,'flesh-4');assert.equal(r.selected.outerwear,'student-jacket');assert.equal(r.selected.shirt,null);assert.equal(r.selected.pants,'student-shorts');assert.equal(r.selected.shoes,'student-long-socks-shoes');assert.equal(r.selected.helmet,'student-hat');assert.equal(r.color,'#ffc1bf');assert.ok(r.group.includes('student-shorts'));assert.equal(r.newFlare,3);assert.equal(r.shortEnd,11,'Micro-wide ultra shorts end well above the knee, so a folded calf never reaches their hem');
-for(const s of r.socks)assert.equal(s.show,[null,'student-shorts','pink-shorts','wide-shorts'].includes(s.pants)&&s.i>=24,'Long pants must cover the leg-based sock');
+for(const s of r.socks)assert.equal(s.show,[null,'student-shorts','pink-shorts','extra-wide-shorts'].includes(s.pants)&&s.i>=24,'Long pants must cover the leg-based sock');
 for(const p of r.paths)assert.ok(!/NaN|Infinity/.test(p));
 const nums=r.collars.map(d=>d.match(/-?\d+(?:\.\d+)?/g).map(Number));for(let i=0;i<nums[0].length;i++)assert.ok(Math.abs(nums[1][i]-(i%2?nums[0][i]:94-nums[0][i]))<.001);
 console.log('Student suit: outerwear slot, five individual pieces, micro-wide ultra-short cut, symmetric small collar, and calf socks hidden by long pants.');
