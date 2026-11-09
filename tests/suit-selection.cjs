@@ -87,7 +87,7 @@ assert.ok(layered,'Suit jacket occupies outerwear and preserves its inner shirt 
 for(const id of ['ivory-suit','royal-suit','navy-suit','batfish-suit'])assert.equal(presets.find(p=>p.id===id).applied.skin,'flesh',id+' includes the unnumbered flesh skin');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 assert.equal([...html.matchAll(/data-category="([^"]+)"/g)][0][1],'suit','Suit tab is first');
-assert.equal(vm.runInContext('decorationCounts().categories.suit',context),13,'Suit badge excludes the three disabled outfits');
+assert.equal(vm.runInContext('decorationCounts().categories.suit',context),16,'Suit badge excludes the three disabled outfits');
 assert.equal(vm.runInContext("decorationCatalog.skin.find(s=>s.id==='pochita').name",context),'大眼睛皮肤');
 assert.equal(vm.runInContext('POCHITA_TAIL_VISIBLE',context),false,'Tail is hidden behind a reversible flag');
 assert.ok(vm.runInContext('pochitaCordSource.length>0&&pochitaGripSource.length>0',context),'Tail artwork remains available');
