@@ -7,7 +7,7 @@ const r=vm.runInContext(`(()=>{
  for(const id of Object.keys(capVariants)){applyDecorationSelection('helmet',id);caps.push({id,hidden:hornHidden(),color:capVariants[id].color});}
  for(const id of Object.keys(divingGoggleVariants)){applyDecorationSelection('helmet',id);goggles.push({id,hidden:hornHidden()});}
  for(const id of Object.keys(swimRingVariants)){
-  applyDecorationSelection('outerwear',id);applyDecorationSelection('cape','gourd');applyDecorationSelection('shirt','red-tee');
+  applyDecorationSelection('outerwear',id);applyDecorationSelection('cape','gourd');applyDecorationSelection('shirt','yellow-tee');
   for(const size of [60,100,150])for(const part of ['head','leftHand','rightLeg']){
    dragPoses.length=0;dragPoses.push(Object.assign(createDragPose(part),{x:35,y:-50}));
    const warp=buildWarp({body:size,width:size,arms:size,legs:size,head:size});
@@ -35,7 +35,7 @@ const r=vm.runInContext(`(()=>{
  placeDivingGoggleLayers();
  const goggleLayers={head:partLayers.head.children.map(n=>n.name),front:divingGoggleOverlay.children.map(n=>n.name)};
  const layers=[];
- for(const shirt of ['red-tee','shell-top'])for(const part of ['leftHand','rightLeg']){
+ for(const shirt of ['yellow-tee','shell-top'])for(const part of ['leftHand','rightLeg']){
   selectedDecorations.shirt=shirt;dragPoses.length=0;dragPoses.push(Object.assign(createDragPose(part),{x:30,y:-60}));
   updateGarmentOrder();updatePartOrder();layers.push({root:svg.children.map(n=>n.name),outfit:outfitOverlay.children.map(n=>n.name)});
  }

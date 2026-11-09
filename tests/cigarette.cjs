@@ -1,9 +1,9 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const controls=['body','width','arms','legs','head'].map(key=>({dataset:{control:key},value:'100'}));
-const context=vm.createContext({document:{querySelector:()=>({}),querySelectorAll:()=>controls},requestAnimationFrame:()=>1,console});
+const context=vm.createContext({document:{querySelector:()=>({setAttribute(){}}),querySelectorAll:()=>controls},requestAnimationFrame:()=>1,console});
 vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../script.js'),'utf8').split('resetButton.addEventListener')[0],context);
 const result=vm.runInContext(`(()=>{
- selectedDecorations.helmet='cigarette';
+ selectedDecorations.neck='cigarette';
  return [70,100,140].map(head=>{
   const poses=[-1,0,1].map(mouth=>{
    dragPoses.length=0;dragPoses.push({part:'head',x:0,y:0,angle:0,mouth});
@@ -22,3 +22,20 @@ for(const poses of result){
  assert.ok(Math.hypot(poses[1].tip.x-poses[2].tip.x,poses[1].tip.y-poses[2].tip.y)>1);
 }
 console.log('Cigarette: anchored mouth rotation across head sizes; visible at rest/open, still visible when shut.');
+
+const placement=JSON.parse(vm.runInContext(`JSON.stringify((()=>{
+ const node={style:{}};cigarettePaths=[node];
+ applyDecorationSelection('helmet','crown');
+ applyDecorationSelection('neck','cigarette');update();
+ const withHat=selectedDecorations.helmet==='crown'&&node.style.display==='';
+ applyDecorationSelection('helmet','yellow-hat');update();
+ const hatChangeKeeps=selectedDecorations.neck==='cigarette'&&node.style.display==='';
+ applyDecorationSelection('neck','scarf');update();
+ const scarfReplaces=selectedDecorations.helmet==='yellow-hat'&&node.style.display==='none';
+ applyDecorationSelection('neck','cigarette');update();
+ applyDecorationSelection('neck',null);update();
+ return {withHat,hatChangeKeeps,scarfReplaces,cleared:node.style.display==='none',inNeck:decorationCatalog.neck.some(item=>item.id==='cigarette'),inHelmet:decorationCatalog.helmet.some(item=>item.id==='cigarette'),helmetStyle:decorationStyleGroups.helmet.some(group=>group[2].includes('cigarette'))};
+})())`,context));
+for(const key of ['withHat','hatChangeKeeps','scarfReplaces','cleared','inNeck'])assert.equal(placement[key],true,key);
+assert.equal(placement.inHelmet,false);assert.equal(placement.helmetStyle,false);
+console.log('Cigarette belongs to neckwear, stays visible across hat changes, and can be replaced by a scarf or removed.');

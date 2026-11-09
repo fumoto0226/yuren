@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
-const context=vm.createContext({document:{querySelector:()=>({setAttribute(){},removeAttribute(){}}),querySelectorAll:()=>['body','width','arms','legs','head'].map(key=>({dataset:{control:key},value:'100'}))},requestAnimationFrame:()=>1,console});
+const context=vm.createContext({document:{querySelector:()=>({setAttribute(){},removeAttribute(){}}),querySelectorAll:()=>['body','width','arms','legs','head'].map(key=>({dataset:{control:key},value:'100',setAttribute(){}}))},requestAnimationFrame:()=>1,console});
 vm.runInContext(fs.readFileSync(path.join(root,'script.js'),'utf8').split('resetButton.addEventListener')[0],context);
 const data=vm.runInContext('({groups:decorationStyleGroups,catalog:decorationCatalog,special:specialShirtIds})',context);
 for(const [category,groups] of Object.entries(data.groups)){
@@ -53,10 +53,28 @@ for(const result of toggles){assert.ok(result.selected,result.category);assert.o
 console.log('Every decoration category supports selecting and then clicking again to cancel.');
 
 const defaults=vm.runInContext(`Object.entries(decorationStyleGroups).flatMap(([category,groups])=>groups.map(([key,,ids])=>{
- applyDecorationSelection(category,ids[ids.length-1]);selectBaseDecoration(category,key);
+ applyDecorationSelection(category,null);selectBaseDecoration(category,key);
  const first=selectedDecorations[category]===ids[0]&&!baseDecorationSelections[category];
  selectBaseDecoration(category,key);
- return first&&selectedDecorations[category]===ids[0]&&!baseDecorationSelections[category];
+ const cleared=selectedDecorations[category]===null;
+ applyDecorationSelection(category,ids[ids.length-1]);selectBaseDecoration(category,key);
+ return first&&cleared&&selectedDecorations[category]===null;
 }))`,context);
-assert.ok(defaults.every(Boolean),'Every style click selects its first actual color, including when already selected');
-console.log(defaults.length+' style cards select their first real color; every style has at least one registered color.');
+assert.ok(defaults.every(Boolean),'Every style selects its first color and toggles off any worn color in that style');
+console.log(defaults.length+' style cards select their first color and toggle off when clicked again.');
+
+const usage=vm.runInContext(`Object.entries(decorationCatalog).filter(([slot])=>slot!=='suit').flatMap(([slot,items])=>items.map(item=>{
+ const expected=decorationCatalog.suit.filter(s=>s.pieces?.[slot]===item.id).length;
+ const dots=decorationSuitDots(slot,item.id);
+ return expected===decorationSuitUsage(slot,item.id)&&(dots.match(/<i /g)||[]).length===expected;
+}))`,context);
+assert.ok(usage.every(Boolean),'Exactly one dot per suit that references a registered color');
+const cleared=vm.runInContext(`(()=>{
+ applyDecorationSelection('suit','angel-suit');applyDecorationSelection('helmet','red-baseball-cap');
+ baseDecorationSelections.pants='loose-wide';
+ const before={...selectedDecorations};
+ clearAllDecorations();
+ return {before,empty:Object.values(selectedDecorations).every(v=>v===null),base:Object.keys(baseDecorationSelections).length,helmet:helmetVisible};
+})()`,context);
+assert.ok(cleared.before.skin);assert.ok(cleared.empty);assert.equal(cleared.base,0);assert.equal(cleared.helmet,false);
+console.log('Suit usage dots match exact component colors; clear removes all decorations, skin, suit and base choices.');

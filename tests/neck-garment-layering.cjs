@@ -5,23 +5,29 @@ vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../script.j
 const r=vm.runInContext(`(()=>{
  const children=[];
  neckOverlay={name:'neck',insertBefore(node,before){const i=children.indexOf(node);if(i>=0)children.splice(i,1);const j=children.indexOf(before);children.splice(j<0?children.length:j,0,node);}};
- const scarf={name:'scarf'},silver={name:'silver'},royal={name:'royal'};
- scarfPaths=[{node:scarf}];children.push(scarf,silver,royal);
+ const scarf={name:'scarf'};
+ scarfPaths=[{node:scarf}];children.push(scarf);
  garmentPaths={greenVestLeft:{name:'vestLeft'},greenVestRight:{name:'vestRight'},alohaBody:{name:'outer'}};
- const collar={name:'collar'},edge={name:'collarEdge'};
- placeNeckGarmentBelowAccessories(collar);placeNeckGarmentBelowAccessories(edge);placeOuterwearOverNeckline();
+ spaceCollarOverlay={name:'spaceCollar'};
+ const collar={name:'collar'},edge={name:'collarEdge'},ivoryCollar={name:'ivoryCollar'};
+ placeNeckGarmentBelowAccessories(ivoryCollar);placeNeckGarmentBelowAccessories(collar);placeNeckGarmentBelowAccessories(edge);placeOuterwearOverNeckline();
  const neckOrder=children.map(n=>n.name),scene=[];
  svg={appendChild(node){const i=scene.indexOf(node);if(i>=0)scene.splice(i,1);scene.push(node);}};
  for(const name of layerOrder)partLayers[name]={name};outfitOverlay={name:'outfit'};
  selectedDecorations.shirt='black-turtleneck-tee';
- const poses=[];for(const neck of ['scarf','silver-collar','royal-collar']){
+ const poses=[];
+ const shirts=[null,...decorationCatalog.shirt.map(item=>item.id)];
+ const coats=[null,...decorationCatalog.outerwear.map(item=>item.id)];
+ for(const shirt of shirts)for(const coat of coats)for(const {id:neck} of decorationCatalog.neck){
+  selectedDecorations.shirt=shirt;selectedDecorations.outerwear=coat;
   selectedDecorations.neck=neck;armRaised.left=armRaised.right=false;updatePartOrder();
   const resting=scene.map(n=>n.name);armRaised.right=true;updatePartOrder();
-  poses.push({resting,raised:scene.map(n=>n.name)});
+  poses.push({shirt,coat,neck,resting,raised:scene.map(n=>n.name)});
  }
  return {neckOrder,poses};
 })()`,c);
-for(const accessory of ['scarf','silver','royal'])for(const garment of ['collar','collarEdge','outer'])assert.ok(r.neckOrder.indexOf(garment)<r.neckOrder.indexOf(accessory),'All neck accessories must cover clothing collars and outerwear');
+for(const accessory of ['scarf'])for(const garment of ['collar','collarEdge','ivoryCollar','outer','spaceCollar'])assert.ok(r.neckOrder.indexOf(garment)<r.neckOrder.indexOf(accessory),'All neck accessories must cover clothing collars and outerwear');
 assert.ok(r.neckOrder.indexOf('outer')>r.neckOrder.indexOf('collarEdge'),'Outerwear covers the inner high collar');
-for(const p of r.poses){assert.ok(p.resting.indexOf('neck')>p.resting.indexOf('head'),'High collar remains above the head/neck seam');assert.ok(p.raised.indexOf('rightHand')>p.raised.indexOf('neck'),'A raised hand still covers every neck accessory');}
-console.log('Neck layers: head < clothing collar < outerwear < all neck accessories < raised hand; no new masks.');
+assert.ok(r.neckOrder.indexOf('spaceCollar')>r.neckOrder.indexOf('outer'),'Space outer collar covers inner garment necklines');
+for(const p of r.poses){assert.equal(p.resting.includes('spaceCollar'),false,'Space collar remains inside the neck layer, never re-promoted above accessories');assert.ok(p.resting.indexOf('neck')>p.resting.indexOf('head'),'High collar remains above the head/neck seam');assert.ok(p.raised.indexOf('rightHand')>p.raised.indexOf('neck'),'A raised hand still covers every neck accessory');}
+console.log(`${r.poses.length} shirt/outerwear/neck combinations: every collar, including the space collar, stays below neck accessories; raised hands retain their foreground order.`);

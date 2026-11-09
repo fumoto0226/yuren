@@ -5,7 +5,7 @@ const context=vm.createContext({document:{querySelector:()=>({setAttribute(){}})
 vm.runInContext(fs.readFileSync(path.join(__dirname,'../script.js'),'utf8').split('resetButton.addEventListener')[0],context);
 const result=vm.runInContext(`(()=>{
   activeDecorationCategory='pants';
-  selectedDecorations.shirt='red-tee';selectedDecorations.pants='navy-jumpsuit';
+  selectedDecorations.shirt='yellow-tee';selectedDecorations.pants='navy-jumpsuit';
   selectedDecorations.outerwear='green-vest';selectedDecorations.shoes='brown-boots';
   selectedDecorations.gloves='plain';selectedDecorations.neck='scarf';
   applyDecorationSelection('skin','milk-frog');
@@ -20,7 +20,7 @@ const result=vm.runInContext(`(()=>{
 })()`,context);
 assert.equal(result.dressed.skin,'milk-frog');
 assert.equal(result.dressed.pants,'navy-jumpsuit','Skin keeps every clothing slot');
-assert.equal(result.dressed.shirt,'red-tee');
+assert.equal(result.dressed.shirt,'yellow-tee');
 assert.equal(result.color,'#e9ab24');
 assert.ok(result.belly.length>20&&!/NaN|Infinity/.test(result.belly));
 assert.equal(result.afterShirt.skin,'milk-frog','Choosing a single item keeps the skin');
@@ -29,3 +29,34 @@ assert.equal(result.bare.skin,null);assert.equal(result.normalColor,'#C5C5C5');
 assert.equal(result.bare.shirt,'coral-tee','Removing the skin leaves the clothes on');
 assert.ok(result.catalog>0,'The suit category contains wearable outfits');
 console.log('Milk frog is a skin: it recolors the frog, conflicts with no clothing, and clothing suits remain available.');
+
+const rainbow=vm.runInContext(`(()=>{
+ applyDecorationSelection('skin','rainbow-color-skin');
+ applyDecorationSelection('pants','black-shorts');
+ const mock=()=>({attrs:{d:'M27 56L67 56L66 130L28 130Z'},style:{},setAttribute(k,v){this.attrs[k]=v},getAttribute(k){return this.attrs[k]}});
+ const body=mock(),upperSkin=mock();upperSkin.previousSibling=body;
+ torsoMaterial={upperSkin,upper:[mock(),mock()],lower:[mock(),mock()],gradient:mock(),fabric:mock(),upperClip:mock()};
+ updateTorsoMaterial(body,buildWarp({body:100,width:100,arms:100,legs:100,head:100}));
+ const wearing={fill:body.attrs.fill,upperFill:upperSkin.attrs.fill,upperVisible:upperSkin.style.display,stops:torsoMaterial.upper.concat(torsoMaterial.lower).map(s=>s.attrs['stop-color']),clip:torsoMaterial.upperClip.attrs.points};
+ applyDecorationSelection('skin','blue-color-skin');
+ updateTorsoMaterial(body,buildWarp({body:100,width:100,arms:100,legs:100,head:100}));
+ return {wearing,solid:upperSkin.style.display,paint:skinColor(),defs:rainbowSkinDefs()};
+})()`,context);
+assert.equal(rainbow.wearing.upperFill,'url(#rainbow-skin)');assert.equal(rainbow.wearing.upperVisible,'');
+assert.ok(rainbow.wearing.stops.every(s=>/^#[0-9a-f]{6}$/i.test(s)),'Material stops are actual colors, not gradient URLs');
+assert.ok(!/NaN|undefined/.test(rainbow.wearing.clip));assert.equal(rainbow.solid,'none');assert.equal(rainbow.paint,'#438FF1');
+for(const color of ['#FF75C3','#FFA647','#FFE83F','#9FFF5B','#70E2FF','#CD93FF'])assert.ok(rainbow.defs.includes(color));
+console.log('Rainbow skin preserves all six reference colors and gradient upper body with trousers; solid skin switching restores normal painting.');
+
+const sponge=vm.runInContext(`(()=>{
+ applyDecorationSelection('suit','working-fish-suit');
+ const before={...selectedDecorations};applyDecorationSelection('skin','sponge');
+ const after={...selectedDecorations},color=skinColor(),body=skinTrait('sponge');
+ applyDecorationSelection('helmet','space-helmet');
+ const hidden=!skinTrait('spongeFace')&&skinTrait('sponge');
+ return {before,after,color,body,hidden,paths:spongeHeadSpecs.map(s=>s.source).concat(spongeBodySource)};
+})()`,context);
+assert.equal(sponge.color,'#FEF455');assert.ok(sponge.body&&sponge.hidden);
+for(const slot of ['shirt','pants','shoes','outerwear'])assert.equal(sponge.after[slot],sponge.before[slot]);
+for(const d of sponge.paths)assert.ok(d&&!/NaN|Infinity|undefined/.test(d));
+console.log('Sponge skin preserves clothes, uses yellow throughout and hides facial markings inside full hoods.');

@@ -28,9 +28,14 @@ const art = vm.runInContext(`(() => {
     beach:{top:shellTopMarkup(warp),pants:seaweedPantsMarkup(warp)},
     streaker:{mosaic:mosaicTopMarkup(warp,'all'),top:mosaicTopMarkup(warp),pants:mosaicTopMarkup(warp,'pants'),face:lipstickFaceSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),ribbon:pinkRibbonSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))}))},
     angel:{wingVariants:angelWingVariants,top:angelVestMarkup(warp),halo:angelHaloSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))}))},
+    largePartyHat:largePartyHatSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),
+    oxygenHelmet:{fill:HELMET_GLASS,opacity:HELMET_GLASS_OPACITY},
+    godRing:{back:swimRingMarkup(warp,'pink-striped-swim-ring',false,'god-ring'),front:swimRingMarkup(warp,'pink-striped-swim-ring',true,'god-ring')},
     swim:{caps:capVariants,goggles:divingGoggleVariants,rings:swimRingVariants,cap:capSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),goggle:divingGoggleSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),ring:Object.fromEntries(Object.keys(swimRingVariants).map(id=>[id,swimRingMarkup(warp,id,false,'thumb-'+id)+swimRingMarkup(warp,id,true,'thumb-'+id)]))},
     reference595:{bandVariants:eyeBandVariants,band:eyeBandSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),gourd:gourdParts.map(s=>({...s,source:backAccessoryPath(s,warp)})),slippers:legs.map((s,i)=>'<path d="'+s.bootFill+'" fill="#C5C5C5"/><path d="'+s.bootOutline+'" fill="none" stroke="black" stroke-width="1"/>'+slipperMarkup(s,i?'right':'left')).join('')},
     reference594:{scar:garmentPath(scarSource,warp),earrings:teardropPath(warp),swords:pairedSwordParts.map(spec=>({...spec,source:backAccessoryPath(spec,warp)})),waist:spaceWaistMarkup(warp)},
+    sponge:{head:spongeHeadSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),body:garmentPath(spongeBodySource,warp),arms:arms.map(spongeArmPath),legs:legs.flatMap((shape,i)=>spongeLegSpots[i?'right':'left'].map(args=>spongeLegPath(shape,...args)))},
+    coloredSkinVariants,rainbowSkinDefs:rainbowSkinDefs(),
     muscleVariants:muscleSkinVariants,
     muscleLines:garmentPath(muscleLinesSource,warp),
     narutoItems:{longVariants:longBraidVariants,topknotVariants, hairVariants:spikyHairVariants,hair:yellowSpikyHairSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),sandals:legs.map((l,i)=>{const {toe,up}=l.instepAxes,o=l.instep,p=(x,y)=>(o.x+toe.x*x+up.x*y)+' '+(o.y+toe.y*x+up.y*y),boundary='M'+p(1.5,-12)+'C'+p(2.2,-4)+' '+p(2.2,4)+' '+p(1.5,12),id='sandals-cut-'+i;return '<defs><mask id="'+id+'" maskUnits="userSpaceOnUse" x="-100" y="100" width="300" height="200"><rect x="-100" y="100" width="300" height="200" fill="white"/><path d="'+boundary+'L'+p(100,12)+'L'+p(100,-12)+'Z" fill="black"/></mask><clipPath id="'+id+'-shoe"><path d="'+l.bootFill+'"/></clipPath></defs><g mask="url(#'+id+')"><path d="'+l.bootFill+'" fill="#29496C"/><path d="'+l.bootOutline+'" fill="none" stroke="black" stroke-width="1"/></g><path d="'+boundary+'" fill="none" stroke="black" stroke-width="1" clip-path="url(#'+id+'-shoe)"/>';})},
@@ -40,16 +45,13 @@ const art = vm.runInContext(`(() => {
     longHair:longHairSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),
     secondary:{body:studentOuterMarkup(warp,true),hat:secondaryHatSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),sleeves:arms.map((a,i)=>alohaSleeveMarkup(a,'secondary-thumb-'+i,alohaSleeveStyles['secondary-jacket']))},
     student:{body:studentOuterMarkup(warp),hat:studentHatSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),sleeves:arms.map((a,i)=>alohaSleeveMarkup(a,'student-thumb-'+i,alohaSleeveStyles['student-jacket'])),sockClips:legs.map(l=>({top:limbClipPoints(l,24,true),bottom:ankleHemClipPoints(l)}))},
-    worker:{extraBoots:Object.fromEntries(['black-worker-boots','blue-worker-boots'].map(id=>[id,legs.map((l,i)=>workerBootMarkup(l,i?'right':'left',100,5.5,id)).join('')])),blueBody:workerOuterMarkup(warp,'blue-worker-jacket'),blueSleeves:arms.map((a,i)=>workerSleeveMarkup(a,'blue-worker-thumb-'+i,alohaSleeveStyles['blue-worker-jacket'])),blueBoots:legs.map((l,i)=>workerBootMarkup(l,i?'right':'left',100,5.5,'gray-worker-boots')),hat:workerHatSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),body:workerOuterMarkup(warp),sleeves:arms.map((a,i)=>workerSleeveMarkup(a,'worker-thumb-'+i,alohaSleeveStyles['worker-jacket'])),boots:legs.map((l,i)=>workerBootMarkup(l,i?'right':'left',100,5.5))},
+    worker:{extraBoots:Object.fromEntries(['black-worker-boots','blue-worker-boots','brown-worker-boots'].map(id=>[id,legs.map((l,i)=>workerBootMarkup(l,i?'right':'left',100,5.5,id)).join('')])),blueBody:workerOuterMarkup(warp,'blue-worker-jacket'),blueSleeves:arms.map((a,i)=>workerSleeveMarkup(a,'blue-worker-thumb-'+i,alohaSleeveStyles['blue-worker-jacket'])),blueBoots:legs.map((l,i)=>workerBootMarkup(l,i?'right':'left',100,5.5,'gray-worker-boots')),hat:workerHatSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),body:workerOuterMarkup(warp),sleeves:arms.map((a,i)=>workerSleeveMarkup(a,'worker-thumb-'+i,alohaSleeveStyles['worker-jacket'])),boots:legs.map((l,i)=>workerBootMarkup(l,i?'right':'left',100,5.5))},
     yellowHat: Object.values(yellowHatSources).map(source=>
       transformPath(source,(x,y)=>warp(x,y,'head'))),
-    royal: Object.fromEntries(Object.entries(royalGarmentSpecs).map(([key,spec])=>
-      [key,{...spec,fill:royalPaint(spec.fill),d:garmentPath(spec.source,warp)}])),
-    ivory:Object.fromEntries(Object.entries(ivorySpecs).map(([key,spec])=>[key,{...spec,d:spec.category==='cape'?backAccessoryPath(spec,warp):torsoGarmentPath(spec.source,warp,spec.category==='neck')}])),
+    ivory:Object.fromEntries(Object.entries(ivorySpecs).map(([key,spec])=>[key,{...spec,d:spec.category==='cape'?backAccessoryPath(spec,warp):torsoGarmentPath(spec.source,warp,spec.category==='neck'||!!spec.neckline)}])),
     ivoryBody:torsoGarmentPath(ivoryBodySource,warp),ivorySides:torsoGarmentPath(ivorySidesSource,warp),
     batGloves:arms.map(shape=>batGlovePaths(shape)),
     batCowl:transformPath(batCowlSource,(x,y)=>warp(x,y,'head')),
-    royalBuckles:legs.map(shape=>royalBucklePath(shape)),
     jobsPelvisEnd:jobsMaterialReference().end,
     jobsPelvisStops:Array.from({length:33},(_,i)=>({offset:i/32,color:jobsDenimColor(i/32)})),
     jobsMesh:legs.map((shape,i)=>jobsClothMesh(shape,i?'right':'left',100,warp)),
@@ -63,6 +65,8 @@ const art = vm.runInContext(`(() => {
     crown: Object.values(crownSources).map(source=>
       transformPath(source,(x,y)=>warp(x,y,'head'))),
     scarf: scarfSources.map(source => transformPath(source,(x,y) => warp(x,y,'head'))),
+    scoopTee:{fill:looseTopPath(scoopTeeSource,warp),sides:looseTopPath(scoopTeeSidesSource,warp),neck:garmentPath(scoopTeeNeckSource,warp),hem:looseTopPath(scoopTeeHemSource,warp)},
+    roundLongSleeveStyle,roundLongSleeveWidths:Array.from({length:32},(_,i)=>teeSleeveWidth(i,roundLongSleeveStyle)),
     shirt: {
       fill: garmentPath(shirtSource,warp),
       sides: garmentPath(shirtSidesSource,warp),
@@ -203,9 +207,9 @@ const teeThumbnail=(color,sleeveEnd,flare,id)=>svg('-2 53 104 63',[
     true,[],flare)
     +line(vm.runInContext(`cuffPath(thumbArm,${sleeveEnd},${flare})`,
       Object.assign(context,{thumbArm:arm})))),
-  `<path d="${['red-tee','black-turtleneck-tee'].includes(id)?art.redTee.fill:art.tee.fill}" fill="${color}"/>`,
+  `<path d="${id==='black-turtleneck-tee'?art.redTee.fill:art.tee.fill}" fill="${color}"/>`,
   line(art.tee.sides),line(art.tee.top),
-  id==='black-turtleneck-tee'?'':line(id==='red-tee'?art.redTee.neck:art.tee.neck),line(art.tee.hem),
+  id==='black-turtleneck-tee'?'':line(art.tee.neck),line(art.tee.hem),
 ].join('\n'));
 const looseTopThumbnail=id=>{
   const style=vm.runInContext(`teeStyles['${id}']`,context);
@@ -365,10 +369,10 @@ const sharkHeadContent=sharkTeeth
   +`<path d="${vm.runInContext('sharkEyeWhite',context)}" fill="white" `
   +`stroke="black" stroke-linecap="round" stroke-linejoin="round"/>`
   +(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'');
-const skinBody=(color,hideHorn=false,hideChestLines=false,hideLowerChin=false)=>frogPaths.map((tag,index)=>{
+const skinBody=(color,hideHorn=false,hideChestLines=false,hideLowerChin=false,hornColor=null)=>frogPaths.map((tag,index)=>{
   if(hideLowerChin&&index===10)return '';
   if(index===0||index>=12||hideHorn&&(index===1||index===11)||hideChestLines&&(index===9||index===10))return '';
-  let node=tag.replace(/fill="#C5C5C5"/g,`fill="${color}"`);
+  let node=tag.replace(/fill="#C5C5C5"/g,`fill="${index===1&&hornColor?hornColor:color}"`);
   if(!/\bfill=/.test(node))node=node.replace('<path ','<path fill="none" ');
   return node;
 }).join('')+(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'');
@@ -425,25 +429,8 @@ const suitPantsIcon=widePantsThumbnail('suit-trousers',3.5,suitWidths,'8 108 86 
 const suitPantsContent=suitPantsIcon.replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'');
 const dressShoesContent=art.pants.legs.map(leg=>
   `<path d="${leg.bootFill}" fill="${art.colors.dressShoes}"/>`+line(leg.bootOutline)+seam(leg)).join('');
-const royalDetails=category=>Object.values(art.royal).filter(spec=>spec.category===category)
-  .map(spec=>`<path d="${spec.d}" fill="${spec.fill}"${spec.outline?' stroke="black" stroke-width="1" stroke-linejoin="round"':''}/>`).join('');
-const royalCoatContent=[
-  ...art.shirt.arms.map((arm,index)=>clippedTube(arm,limbCuff(arm,25),art.colors.royalRed,`royal-arm-${index}`)
-    +clippedTube(arm,limbCuff(arm,25),art.colors.royalWhite,`royal-cuff-${index}`,0,false)
-    +line(vm.runInContext('cuffPath(thumbArm,25)+cuffPath(thumbArm,31)',Object.assign(context,{thumbArm:arm})))),
-  `<path d="${art.shirt.fill}" fill="${art.colors.royalRed}"/>`,
-  royalDetails('shirt'),line(art.shirt.sides),line(art.shirt.top),line(art.shirt.hem),
-].join('');
 const royalWidths=vm.runInContext('Array.from({length:32},(_,i)=>wideLegExtraWidth(i,3))',context);
 const royalPantsIcon=widePantsThumbnail('royal-trousers',3,royalWidths,'8 108 86 80');
-// The buckle sits across the top edge of the shoe and is clipped to it in
-// the app, so the icon has to clip it the same way or half of it floats
-// outside the shoe.
-const royalShoesContent=art.pants.legs.map((leg,i)=>
-  `<defs><clipPath id="royal-shoe-${i}"><path d="${leg.bootFill}"/></clipPath></defs>`
-  +`<path d="${leg.bootFill}" fill="${art.colors.royalShoe}"/>`
-  +`<path d="${art.royalBuckles[i]}" fill="${art.colors.royalGold}" `
-  +`fill-rule="evenodd" clip-path="url(#royal-shoe-${i})"/>`+line(leg.bootOutline)+seam(leg)).join('');
 const royalCrownContent=art.crown.map(d=>`<path d="${d}" fill="${art.colors.crown}" stroke="black" stroke-width="${art.crownStrokeWidth}" stroke-linejoin="round"/>`).join('');
 const originalPaths=[...original.matchAll(/<path d="([^"]+)"[^>]*>/g)];
 const royalHeadContent=`<path d="${originalPaths[5][1]}Z" fill="${sharkFlesh}" stroke="black" stroke-linejoin="round"/>`
@@ -562,6 +549,7 @@ const thumbnails = {
  ...Object.fromEntries(Object.entries(art.swim.caps).map(([id,v])=>[id,svg('48 -3 45 64',art.swim.cap.map(s=>`<path d="${s.source}" fill="${s.fill==='none'?'none':v.color}" stroke="${s.stroke}" stroke-width="${s.strokeWidth}" stroke-linecap="round"/>`).join(''))])),
  ...Object.fromEntries(Object.entries(art.swim.goggles).map(([id,v])=>[id,svg('38 9 56 51',art.swim.goggle.map(s=>`<path d="${s.source}" fill="${s.fill==='none'?'none':s.fill==='#A8EFFF'?v.lens:v.color}" fill-opacity="${s.opacity}" stroke="${s.stroke}" stroke-width="${s.strokeWidth}"/>`).join(''))])),
  ...Object.fromEntries(Object.entries(art.swim.ring).map(([id,markup])=>[id,svg('-16 47 120 72',markup)])),
+ 'large-party-hat':svg('60 25 52 32',art.largePartyHat.map(s=>`<path d="${s.source}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="1" stroke-linejoin="round"/>`).join('')),
  'gourd':svg('-1 23 118 129',art.reference595.gourd.map(s=>`<path d="${s.source}" fill="${s.fill}" stroke="black" stroke-width="${s.strokeWidth||1}"/>`).join('')),
  'navy-slippers':svg('-3 176 107 22',art.reference595.slippers),
  'scar':svg('-2 9 104 188',skinBody('#C5C5C5',false,false,true)+line(art.reference594.scar,.7)),
@@ -577,6 +565,8 @@ const thumbnails = {
  'mosaic-top':svg('22 64 50 50',art.streaker.top),
  'mosaic-pants':svg('22 108 50 34',art.streaker.pants),
  'streaker-suit':svg('-3 7 120 190',pinkRibbonContent+lipstickSkinContent(true)+art.streaker.mosaic),
+ ...Object.fromEntries(Object.entries(art.coloredSkinVariants).map(([id,v])=>[id,svg('-2 9 104 188',(v.gradient?'<defs>'+art.rainbowSkinDefs+'</defs>':'')+skinBody(v.color,false,false,false,v.hornColor))])),
+ 'sponge-skin':svg('-2 8 104 189',art.sponge.head.filter(s=>s.behind).map(kappaTag).join('')+skinBody('#FEF455')+art.sponge.head.filter(s=>!s.behind).map(kappaTag).join('')+`<path d="${art.sponge.body}" fill="#C2C104"/>`+art.sponge.arms.concat(art.sponge.legs).map(d=>`<path d="${d}" fill="#C2C104"/>`).join('')+frogPaths[8]+(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'')),
  'flesh-8':svg('-2 9 104 188',skinBody('#754F36')),
  'angel-halo':svg('19 -6 56 15',angelHalo),
  'angel-wings':svg('-23 46 141 51',backDetails('angel-wings')),
@@ -638,17 +628,9 @@ const thumbnails = {
  'batfish-suit':svg('-2 0 104 198',batCape+royalHeadContent+batCowl+originalPaths[8][0]+(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'')+batPants+batBoots+batTop+batHands),
   'ivory-tunic':svg('-8 53 116 63',ivoryTop),
   'ivory-trousers':ivoryPants,
-  'silver-collar':svg('23 52 48 32',ivoryDetails('neck')),
   'crimson-cape':svg('2 50 92 137',backDetails('crimson-cape')),
-  'ivory-suit':svg('-8 8 116 190',backDetails('crimson-cape')+royalCrownContent+royalHeadContent+kingBootFeet+ivoryPants.replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'')+ivoryTop+ivoryDetails('neck')),
-  'royal-coat':svg('-2 53 104 63',royalCoatContent),
+  'ivory-suit':svg('-8 8 116 190',backDetails('crimson-cape')+royalCrownContent+royalHeadContent+kingBootFeet+ivoryPants.replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'')+ivoryTop),
   'royal-trousers':royalPantsIcon,
-  'royal-shoes':svg('-2 176 104 20',royalShoesContent),
-  'royal-collar':svg('23 52 48 27',royalDetails('neck')),
-  // The red and white king wears the same crimson cape, so his icon shows
-  // it too — behind everything, as it is worn.
-  'royal-suit':svg('-2 8 104 188',backDetails('crimson-cape')+royalCrownContent+royalHeadContent+royalShoesContent
-    +royalPantsIcon.replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'')+royalCoatContent+royalDetails('neck')),
   'suit-jacket':svg('-2 53 104 63',suitJacketContent),
   'suit-trousers':svg('8 108 86 80',suitPantsContent),
   'black-dress-shoes':svg('-2 176 104 20',dressShoesContent),
@@ -681,11 +663,11 @@ const thumbnails = {
   scarf: svg('5 44 94 39', art.scarf.map(d =>
     `<path d="${d}" fill="#d84f50" stroke="black" stroke-width="1" stroke-linejoin="round"/>`).join('\n')),
   shirt: svg('-2 53 104 63', [
-    ...art.shirt.arms.map((arm,index) => clippedTube(arm,limbCuff(arm,31),
-      '#7d9ea2',`shirt-sleeve-${index}`) + line(vm.runInContext(
-      'cuffPath(thumbArm,31)', Object.assign(context, {thumbArm:arm})))),
-    `<path d="${art.shirt.fill}" fill="#7d9ea2"/>`,
-    line(art.shirt.sides), line(art.shirt.top),line(art.shirt.hem),
+    ...art.shirt.arms.map((arm,index) => clippedTube(arm,limbCuff(arm,31,art.roundLongSleeveStyle.flare),
+      '#7d9ea2',`shirt-sleeve-${index}`,31,true,art.roundLongSleeveWidths,0) + line(vm.runInContext(
+      'cuffPath(thumbArm,31,roundLongSleeveStyle.flare)', Object.assign(context, {thumbArm:arm})))),
+    `<path d="${art.tee.fill}" fill="#7d9ea2"/>`,
+    line(art.shirt.sides),line(art.tee.neck),line(art.tee.top),line(art.shirt.hem),
   ].join('\n')),
   'blue-vest': svg('24 54 47 51', [
     `<path d="${art.vest.fill}" fill="#2e5bd5"/>`,
@@ -717,8 +699,10 @@ const thumbnails = {
     `<path d="${art.tee.patches.red}" fill="#d9575b" stroke="black" stroke-width="1"/>`,
     line(art.tee.patches.stitches,.7),
   ].join('\n')),
-  'red-tee': teeThumbnail(art.colors.redTee,20,2.5,'red-tee'),
+  'gray-scoop-tee':teeThumbnail('#7B7575',20,3,'gray-scoop-tee').replace('viewBox="-2 53 104 63"','viewBox="-2 53 104 79"').replace(art.tee.fill,art.scoopTee.fill).replace(line(art.tee.sides),line(art.scoopTee.sides)).replace(line(art.tee.top),'').replace(line(art.tee.neck),line(art.scoopTee.neck)).replace(line(art.tee.hem),line(art.scoopTee.hem)),
   'coral-tee': teeThumbnail(art.colors.coralTee,17,3,'coral-tee'),
+  'red-cropped-tee-2':teeThumbnail('#DE0C0C',17,3,'red-cropped-tee-2'),
+  'black-cropped-tee':teeThumbnail('#25272B',17,3,'black-cropped-tee'),
   'red-triangle': svg('24 53 48 83',
     `<path d="${art.redTriangle}" fill="${art.colors.redTriangle}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`),
   pants: svg('12 108 78 78', [
@@ -795,13 +779,26 @@ const thumbnails = {
 
 for(const [id,item] of Object.entries(art.boxerVariants))thumbnails[id]=svg('25 109 44 27',`<path d="${art.pants.fill}" fill="${item.color}"/>`+line(art.pants.sides)+line(art.pants.shortsLower)+line(art.pants.waist));
 for(const [id,item] of Object.entries(art.briefVariants))thumbnails[id]=svg('25 109 44 27',`<path d="${art.briefs}" fill="${item.color}" stroke="black" stroke-width="1" stroke-linejoin="round"/>`);
+const redFarmerScarf=art.scarf.map(d=>`<path d="${d}" fill="#d84f50" stroke="black" stroke-width="1"/>`).join('');
+const fisherHat=art.yellowHat.map(d=>`<path d="${d}" fill="#ffe047" stroke="black" stroke-width="1"/>`).join('');
+const fisherVest=art.greenVest.map(d=>`<path d="${d}" fill="#278b20" stroke="black" stroke-width="1"/>`).join('');
+const brownFisherBoots=art.worker.extraBoots['brown-worker-boots'];
+// Reuse the existing tucked trouser silhouette where wide boot shafts cover the hems.
+const fisherTrousers=blueWorkerTucked.replaceAll('#1d3b68','#f66b19');
+const oxygenBack=frogPaths[0].replace(/fill(?:-opacity)?="[^"]*"/g,'').replace('<path ',`<path fill="${art.oxygenHelmet.fill}" fill-opacity="${art.oxygenHelmet.opacity}" `);
+const oxygenFront=frogPaths.slice(12,15).map(tag=>/\bfill=/.test(tag)?tag:tag.replace('<path ','<path fill="none" ')).join('')+line('M26.1046 56.4524L67.7274 55.0466');
+const rainbowGodSkin=skinBody('url(#rainbow-skin)',false,false,false,'url(#rainbow-skin-horn)');
+thumbnails['fish-god-suit']=svg('-5 -4 115 203','<defs>'+art.rainbowSkinDefs+'</defs>'+art.godRing.back+oxygenBack+rainbowGodSkin+art.godRing.front+oxygenFront);
+thumbnails['farmer-suit']=svg('-4 9 108 189',skinBody('#C5C5C5')+stripSvg(jumpsuitThumbnail(art.colors.jumpsuit,'farmer-jumpsuit'))+redFarmerScarf);
+thumbnails['fisher-suit']=svg('-9 5 119 193',skinBody('#438FF1',true)+fisherTrousers+brownFisherBoots+fisherVest+fisherHat);
+thumbnails['working-fish-suit']=svg('-4 9 108 189',skinBody('#37B2EC')+stripSvg(teeThumbnail('#DE0C0C',17,3,'working-fish-tee'))+stripSvg(jumpsuitThumbnail(art.colors.navyJumpsuit,'working-fish-jumpsuit')));
 for(const id of Object.keys(capePalettes)){
   thumbnails[id]=svg(id==='gourd'?'-1 23 118 129':id==='paired-swords'?'-12 92 126 59':art.angel.wingVariants[id]?'-23 46 141 51':id==='dual-swords'?'-6 18 106 101':id==='greatsword'?'-28 0 134 180':id==='kappa-shell'?'25 48 57 81':'2 50 92 137',backDetails(id));
 }
 
 for (const [name, content] of Object.entries(thumbnails)) {
-  const filename=art.swim.caps[name]||art.swim.goggles[name]||art.swim.rings[name]||art.reference595.bandVariants[name]||art.angel.wingVariants[name]||art.worker.extraBoots[name]||art.muscleVariants[name]||art.narutoItems.longVariants[name]||art.narutoItems.topknotVariants[name]||art.narutoItems.hairVariants[name]||art.denimVariants[name]||art.workwearVariants[name]||art.boxerVariants[name]||art.briefVariants[name]||art.thongVariants[name]||shortFlares[name]?name:['blue-eye-band','gourd','navy-slippers','scar','teardrop-earrings','paired-swords','black-gray-sweatpants','beach-suit','shell-top','seaweed-pants','lipstick-fish','pink-ribbon-hair','mosaic-top','mosaic-pants','streaker-suit','angel-suit','angel-halo','angel-wings','angel-vest','white-loose-wide-trousers','flesh-8','flesh-7','muscle-skin','yellow-spiky-hair','navy-sandals','space-helmet','space-shirt','space-trousers','orange-shoes','space-gloves','astronaut-suit','flesh-6','topknot-hair','charcoal-blazer','colorblock-shoes','topknot-suit','hypnotic','white-tie-shirt','dark-gray-slight-wide-trousers','makima-suit','long-braid-hair','flesh-5','secondary-hat','secondary-jacket','black-slight-wide-trousers','brown-shoes','secondary-suit','student-long-socks-shoes','flesh-4','student-hat','student-jacket','student-shorts','student-shoes','student-suit','little-yellow-fish','white-worker-helmet','blue-worker-jacket','blue-worker-trousers','gray-worker-boots','blue-worker-suit','flesh-3','worker-helmet','worker-jacket','worker-trousers','worker-boots','worker-suit','kappa','kappa-hair','kappa-suit','flesh-2','round-glasses','black-turtleneck-tee','gray-sneakers','jobs-suit','cigarette','large-ripped-denim-jeans','denim-jumpsuit','washed-denim-jeans','ripped-denim-jeans','denim-jeans','cinched-long-sleeve','aloha-open-jacket','aloha-open-long-jacket','aloha-long-jacket','aloha-jacket','default-skin','alien-skin','clown-skin','party-hat','clown-suit','flesh-skin','shark-hood','shark-suit','pochita','chainsaw','pochita-suit','batfish-cowl','batfish-armor','batfish-trousers','batfish-boots','batfish-gloves','batfish-suit',...Object.keys(capePalettes),'ivory-tunic','ivory-trousers','silver-collar','crimson-cape','ivory-suit','royal-coat','royal-trousers','royal-shoes','royal-collar','royal-suit','suit-jacket','suit-trousers','black-dress-shoes','navy-suit','blue-vest','green-vest','yellow-hat','crown','yellow-tee',
-    'patched-tee','red-tee','coral-tee','loose-tee','loose-long-sleeve','red-triangle','red-shorts','red-briefs',
+  const filename=art.coloredSkinVariants[name]||art.swim.caps[name]||art.swim.goggles[name]||art.swim.rings[name]||art.reference595.bandVariants[name]||art.angel.wingVariants[name]||art.worker.extraBoots[name]||art.muscleVariants[name]||art.narutoItems.longVariants[name]||art.narutoItems.topknotVariants[name]||art.narutoItems.hairVariants[name]||art.denimVariants[name]||art.workwearVariants[name]||art.boxerVariants[name]||art.briefVariants[name]||art.thongVariants[name]||shortFlares[name]?name:['sponge-skin','fish-god-suit','farmer-suit','fisher-suit','working-fish-suit','red-cropped-tee-2','large-party-hat','blue-eye-band','gourd','navy-slippers','scar','teardrop-earrings','paired-swords','black-gray-sweatpants','beach-suit','shell-top','seaweed-pants','lipstick-fish','pink-ribbon-hair','mosaic-top','mosaic-pants','streaker-suit','angel-suit','angel-halo','angel-wings','angel-vest','white-loose-wide-trousers','flesh-8','flesh-7','muscle-skin','yellow-spiky-hair','navy-sandals','space-helmet','space-shirt','space-trousers','orange-shoes','space-gloves','astronaut-suit','flesh-6','topknot-hair','charcoal-blazer','colorblock-shoes','topknot-suit','hypnotic','white-tie-shirt','dark-gray-slight-wide-trousers','makima-suit','long-braid-hair','flesh-5','secondary-hat','secondary-jacket','black-slight-wide-trousers','brown-shoes','secondary-suit','student-long-socks-shoes','flesh-4','student-hat','student-jacket','student-shorts','student-shoes','student-suit','little-yellow-fish','white-worker-helmet','blue-worker-jacket','blue-worker-trousers','gray-worker-boots','blue-worker-suit','flesh-3','worker-helmet','worker-jacket','worker-trousers','worker-boots','worker-suit','kappa','kappa-hair','kappa-suit','flesh-2','round-glasses','black-turtleneck-tee','gray-sneakers','jobs-suit','cigarette','large-ripped-denim-jeans','denim-jumpsuit','washed-denim-jeans','ripped-denim-jeans','denim-jeans','cinched-long-sleeve','aloha-open-jacket','aloha-open-long-jacket','aloha-long-jacket','aloha-jacket','default-skin','alien-skin','clown-skin','party-hat','clown-suit','flesh-skin','shark-hood','shark-suit','pochita','chainsaw','pochita-suit','batfish-cowl','batfish-armor','batfish-trousers','batfish-boots','batfish-gloves','batfish-suit',...Object.keys(capePalettes),'ivory-tunic','ivory-trousers','crimson-cape','ivory-suit','royal-trousers','suit-jacket','suit-trousers','black-dress-shoes','navy-suit','blue-vest','green-vest','yellow-hat','crown','yellow-tee',
+    'patched-tee','gray-scoop-tee','black-cropped-tee','coral-tee','loose-tee','loose-long-sleeve','red-triangle','red-shorts','red-briefs',
     'pink-shorts','orange-shorts','black-shorts','wide-shorts','skirt','milk-frog',
     'red-thong','wide-pants',
     'navy-jumpsuit','loose-wide-pants','brown-boots','dark-boots']

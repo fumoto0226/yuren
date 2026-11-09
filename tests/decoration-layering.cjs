@@ -137,7 +137,7 @@ const result=vm.runInContext(`(()=>{
   const jacketOnlyInOuterwear=decorationCatalog.outerwear.some(item=>item.id==='green-vest')
     &&!decorationCatalog.shirt.some(item=>item.id==='green-vest');
   selectedDecorations.pants='navy-jumpsuit';
-  selectedDecorations.shirt='red-tee';
+  selectedDecorations.shirt='yellow-tee';
   refresh();
   const navyJumpsuitLeg=snapshot();
   const navyJumpsuitSleeveless=hasSleevelessOutfit();
@@ -365,7 +365,7 @@ for(const item of lowHipSeams){
 }
 console.log('All continuous trousers and knee shorts hide hip seams before promotion on both sides.');
 
-const shirtUnderPants=vm.runInContext(`(()=>{
+const shirtPantsOrder=vm.runInContext(`(()=>{
  const children=[];
  outfitOverlay={appendChild(node){const i=children.indexOf(node);if(i>=0)children.splice(i,1);children.push(node);}};
  const tops=innerTopKeys();
@@ -377,8 +377,14 @@ const shirtUnderPants=vm.runInContext(`(()=>{
   updateGarmentOrder();
   const lastTop=Math.max(...tops.map(key=>children.indexOf(garmentPaths[key])));
   const firstBottom=Math.min(...bottoms.map(key=>children.indexOf(garmentPaths[key])));
-  return {id:item.id,ordered:lastTop<firstBottom};
+  const firstTop=Math.min(...tops.map(key=>children.indexOf(garmentPaths[key])));
+  const lastBottom=Math.max(...bottoms.map(key=>children.indexOf(garmentPaths[key])));
+  return {id:item.id,over:shirtHemOverPants(),under:lastTop<firstBottom,above:firstTop>lastBottom};
  });
 })()`,context);
-for(const row of shirtUnderPants)assert.ok(row.ordered,`${row.id}: all shirt pieces stay behind pants and denim belt details`);
-console.log('Every shirt, including patches and special tunic details, stays below pants and their waistband details.');
+const flaredTops=new Set(['loose-tee','loose-long-sleeve','cinched-long-sleeve']);
+for(const row of shirtPantsOrder){
+ assert.equal(row.over,flaredTops.has(row.id),`${row.id}: hem rule follows the garment cut`);
+ assert.ok(row.over?row.above:row.under,`${row.id}: flared hems cover pants; fitted tops remain tucked behind waistband details`);
+}
+console.log('Flared shirt hems cover pants and waistbands; fitted shirts retain the tucked-in order.');

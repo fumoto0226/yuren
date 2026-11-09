@@ -3,15 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#6a6a6a" />
-    <title>鱼人 · 路径变形</title>
+    <meta name="theme-color" content="#CFEBFE" />
+    <title>鱼人 · 换装工作室</title>
     <link rel="icon" type="image/svg+xml" href="./svg/favicon.svg" />
-    <link rel="stylesheet" href="./style.css?v=wardrobe-disabled-suits-1" />
+    <link rel="stylesheet" href="./style.css?v=studio-slot-shadows-20261109" />
   </head>
   <body>
     <main>
       <aside class="wardrobe" aria-label="装饰列表">
-        <h1>装饰 <span class="wardrobe-total-count" data-decoration-total></span></h1>
+        <h1><img data-category-icon src="./svg/ui/suit.svg" alt="" /><span data-category-heading>套装</span><span data-category-count></span></h1>
+        <section class="wardrobe-panel" role="tabpanel" aria-label="装饰选项">
+          <div class="decoration-options" data-decoration-options></div>
+        </section>
+      </aside>
+      <div class="catalog-total">单品总数：<span data-decoration-total></span></div>
+      <nav class="category-dock" aria-label="换装分类">
         <div class="wardrobe-tabs" role="tablist" aria-label="装饰分类">
           <button type="button" role="tab" aria-selected="true" data-category="suit">套装</button>
           <button type="button" role="tab" aria-selected="false" data-category="skin">皮肤</button>
@@ -24,10 +30,12 @@
           <button type="button" role="tab" aria-selected="false" data-category="shoes">鞋子</button>
           <button type="button" role="tab" aria-selected="false" data-category="gloves">手部</button>
         </div>
-        <section class="wardrobe-panel" role="tabpanel" aria-label="装饰选项">
-          <div class="decoration-options" data-decoration-options></div>
-        </section>
-      </aside>
+        <div class="quick-actions">
+          <button type="button" data-action="clear-decorations" title="清除装饰" aria-label="清除装饰"><img src="./svg/ui/clear.svg" alt="" /></button>
+          <button type="button" data-action="randomize" title="随机换装" aria-label="随机换装"><img src="./svg/ui/randomize.svg" alt="" /></button>
+          <button type="button" data-action="undo" title="撤销上一步（最多三步）" aria-label="撤销上一步" disabled><img src="./svg/ui/undo.svg" alt="" /></button>
+        </div>
+      </nav>
       <section class="preview" aria-label="SVG 路径变形预览">
         <div id="character"></div>
       </section>
@@ -51,20 +59,27 @@
           </div>
         </section>
         <div class="control-stack">
-        <label><span>身体高度</span><input data-control="body" type="range" min="15" max="220" value="100" /></label>
-        <label><span>身体胖瘦</span><input data-control="width" type="range" min="60" max="150" value="100" /></label>
-        <label><span>手臂长度</span><input data-control="arms" type="range" min="55" max="240" value="100" /></label>
-        <label><span>腿部长度</span><input data-control="legs" type="range" min="50" max="180" value="100" /></label>
-        <label><span>鱼头大小</span><input data-control="head" type="range" min="70" max="140" value="100" /></label>
-        <div class="actions" aria-label="编辑操作">
-          <button type="button" data-action="reset">复原</button>
-          <button type="button" data-action="randomize">随机</button>
-          <button type="button" data-action="helmet" aria-pressed="false">隐藏帽子</button>
-          <button type="button" data-action="export" disabled>导出 SVG</button>
+        <h2>体型</h2>
+        <div class="body-control"><div class="control-label"><label for="control-body">身体高度</label><button type="button" data-reset-control="body" aria-label="复原身体高度">复原</button></div><input id="control-body" data-control="body" type="range" min="15" max="220" value="100" /></div>
+        <div class="body-control"><div class="control-label"><label for="control-width">身体胖瘦</label><button type="button" data-reset-control="width" aria-label="复原身体胖瘦">复原</button></div><input id="control-width" data-control="width" type="range" min="60" max="150" value="100" /></div>
+        <div class="body-control"><div class="control-label"><label for="control-arms">手臂长度</label><button type="button" data-reset-control="arms" aria-label="复原手臂长度">复原</button></div><input id="control-arms" data-control="arms" type="range" min="55" max="240" value="100" /></div>
+        <div class="body-control"><div class="control-label"><label for="control-legs">腿部长度</label><button type="button" data-reset-control="legs" aria-label="复原腿部长度">复原</button></div><input id="control-legs" data-control="legs" type="range" min="50" max="180" value="100" /></div>
+        <div class="body-control"><div class="control-label"><label for="control-head">鱼头大小</label><button type="button" data-reset-control="head" aria-label="复原鱼头大小">复原</button></div><input id="control-head" data-control="head" type="range" min="70" max="140" value="100" /></div>
+        <div class="actions" aria-label="体型操作">
+          <button type="button" data-action="reset-body">复原体型</button>
+          <button type="button" data-action="randomize-body">随机体型</button>
         </div>
         </div>
+        <section class="export-panel" aria-label="导出">
+          <div class="export-actions">
+            <button type="button" data-action="export-png" disabled>导出 PNG</button>
+            <button type="button" data-action="export" disabled>导出 SVG</button>
+          </div>
+          <p class="export-status" role="status"></p>
+        </section>
       </aside>
     </main>
     <script src="./script.js"></script>
+    <script src="./studio-ui.js"></script>
   </body>
 </html>

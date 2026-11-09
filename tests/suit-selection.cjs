@@ -67,14 +67,11 @@ for(const preset of presets){
   assert.ok(fs.existsSync(path.join(__dirname,'..',piece.icon)),'Each piece has a thumbnail');
  }
 }
-const king=presets.find(preset=>preset.id==='royal-suit');
-assert.equal(king.applied.helmet,'crown');assert.equal(king.applied.neck,'royal-collar');
-assert.equal(king.applied.skin,'flesh');
 // A preset may also bring a skin of its own, and then it replaces it.
 const pochita=presets.find(preset=>preset.id==='pochita-suit');
 assert.equal(pochita.applied.skin,'pochita');
 assert.equal(pochita.applied.helmet,'chainsaw');
-console.log('Every suit is a combination of independently selectable catalog items; royal suit includes the unnumbered flesh skin.');
+console.log('Every remaining suit is a combination of independently selectable catalog items.');
 
 const layered=vm.runInContext(`(()=>{
  applyDecorationSelection('shirt','loose-tee');
@@ -84,10 +81,35 @@ const layered=vm.runInContext(`(()=>{
  return worn&&selectedDecorations.shirt==='loose-tee'&&selectedDecorations.outerwear===null;
 })()`,context);
 assert.ok(layered,'Suit jacket occupies outerwear and preserves its inner shirt on selection/removal');
-for(const id of ['ivory-suit','royal-suit','navy-suit','batfish-suit'])assert.equal(presets.find(p=>p.id===id).applied.skin,'flesh',id+' includes the unnumbered flesh skin');
+for(const id of ['ivory-suit','navy-suit','batfish-suit'])assert.equal(presets.find(p=>p.id===id).applied.skin,'flesh',id+' includes the unnumbered flesh skin');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 assert.equal([...html.matchAll(/data-category="([^"]+)"/g)][0][1],'suit','Suit tab is first');
-assert.equal(vm.runInContext('decorationCounts().categories.suit',context),16,'Suit badge excludes the three disabled outfits');
+assert.equal(vm.runInContext('decorationCounts().categories.suit',context),presets.length-3,'Suit badge excludes the three disabled outfits');
 assert.equal(vm.runInContext("decorationCatalog.skin.find(s=>s.id==='pochita').name",context),'大眼睛皮肤');
 assert.equal(vm.runInContext('POCHITA_TAIL_VISIBLE',context),false,'Tail is hidden behind a reversible flag');
 assert.ok(vm.runInContext('pochitaCordSource.length>0&&pochitaGripSource.length>0',context),'Tail artwork remains available');
+
+const workPresets=vm.runInContext(`(()=>{
+ const results={};
+ for(const id of ['farmer-suit','fisher-suit','working-fish-suit']){
+  selectedDecorations.skin='clown';applyDecorationSelection('suit',id);
+  results[id]={...selectedDecorations,color:skinColor()};
+ }
+ return {results,wide:styleGroup('pants','wide')[2],oldPants:decorationCatalog.pants.some(p=>p.id==='wide-pants'),boots:bootProfiles['brown-worker-boots'],tee:teeStyles['red-cropped-tee-2']};
+})()`,context);
+for(const [id,pieces] of Object.entries({
+ 'farmer-suit':{skin:null,neck:'scarf',pants:'jumpsuit',shirt:null,helmet:null,shoes:null},
+ 'fisher-suit':{skin:'blue-color-skin',helmet:'yellow-hat',outerwear:'green-vest',shoes:'brown-worker-boots',pants:'worker-trousers',shirt:null},
+ 'working-fish-suit':{skin:'cyan-color-skin',pants:'navy-jumpsuit',shirt:'red-cropped-tee-2',helmet:null,shoes:null}
+}))for(const [slot,value] of Object.entries(pieces))assert.equal(workPresets.results[id][slot],value,id+'/'+slot);
+assert.equal(workPresets.results['farmer-suit'].color,'#C5C5C5');
+assert.equal(workPresets.results['fisher-suit'].color,'#438FF1');
+assert.equal(workPresets.results['working-fish-suit'].color,'#37B2EC');
+assert.deepEqual(Array.from(workPresets.wide),['worker-trousers','blue-worker-trousers']);assert.equal(workPresets.oldPants,false);
+assert.equal(workPresets.boots.color,'#59371F');assert.ok(workPresets.boots.tuckPants);
+assert.equal(workPresets.tee.color,'#DE0C0C');assert.equal(workPresets.tee.sleeveEnd,17);
+console.log('Farmer, fisher and working-fish presets apply exact components and skin colors; wide trousers contain only the two worker colors.');
+
+const godPreview=fs.readFileSync(path.join(__dirname,'../svg/fish-god-suit.svg'),'utf8');
+const glassOutline=[...godPreview.matchAll(/<path\b[^>]*>/g)].map(m=>m[0]).find(tag=>tag.includes('M45.6943 0.5'));
+assert.ok(glassOutline&&glassOutline.includes('fill="none"'),'Oxygen helmet outline must stay unfilled over the gradient face');
