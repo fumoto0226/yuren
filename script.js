@@ -2539,21 +2539,25 @@ const spongeEllipse=(cx,cy,rx,ry,angle=0)=>transformPath(circleSource(0,0,1),(x,
 const spongeHeadSpecs=[
  {source:spongeReferencePath("M5.27485 0.200195L7.16722 0.866804L6.99458 1.92059L5.03784 1.55499L5.27485 0.200195Z"),fill:'white',stroke:'black',strokeWidth:1,role:'head',behind:true},
  {source:spongeReferencePath("M4.76664 2.46892L6.77098 2.55858L6.9111 3.61719L4.93237 3.83427L4.76664 2.46892Z"),fill:'white',stroke:'black',strokeWidth:1,role:'head',behind:true},
- {source:spongeReferencePath(spongeEllipse(3.49537,16.1219,1.36174,1.96695,0.5047474743475081)),fill:'#C2C104',stroke:'none',role:'head'},
+ {source:spongeReferencePath(spongeEllipse(3.49537,16.1219-3*.386236,1.36174,1.96695,0.5047474743475081)),fill:'#C2C104',stroke:'none',role:'head'},
  {source:spongeReferencePath(circleSource(9.65865,10.2287,1.2585)),fill:'#C2C104',stroke:'none',role:'head'},
  {source:spongeReferencePath(circleSource(12.1753,14.9445,1.2585)),fill:'#C2C104',stroke:'none',role:'head'},
  {source:'M60.7 31.5L64.3 29.8L65 31.6L61.5 33Z M61.5 34.2L66.2 34.2L66.4 36.1L61.8 36Z M60.7 37L65.7 39L65 41L60 38.6Z',fill:'black',stroke:'none',role:'head'},
 ];
-const spongeBodySource=[[38,78,3,4.2,.35],[56,92,2.1,2.1,0],[38.5,105,2,2.7,-.25],[55,119,2.8,3.8,.4]].map(args=>spongeEllipse(...args)).join(' ');
-const spongeLegSpots={left:[[11,1.8,2.6],[27,1.6,2.2]],right:[[15,1.7,2.4],[28,1.8,2.7]]};
-function spongeLegPath(shape,index,rx,ry){
- const p=shape.centerline[index],a=shape.centerline[index-1],b=shape.centerline[index+1],l=Math.hypot(b.x-a.x,b.y-a.y)||1;
- return transformPath(circleSource(0,0,1),(x,y)=>({x:p.x+(b.y-a.y)/l*x*rx+(b.x-a.x)/l*y*ry,y:p.y-(b.x-a.x)/l*x*rx+(b.y-a.y)/l*y*ry}));
+// Group 599 uses the original character coordinates, 10.5386 above our body.
+const spongeBodySource=[[44.5273,71.2171,3.43285,4.95856,28.9199],[56.8962,87.1655,3.81007,5.50344,28.9199],[40.4863,98.0876,2.5,2.5,0],[61.4004,65,2.5,2.5,0]].map(([x,y,rx,ry,angle])=>spongeEllipse(x,y+10.5386,rx,ry,angle*Math.PI/180)).join(' ');
+const spongeLimbSpots=[{"kind":"leg","side":"left","index":22,"x":24.4354,"y":164.4956,"rx":2.09989,"ry":3.69601,"angle":0.28100499088809505,"origin":{"x":25.958302038574217,"y":164.02612390136719},"dx":-0.25888478150329,"dy":0.9659082098760697},{"kind":"leg","side":"right","index":11,"x":64.9707,"y":142.0946,"rx":2.5,"ry":2.94275,"angle":-0.3375536586527113,"origin":{"x":64.43404014585553,"y":143.10399679565433},"dx":0.3966087421077943,"dy":0.9179877481119633},{"kind":"arm","side":"left","index":4,"x":23.9666,"y":64.9572,"rx":2.49859,"ry":3.60907,"angle":0.5047474743475081,"origin":{"x":22.942745733762912,"y":64.82759667031581},"dx":-0.6804408413616788,"dy":0.7328030167835082},{"kind":"arm","side":"right","index":8,"x":75.4004,"y":67.5386,"rx":2.5,"ry":2.5,"angle":0,"origin":{"x":75.7522087280036,"y":66.85004023165781},"dx":0.6456001523994197,"dy":0.7636756138713909}];
+const spongeLegSpots=Object.fromEntries(['left','right'].map(side=>[side,spongeLimbSpots.filter(s=>s.kind==='leg'&&s.side===side).map(s=>[s.index,s])]));
+function spongeLimbSpotPath(shape,spec){
+ const {index,origin,dx,dy}=spec,p=shape.centerline[index],a=shape.centerline[index-1],b=shape.centerline[index+1],l=Math.hypot(b.x-a.x,b.y-a.y)||1;
+ const ux=(b.x-a.x)/l,uy=(b.y-a.y)/l;
+ return transformPath(spongeEllipse(spec.x,spec.y,spec.rx,spec.ry,spec.angle),(x,y)=>{
+  const along=(x-origin.x)*dx+(y-origin.y)*dy,across=-(x-origin.x)*dy+(y-origin.y)*dx;
+  return {x:p.x+ux*along-uy*across,y:p.y+uy*along+ux*across};
+ });
 }
-function spongeArmPath(shape){
- const p=shape.centerline[14],a=shape.centerline[13],b=shape.centerline[15],l=Math.hypot(b.x-a.x,b.y-a.y)||1;
- return transformPath(circleSource(0,0,1),(x,y)=>({x:p.x+(b.x-a.x)/l*x*2.7-(b.y-a.y)/l*y*1.9,y:p.y+(b.y-a.y)/l*x*2.7+(b.x-a.x)/l*y*1.9}));
-}
+function spongeLegPath(shape,index,spec){return spongeLimbSpotPath(shape,spec);}
+function spongeArmPath(shape,side=0){return spongeLimbSpotPath(shape,spongeLimbSpots.find(s=>s.kind==='arm'&&s.side===(side===1||side==='right'?'right':'left')));}
 const angelHaloSpecs=[{source:transformPath(circleSource(47,1,1),(x,y)=>({x:47+(x-47)*24,y:1+(y-1)*5})),fill:'none',stroke:'#E8FF4C',strokeWidth:2.5,role:'headRigid'}];
 function angelVestMarkup(warp){
  const tag=(d,fill,stroke='black',width=1)=>`<path d="${garmentPath(d,warp)}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round"/>`;
@@ -5748,7 +5752,7 @@ function update() {
     const cinched=!!teeStyle?.cinched;
     const outerSleeveStyle=alohaSleeveStyles[selectedDecorations.outerwear];
     const aloha=!!outerSleeveStyle;
-    if(spongeMark){spongeMark.setAttribute('d',spongeArmPath(shape));spongeMark.style.display=skinTrait('sponge')&&!longSleeve&&!isTee&&!aloha?'':'none';}
+    if(spongeMark){spongeMark.setAttribute('d',spongeArmPath(shape,side));spongeMark.style.display=skinTrait('sponge')&&!longSleeve&&!isTee&&!aloha?'':'none';}
     // The space sleeve supplies all arm fabric; a folded cuff must never expose the native grey hose.
     innerArm.style.display=innerSleeve.style.display=outerSleeveStyle?.space?'none':'';
     alohaSleeve.style.display=aloha?'':'none';
