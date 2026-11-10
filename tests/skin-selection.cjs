@@ -60,3 +60,15 @@ assert.equal(sponge.color,'#FEF455');assert.ok(sponge.body&&sponge.hidden);
 for(const slot of ['shirt','pants','shoes','outerwear'])assert.equal(sponge.after[slot],sponge.before[slot]);
 for(const d of sponge.paths)assert.ok(d&&!/NaN|Infinity|undefined/.test(d));
 console.log('Sponge skin preserves clothes, uses yellow throughout and hides facial markings inside full hoods.');
+
+const gyaru=vm.runInContext(`(()=>{applyDecorationSelection('helmet',null);applyDecorationSelection('shirt','yellow-tee');applyDecorationSelection('pants','student-shorts');applyDecorationSelection('skin','gyaru');const result={color:skinColor(),face:skinTrait('gyaruFace'),shirt:selectedDecorations.shirt,pants:selectedDecorations.pants,eye:skinTrait('eyeWhite'),specs:gyaruFaceSpecs};applyDecorationSelection('helmet','shark-hood');result.hoodHidesFace=!skinTrait('gyaruFace');return result;})()`,context);
+assert.equal(gyaru.color,'#B96723');assert.ok(gyaru.face&&gyaru.hoodHidesFace);
+assert.equal(gyaru.shirt,'yellow-tee');assert.equal(gyaru.pants,'student-shorts');
+assert.ok(gyaru.specs.some(s=>s.fill==='#96FF6F'));assert.ok(gyaru.specs.some(s=>s.fill==='#0089FA'));
+for(const s of gyaru.specs)assert.ok(s.source&&!/NaN|undefined|Infinity/.test(s.source));
+console.log('Gyaru skin preserves clothing, matches brown/blue/green reference colors and hides face details under full hoods.');
+const gyaruReference=vm.runInContext(`(()=>{selectedDecorations.helmet=null;return {eye:skinTrait('eye'),green:gyaruFaceSpecs.find(s=>s.fill==='#96FF6F'),pupil:gyaruFaceSpecs.find(s=>s.ellipse&&s.fill==='black'),iris:gyaruFaceSpecs.find(s=>s.strokeWidth===4)};})()`,context);
+assert.equal(gyaruReference.eye,'white');
+assert.deepEqual(Array.from(gyaruReference.green.ellipse),[40,31.5,3.5,4]);
+assert.deepEqual(Array.from(gyaruReference.pupil.ellipse),[2.00484,2.93563,2.00484,2.93563]);
+assert.ok(gyaruReference.iris,'Reference iris keeps its full outside stroke instead of a centered stroke covering the blue area');

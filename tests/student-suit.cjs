@@ -36,4 +36,8 @@ assert.equal(sockVariants.short,24);assert.equal(sockVariants.long,20);assert.ok
 
 const shoeGroups=vm.runInContext("decorationStyleGroups.shoes",c);
 assert.ok(shoeGroups.some(([key,name,ids])=>name==='短袜鞋'&&ids.length===1&&ids[0]==='student-shoes'));
-assert.ok(shoeGroups.some(([key,name,ids])=>name==='长袜鞋'&&ids.length===1&&ids[0]==='student-long-socks-shoes'));
+assert.ok(shoeGroups.some(([key,name,ids])=>name==='长袜鞋'&&ids.length===3&&ids[0]==='student-long-socks-shoes'));
+
+const stripes=vm.runInContext(`(()=>{const results=[];for(const shoes of ['tricolor-long-socks-shoes','striped-long-socks-shoes'])for(const size of [60,100,150])for(const side of ['left','right']){const w=buildWarp({body:size,width:size,arms:size,legs:size,head:size});results.push({shoes,d:sockStripeMarkup(legGeometry(side,w),shoes),visible:studentSockVisible(20,null,shoes),hidden:studentSockVisible(20,'plain',shoes)});}return results;})()`,c);
+for(const r of stripes){assert.ok(r.visible&&!r.hidden);assert.ok(!/NaN|Infinity|undefined/.test(r.d));assert.equal((r.d.match(/<path /g)||[]).length,r.shoes==='tricolor-long-socks-shoes'?3:6);}
+console.log('Both striped long socks share the long-sock cut, finite live geometry and trouser occlusion.');

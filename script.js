@@ -56,7 +56,7 @@ const denimVariants=Object.fromEntries([
 }])).filter(([id])=>['denim-jeans','washed-denim-jeans','light-denim-jeans','light-ripped-denim-jeans','dark-denim-jeans','dark-large-ripped-denim-jeans'].includes(id)));
 denimVariants['jobs-gradient-jeans']={finish:'jobs-gradient',name:'渐变牛仔',color:'#667c99',wash:'#8c8c8c'};
 function denimColor(id=selectedDecorations.pants){return denimVariants[id]?.color||workwearVariants[id]?.color||decorationColors.denimBlue;}
-const boxerVariants={'red-shorts':{name:'红色四角内裤',color:'#d44a49'},'white-boxers':{name:'白色四角内裤',color:'#F2F1EE'},'black-boxers':{name:'黑色四角内裤',color:'#202124'}};
+const boxerVariants={'pink-polka-boxers':{name:'粉色波点四角内裤',color:'#FFA5F0'},'red-shorts':{name:'红色四角内裤',color:'#d44a49'},'white-boxers':{name:'白色四角内裤',color:'#F2F1EE'},'black-boxers':{name:'黑色四角内裤',color:'#202124'}};
 const briefVariants={'red-briefs':{name:'红色三角内裤',color:'#d44a49'},'white-briefs':{name:'白色三角内裤',color:'#F2F1EE'},'black-briefs':{name:'黑色三角内裤',color:'#202124'}};
 const thongVariants={'red-thong':{name:'红色丁字裤',color:'#c60000'},'green-thong':{name:'绿色丁字裤',color:'#55a66a'},'purple-thong':{name:'紫色丁字裤',color:'#9364bb'},'white-thong':{name:'白色丁字裤',color:'#F2F1EE'},'black-thong':{name:'黑色丁字裤',color:'#202124'}};
 const workwearVariants={
@@ -137,13 +137,13 @@ const angelWingVariants={
 const disabledSuitIds=['batfish-suit','pochita-suit','makima-suit'];
 const POCHITA_TAIL_VISIBLE=false; // Keep the tail artwork and motion available for later restoration.
 const decorationCatalog = {
-  skin: [{id:'sponge',name:'海绵皮肤',icon:'./svg/sponge-skin.svg'},...Object.entries(coloredSkinVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'scar',name:'刀疤皮肤',icon:'./svg/scar.svg'},{id:'lipstick-fish',name:'口红鱼皮肤',icon:'./svg/lipstick-fish.svg'},{id:'flesh-8',name:'肉色皮肤8',icon:'./svg/flesh-8.svg'},{id:'flesh-7',name:'肉色皮肤7',icon:'./svg/flesh-7.svg'},...Object.entries(muscleSkinVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+(id==='muscle'?'muscle-skin':id)+'.svg'})),{id:'flesh-6',name:'肉色皮肤6',icon:'./svg/flesh-6.svg'},{id:'hypnotic',name:'迷幻眼皮肤',icon:'./svg/hypnotic.svg'},{id:'flesh-5',name:'肉色皮肤5',icon:'./svg/flesh-5.svg'},{id:'flesh-4',name:'肉色皮肤4',icon:'./svg/flesh-4.svg'},{id:'little-yellow-fish',name:'小黄鱼皮肤',icon:'./svg/little-yellow-fish.svg'},{id:'flesh-3',name:'肉色皮肤3',icon:'./svg/flesh-3.svg'},{id:'kappa',name:'河童皮肤',icon:'./svg/kappa.svg'},{id:'flesh-2',name:'肉色皮肤2',icon:'./svg/flesh-2.svg'},
+  skin: [{id:'monkey',name:'猴子皮肤',icon:'./svg/monkey-skin.svg'},{id:'gyaru',name:'辣妹皮肤',icon:'./svg/gyaru-skin.svg'},{id:'sponge',name:'海绵皮肤',icon:'./svg/sponge-skin.svg'},...Object.entries(coloredSkinVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'scar',name:'刀疤皮肤',icon:'./svg/scar.svg'},{id:'lipstick-fish',name:'口红鱼皮肤',icon:'./svg/lipstick-fish.svg'},{id:'flesh-8',name:'肉色皮肤8',icon:'./svg/flesh-8.svg'},{id:'flesh-7',name:'肉色皮肤7',icon:'./svg/flesh-7.svg'},...Object.entries(muscleSkinVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+(id==='muscle'?'muscle-skin':id)+'.svg'})),{id:'flesh-6',name:'肉色皮肤6',icon:'./svg/flesh-6.svg'},{id:'hypnotic',name:'迷幻眼皮肤',icon:'./svg/hypnotic.svg'},{id:'flesh-5',name:'肉色皮肤5',icon:'./svg/flesh-5.svg'},{id:'flesh-4',name:'肉色皮肤4',icon:'./svg/flesh-4.svg'},{id:'little-yellow-fish',name:'小黄鱼皮肤',icon:'./svg/little-yellow-fish.svg'},{id:'flesh-3',name:'肉色皮肤3',icon:'./svg/flesh-3.svg'},{id:'kappa',name:'河童皮肤',icon:'./svg/kappa.svg'},{id:'flesh-2',name:'肉色皮肤2',icon:'./svg/flesh-2.svg'},
     { id: 'milk-frog', name: '奶鱼', icon: './svg/milk-frog.svg' },
     { id: 'pochita', name: '大眼睛皮肤', icon: './svg/pochita.svg' },
     { id: 'flesh', name: '肉色皮肤1', icon: './svg/flesh-skin.svg' },
     { id: 'clown', name: '小丑皮肤', icon: './svg/clown-skin.svg' },
     { id: 'alien', name: '外星皮肤', icon: './svg/alien-skin.svg' }],
-  suit: [{id:'fish-god-suit',name:'鱼神套装',icon:'./svg/fish-god-suit.svg',pieces:{skin:'rainbow-color-skin',outerwear:'pink-striped-swim-ring',helmet:'plain'}},{id:'farmer-suit',name:'农夫套装',defaultSkin:true,icon:'./svg/farmer-suit.svg',pieces:{neck:'scarf',pants:'jumpsuit'}},{id:'fisher-suit',name:'渔人套装',icon:'./svg/fisher-suit.svg',pieces:{skin:'blue-color-skin',helmet:'yellow-hat',outerwear:'green-vest',shoes:'brown-worker-boots',pants:'worker-trousers'}},{id:'working-fish-suit',name:'工鱼套装',icon:'./svg/working-fish-suit.svg',pieces:{skin:'cyan-color-skin',pants:'navy-jumpsuit',shirt:'red-cropped-tee-2'}},{id:'beach-suit',name:'海滩套装',icon:'./svg/beach-suit.svg',pieces:{skin:'flesh-4',shirt:'shell-top',pants:'green-ultra-shorts'}},{id:'streaker-suit',name:'裸奔套装',icon:'./svg/streaker-suit.svg',pieces:{skin:'lipstick-fish',helmet:'pink-ribbon-hair',shirt:'mosaic-top',pants:'mosaic-pants'}},{id:'angel-suit',name:'天使套装',icon:'./svg/angel-suit.svg',pieces:{skin:'flesh-8',helmet:'angel-halo',shirt:'angel-vest',pants:'white-loose-wide-trousers',cape:'angel-wings'}},{id:'astronaut-suit',name:'宇航员套装',icon:'./svg/astronaut-suit.svg',pieces:{helmet:'space-helmet',outerwear:'space-shirt',pants:'space-trousers',shoes:'orange-shoes',gloves:'space-gloves'}},{id:'topknot-suit',name:'小辫子男套装',icon:'./svg/topknot-suit.svg',pieces:{skin:'flesh-6',helmet:'topknot-hair',shirt:'white-tie-shirt',outerwear:'charcoal-blazer',pants:'dark-gray-slight-wide-trousers',shoes:'colorblock-shoes'}},{id:'makima-suit',name:'马奇马套装',icon:'./svg/makima-suit.svg',pieces:{skin:'hypnotic',helmet:'long-braid-hair',shirt:'white-tie-shirt',pants:'dark-gray-slight-wide-trousers',shoes:'brown-shoes'}},{id:'secondary-suit',name:'中学生套装',icon:'./svg/secondary-suit.svg',pieces:{skin:'flesh-5',helmet:'secondary-hat',outerwear:'secondary-jacket',pants:'black-slight-wide-trousers',shoes:'brown-shoes'}},{id:'student-suit',name:'小学生套装',icon:'./svg/student-suit.svg',pieces:{skin:'flesh-4',helmet:'student-hat',outerwear:'student-jacket',pants:'student-shorts',shoes:'student-long-socks-shoes'}},{id:'blue-worker-suit',name:'蓝色工人套装',icon:'./svg/blue-worker-suit.svg',pieces:{skin:'flesh-3',helmet:'white-worker-helmet',outerwear:'blue-worker-jacket',pants:'blue-worker-trousers',shoes:'gray-worker-boots'}},{id:'worker-suit',name:'橙色工人套装',icon:'./svg/worker-suit.svg',pieces:{skin:'flesh-3',helmet:'worker-helmet',outerwear:'worker-jacket',pants:'worker-trousers',shoes:'worker-boots'}},{id:'kappa-suit',name:'河童套装',icon:'./svg/kappa-suit.svg',pieces:{skin:'kappa',helmet:'kappa-hair',cape:'kappa-shell'}},{id:'jobs-suit',name:'乔布斯套装',icon:'./svg/jobs-suit.svg',pieces:{skin:'flesh-2',helmet:'round-glasses',shirt:'black-turtleneck-tee',pants:'jobs-gradient-jeans',shoes:'gray-sneakers'}},{id:'clown-suit',name:'小丑鱼人套装',icon:'./svg/clown-suit.svg',
+  suit: [{id:'monk-suit',name:'僧人套装',icon:'./svg/monk-suit.svg',pieces:{skin:'flesh-3',helmet:'lotus-hat',shirt:'monk-robe',pants:'white-loose-wide-trousers',shoes:'brown-shoes'}},{id:'walker-suit',name:'行者套装',icon:'./svg/walker-suit.svg',pieces:{skin:'monkey',helmet:'golden-circlet',neck:'small-blue-scarf',shirt:'walker-shirt',pants:'walker-sweatpants',shoes:'black-worker-boots'}},{id:'chef-suit',name:'厨师套装',icon:'./svg/chef-suit.svg',pieces:{skin:'flesh-3',helmet:'chef-hat',outerwear:'white-chef-jacket',pants:'white-sweatpants',shoes:'gray-plain-shoes'}},{id:'gyaru-suit',name:'辣妹套装',icon:'./svg/gyaru-suit.svg',pieces:{skin:'gyaru',helmet:'yellow-bow-hair',shirt:'pink-heart-bra',pants:'pink-polka-boxers',shoes:'striped-long-socks-shoes'}},{id:'fish-god-suit',name:'鱼神套装',icon:'./svg/fish-god-suit.svg',pieces:{skin:'rainbow-color-skin',outerwear:'pink-striped-swim-ring',helmet:'plain'}},{id:'farmer-suit',name:'农夫套装',defaultSkin:true,icon:'./svg/farmer-suit.svg',pieces:{neck:'scarf',pants:'jumpsuit'}},{id:'fisher-suit',name:'渔人套装',icon:'./svg/fisher-suit.svg',pieces:{skin:'blue-color-skin',helmet:'yellow-hat',outerwear:'green-vest',shoes:'brown-worker-boots',pants:'worker-trousers'}},{id:'working-fish-suit',name:'工鱼套装',icon:'./svg/working-fish-suit.svg',pieces:{skin:'cyan-color-skin',pants:'navy-jumpsuit',shirt:'red-cropped-tee-2'}},{id:'beach-suit',name:'海滩套装',icon:'./svg/beach-suit.svg',pieces:{skin:'flesh-4',shirt:'shell-top',pants:'green-ultra-shorts'}},{id:'streaker-suit',name:'裸奔套装',icon:'./svg/streaker-suit.svg',pieces:{skin:'lipstick-fish',helmet:'pink-ribbon-hair',shirt:'mosaic-top',pants:'mosaic-pants'}},{id:'angel-suit',name:'天使套装',icon:'./svg/angel-suit.svg',pieces:{skin:'flesh-8',helmet:'angel-halo',shirt:'angel-vest',pants:'white-loose-wide-trousers',cape:'angel-wings'}},{id:'astronaut-suit',name:'宇航员套装',icon:'./svg/astronaut-suit.svg',pieces:{helmet:'space-helmet',outerwear:'space-shirt',pants:'space-trousers',shoes:'orange-shoes',gloves:'space-gloves'}},{id:'topknot-suit',name:'小辫子男套装',icon:'./svg/topknot-suit.svg',pieces:{skin:'flesh-6',helmet:'topknot-hair',shirt:'white-tie-shirt',outerwear:'charcoal-blazer',pants:'dark-gray-slight-wide-trousers',shoes:'colorblock-shoes'}},{id:'makima-suit',name:'马奇马套装',icon:'./svg/makima-suit.svg',pieces:{skin:'hypnotic',helmet:'long-braid-hair',shirt:'white-tie-shirt',pants:'dark-gray-slight-wide-trousers',shoes:'brown-shoes'}},{id:'secondary-suit',name:'中学生套装',icon:'./svg/secondary-suit.svg',pieces:{skin:'flesh-5',helmet:'secondary-hat',outerwear:'secondary-jacket',pants:'black-slight-wide-trousers',shoes:'brown-shoes'}},{id:'student-suit',name:'小学生套装',icon:'./svg/student-suit.svg',pieces:{skin:'flesh-4',helmet:'student-hat',outerwear:'student-jacket',pants:'student-shorts',shoes:'student-long-socks-shoes'}},{id:'blue-worker-suit',name:'蓝色工人套装',icon:'./svg/blue-worker-suit.svg',pieces:{skin:'flesh-3',helmet:'white-worker-helmet',outerwear:'blue-worker-jacket',pants:'blue-worker-trousers',shoes:'gray-worker-boots'}},{id:'worker-suit',name:'橙色工人套装',icon:'./svg/worker-suit.svg',pieces:{skin:'flesh-3',helmet:'worker-helmet',outerwear:'worker-jacket',pants:'worker-trousers',shoes:'worker-boots'}},{id:'kappa-suit',name:'河童套装',icon:'./svg/kappa-suit.svg',pieces:{skin:'kappa',helmet:'kappa-hair',cape:'kappa-shell'}},{id:'jobs-suit',name:'乔布斯套装',icon:'./svg/jobs-suit.svg',pieces:{skin:'flesh-2',helmet:'round-glasses',shirt:'black-turtleneck-tee',pants:'jobs-gradient-jeans',shoes:'gray-sneakers'}},{id:'clown-suit',name:'小丑鱼人套装',icon:'./svg/clown-suit.svg',
     pieces:{skin:'clown',helmet:'party-hat'}},
     {id:'shark-suit',name:'鲨鱼人套装',icon:'./svg/shark-suit.svg',
     pieces:{skin:'flesh',helmet:'shark-hood',pants:'black-shorts'}},
@@ -152,7 +152,7 @@ const decorationCatalog = {
     {id:'batfish-suit',name:'蝙蝠侠鱼人套装',icon:'./svg/batfish-suit.svg',pieces:{skin:'flesh',helmet:'batfish-cowl',shirt:'batfish-armor',pants:'batfish-trousers',shoes:'batfish-boots',gloves:'batfish-gloves',cape:'charcoal-cape'}},{id:'ivory-suit',name:'白金国王套装',icon:'./svg/ivory-suit.svg',pieces:{skin:'flesh',helmet:'crown',shirt:'ivory-tunic',pants:'ivory-trousers',shoes:'dark-boots',cape:'crimson-cape'}},{id:'navy-suit', name:'藏蓝西装套装', icon:'./svg/navy-suit.svg',
     pieces:{skin:'flesh',outerwear:'suit-jacket', pants:'suit-trousers', shoes:'black-dress-shoes'}},
     ],
-  helmet: [...Object.entries({...capVariants,...divingGoggleVariants}).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),...Object.entries(eyeBandVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'teardrop-earrings',name:'水滴耳环',icon:'./svg/teardrop-earrings.svg'},{id:'pink-ribbon-hair',name:'粉红色飘带发型',icon:'./svg/pink-ribbon-hair.svg'},{id:'angel-halo',name:'天使光环',icon:'./svg/angel-halo.svg'},...Object.entries(spikyHairVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'space-helmet',name:'宇航员头盔',icon:'./svg/space-helmet.svg'},...Object.entries(topknotVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),...Object.entries(longBraidVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'secondary-hat',name:'中学生帽子',icon:'./svg/secondary-hat.svg'},{id:'student-hat',name:'小学生帽子',icon:'./svg/student-hat.svg'},{id:'white-worker-helmet',name:'白色工人安全帽',icon:'./svg/white-worker-helmet.svg'},{id:'worker-helmet',name:'黄色工人安全帽',icon:'./svg/worker-helmet.svg'},{id:'kappa-hair',name:'河童发型',icon:'./svg/kappa-hair.svg'},{id:'round-glasses',name:'棕框眼镜',icon:'./svg/round-glasses.svg'},
+  helmet: [{id:'lotus-hat',name:'莲花帽',icon:'./svg/lotus-hat.svg'},{id:'golden-circlet',name:'金箍',icon:'./svg/golden-circlet.svg'},{id:'chef-hat',name:'白色厨师帽',icon:'./svg/chef-hat.svg'},{id:'yellow-bow-hair',name:'黄色蝴蝶结发型',icon:'./svg/yellow-bow-hair.svg'},...Object.entries({...capVariants,...divingGoggleVariants}).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),...Object.entries(eyeBandVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'teardrop-earrings',name:'水滴耳环',icon:'./svg/teardrop-earrings.svg'},{id:'pink-ribbon-hair',name:'粉红色飘带发型',icon:'./svg/pink-ribbon-hair.svg'},{id:'angel-halo',name:'天使光环',icon:'./svg/angel-halo.svg'},...Object.entries(spikyHairVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'space-helmet',name:'宇航员头盔',icon:'./svg/space-helmet.svg'},...Object.entries(topknotVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),...Object.entries(longBraidVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'secondary-hat',name:'中学生帽子',icon:'./svg/secondary-hat.svg'},{id:'student-hat',name:'小学生帽子',icon:'./svg/student-hat.svg'},{id:'white-worker-helmet',name:'白色工人安全帽',icon:'./svg/white-worker-helmet.svg'},{id:'worker-helmet',name:'黄色工人安全帽',icon:'./svg/worker-helmet.svg'},{id:'kappa-hair',name:'河童发型',icon:'./svg/kappa-hair.svg'},{id:'round-glasses',name:'棕框眼镜',icon:'./svg/round-glasses.svg'},
     {id:'party-hat',name:'派对帽',icon:'./svg/party-hat.svg'},
     {id:'large-party-hat',name:'大派对帽',icon:'./svg/large-party-hat.svg'},
     {id:'shark-hood',name:'鲨鱼头套',icon:'./svg/shark-hood.svg'},
@@ -162,11 +162,11 @@ const decorationCatalog = {
     { id: 'yellow-hat', name: '黄色宽檐帽', icon: './svg/yellow-hat.svg' },
     { id: 'crown', name: '皇冠', icon: './svg/crown.svg' },
   ],
-  neck: [
+  neck: [{id:'small-blue-scarf',name:'小蓝围脖',icon:'./svg/small-blue-scarf.svg'},
     {id:'cigarette',name:'叼烟',icon:'./svg/cigarette.svg'},
     { id: 'scarf', name: '红围巾', icon: './svg/decoration-scarf.svg' },
   ],
-  shirt: [{id:'gray-scoop-tee',name:'灰色深圆领弧摆短袖',icon:'./svg/gray-scoop-tee.svg'},{id:'shell-top',name:'白色贝壳上衣',icon:'./svg/shell-top.svg',sleeveless:true},{id:'mosaic-top',name:'马赛克上衣',icon:'./svg/mosaic-top.svg'},{id:'angel-vest',name:'天使配色无袖背心',icon:'./svg/angel-vest.svg',sleeveless:true},{id:'white-tie-shirt',name:'白色衬衫',icon:'./svg/white-tie-shirt.svg'},{id:'black-turtleneck-tee',name:'高领黑色半袖',icon:'./svg/black-turtleneck-tee.svg'},
+  shirt: [{id:'monk-robe',name:'袈裟配色行者上衣',icon:'./svg/monk-robe.svg'},{id:'walker-shirt',name:'行者上衣',icon:'./svg/walker-shirt.svg'},{id:'pink-heart-bra',name:'粉色心心内衣',icon:'./svg/pink-heart-bra.svg',sleeveless:true},{id:'gray-scoop-tee',name:'灰色深圆领弧摆短袖',icon:'./svg/gray-scoop-tee.svg'},{id:'shell-top',name:'白色贝壳上衣',icon:'./svg/shell-top.svg',sleeveless:true},{id:'mosaic-top',name:'马赛克上衣',icon:'./svg/mosaic-top.svg'},{id:'angel-vest',name:'天使配色无袖背心',icon:'./svg/angel-vest.svg',sleeveless:true},{id:'white-tie-shirt',name:'白色衬衫',icon:'./svg/white-tie-shirt.svg'},{id:'black-turtleneck-tee',name:'高领黑色半袖',icon:'./svg/black-turtleneck-tee.svg'},
     {id:'batfish-armor',name:'鱼徽战衣',icon:'./svg/batfish-armor.svg'},{id:'ivory-tunic',name:'白金束腰阔袖上衣',icon:'./svg/ivory-tunic.svg'},
     { id: 'plain', name: '普通长袖上衣', icon: './svg/decoration-shirt.svg' },
     { id: 'blue-vest', name: '蓝色 V 领背心', icon: './svg/blue-vest.svg', sleeveless: true },
@@ -180,7 +180,7 @@ const decorationCatalog = {
     { id: 'loose-long-sleeve', name: '宽松长袖上衣', icon: './svg/loose-long-sleeve.svg' },
     {id:'cinched-long-sleeve',name:'收口宽松长袖',icon:'./svg/cinched-long-sleeve.svg'},
   ],
-  pants: [{id:'black-gray-sweatpants',name:'黑灰宽松卫裤',icon:'./svg/black-gray-sweatpants.svg'},{id:'mosaic-pants',name:'马赛克裤子',icon:'./svg/mosaic-pants.svg'},{id:'white-loose-wide-trousers',name:'白色超阔长裤',icon:'./svg/white-loose-wide-trousers.svg'},{id:'space-trousers',name:'宇航配色宽松卫裤',icon:'./svg/space-trousers.svg'},
+  pants: [{id:'white-sweatpants',name:'白色拼白宽松卫裤',icon:'./svg/white-sweatpants.svg'},{id:'walker-sweatpants',name:'橙棕行者卫裤',icon:'./svg/walker-sweatpants.svg'},{id:'black-gray-sweatpants',name:'黑灰宽松卫裤',icon:'./svg/black-gray-sweatpants.svg'},{id:'mosaic-pants',name:'马赛克裤子',icon:'./svg/mosaic-pants.svg'},{id:'white-loose-wide-trousers',name:'白色超阔长裤',icon:'./svg/white-loose-wide-trousers.svg'},{id:'space-trousers',name:'宇航配色宽松卫裤',icon:'./svg/space-trousers.svg'},
     {id:'dark-gray-slight-wide-trousers',name:'深灰色微阔长裤',icon:'./svg/dark-gray-slight-wide-trousers.svg'},
     {id:'black-slight-wide-trousers',name:'黑色微阔长裤',icon:'./svg/black-slight-wide-trousers.svg'},
     {id:'green-ultra-shorts',name:'绿色微阔超短裤',icon:'./svg/green-ultra-shorts.svg'},{id:'student-shorts',name:'藏蓝小学生短裤',icon:'./svg/student-shorts.svg'},
@@ -201,7 +201,7 @@ const decorationCatalog = {
     ...Object.entries(workwearVariants).map(([id,item])=>({id,name:item.name,icon:`./svg/${id}.svg`,sleeveless:true})),
     { id: 'loose-wide-pants', name: '几何拼贴阔腿裤', icon: './svg/loose-wide-pants.svg' },
   ],
-  outerwear: [...Object.entries(swimRingVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'space-shirt',name:'宇航配色宽松卫衣',icon:'./svg/space-shirt.svg'},{id:'charcoal-blazer',name:'深灰西装外套',icon:'./svg/charcoal-blazer.svg'},
+  outerwear: [{id:'white-chef-jacket',name:'白色厨师上衣',icon:'./svg/white-chef-jacket.svg'},...Object.entries(swimRingVariants).map(([id,v])=>({id,name:v.name,icon:'./svg/'+id+'.svg'})),{id:'space-shirt',name:'宇航配色宽松卫衣',icon:'./svg/space-shirt.svg'},{id:'charcoal-blazer',name:'深灰西装外套',icon:'./svg/charcoal-blazer.svg'},
     {id:'secondary-jacket',name:'中学生外套',icon:'./svg/secondary-jacket.svg'},
     {id:'student-jacket',name:'小学生外套',icon:'./svg/student-jacket.svg'},
     {id:'blue-worker-jacket',name:'深蓝反光工人外套',icon:'./svg/blue-worker-jacket.svg'},{id:'worker-jacket',name:'橙色反光工人外套',icon:'./svg/worker-jacket.svg'},
@@ -212,7 +212,7 @@ const decorationCatalog = {
     {id:'aloha-open-long-jacket',name:'藏蓝敞胸长袖外套',icon:'./svg/aloha-open-long-jacket.svg'},
     { id: 'green-vest', name: '绿色开襟外套', icon: './svg/green-vest.svg', sleeveless: true },
   ],
-  shoes: [{id:'brown-worker-boots',name:'棕色宽筒长靴',icon:'./svg/brown-worker-boots.svg'},{id:'navy-slippers',name:'深蓝色拖鞋',icon:'./svg/navy-slippers.svg'},{id:'navy-sandals',name:'深蓝色凉鞋',icon:'./svg/navy-sandals.svg'},{id:'orange-shoes',name:'橙色普通鞋',icon:'./svg/orange-shoes.svg'},{id:'colorblock-shoes',name:'灰蓝拼色鞋',icon:'./svg/colorblock-shoes.svg'},{id:'brown-shoes',name:'棕色普通鞋',icon:'./svg/brown-shoes.svg'},{id:'student-long-socks-shoes',name:'黑鞋长白袜',icon:'./svg/student-long-socks-shoes.svg'},{id:'student-shoes',name:'黑鞋短白袜',icon:'./svg/student-shoes.svg'},{id:'black-worker-boots',name:'黑色宽筒长靴',icon:'./svg/black-worker-boots.svg'},{id:'blue-worker-boots',name:'蓝色宽筒长靴',icon:'./svg/blue-worker-boots.svg'},{id:'gray-worker-boots',name:'灰色宽筒长靴',icon:'./svg/gray-worker-boots.svg'},{id:'worker-boots',name:'黄色宽筒长靴',icon:'./svg/worker-boots.svg'},{id:'gray-sneakers',name:'灰色系带休闲鞋',icon:'./svg/gray-sneakers.svg'},{id:'batfish-boots',name:'黑色战靴',icon:'./svg/batfish-boots.svg'},
+  shoes: [{id:'gray-plain-shoes',name:'灰色普通鞋',icon:'./svg/gray-plain-shoes.svg'},{id:'brown-worker-boots',name:'棕色宽筒长靴',icon:'./svg/brown-worker-boots.svg'},{id:'navy-slippers',name:'深蓝色拖鞋',icon:'./svg/navy-slippers.svg'},{id:'navy-sandals',name:'深蓝色凉鞋',icon:'./svg/navy-sandals.svg'},{id:'orange-shoes',name:'橙色普通鞋',icon:'./svg/orange-shoes.svg'},{id:'colorblock-shoes',name:'灰蓝拼色鞋',icon:'./svg/colorblock-shoes.svg'},{id:'brown-shoes',name:'棕色普通鞋',icon:'./svg/brown-shoes.svg'},{id:'student-long-socks-shoes',name:'黑鞋长白袜',icon:'./svg/student-long-socks-shoes.svg'},{id:'tricolor-long-socks-shoes',name:'黑鞋三色横条长袜',icon:'./svg/tricolor-long-socks-shoes.svg'},{id:'striped-long-socks-shoes',name:'黑鞋黑白条纹长袜',icon:'./svg/striped-long-socks-shoes.svg'},{id:'student-shoes',name:'黑鞋短白袜',icon:'./svg/student-shoes.svg'},{id:'black-worker-boots',name:'黑色宽筒长靴',icon:'./svg/black-worker-boots.svg'},{id:'blue-worker-boots',name:'蓝色宽筒长靴',icon:'./svg/blue-worker-boots.svg'},{id:'gray-worker-boots',name:'灰色宽筒长靴',icon:'./svg/gray-worker-boots.svg'},{id:'worker-boots',name:'黄色宽筒长靴',icon:'./svg/worker-boots.svg'},{id:'gray-sneakers',name:'灰色系带休闲鞋',icon:'./svg/gray-sneakers.svg'},{id:'batfish-boots',name:'黑色战靴',icon:'./svg/batfish-boots.svg'},
     {id:'black-dress-shoes', name:'黑皮鞋', icon:'./svg/black-dress-shoes.svg'},
     { id: 'plain', name: '普通鞋子', icon: './svg/decoration-shoes.svg' },
     { id: 'brown-boots', name: '棕色长靴', icon: './svg/brown-boots.svg' },
@@ -243,10 +243,12 @@ const decorationStyleGroups={
   ['collared','衬衫',['white-tie-shirt']],
   ['vest','V领背心',['blue-vest']],
   ['angel-vest','无袖背心',['angel-vest']],
+  ['walker-shirt','行者上衣',['walker-shirt','monk-robe']],
+  ['pink-heart-bra','心心内衣',['pink-heart-bra']],
   ['shell-top','贝壳上衣',['shell-top']],
   ['triangle','三角上衣',['red-triangle']],
   ['mosaic-top','马赛克上衣',['mosaic-top']]],
- pants:[['mosaic-pants','马赛克裤子',['mosaic-pants']],['space','宽松卫裤',['space-trousers','black-gray-sweatpants']],['fitted','紧身长裤',['plain','batfish-trousers']],
+ pants:[['mosaic-pants','马赛克裤子',['mosaic-pants']],['space','宽松卫裤',['space-trousers','black-gray-sweatpants','walker-sweatpants','white-sweatpants']],['fitted','紧身长裤',['plain','batfish-trousers']],
   ['slight-wide','微阔长裤',['suit-trousers','dark-gray-slight-wide-trousers','black-slight-wide-trousers','royal-trousers','jobs-gradient-jeans']],
   ['wide','宽松长裤',['worker-trousers','blue-worker-trousers']],
   ['extra-wide','阔腿长裤',['ivory-trousers']],
@@ -256,10 +258,10 @@ const decorationStyleGroups={
   ['shorts','紧身短裤',['pink-shorts','orange-shorts','black-shorts']],['slight-wide-ultra-shorts','微阔超短裤',['student-shorts','green-ultra-shorts']],
   ['slight-wide-shorts','微阔短裤',['slight-wide-shorts']],
   ['extra-wide-shorts','阔腿短裤',['extra-wide-shorts']]],
- outerwear:[['swim-ring','游泳圈',Object.keys(swimRingVariants)],['space','宽松卫衣',['space-shirt']],['blazer','西装外套',['charcoal-blazer']],['secondary','中学生外套',['secondary-jacket']],['student','小学生外套',['student-jacket']],['worker','工人外套',['worker-jacket','blue-worker-jacket']],['suit','西装上衣',['suit-jacket']],['short','短袖外套',['aloha-jacket']],['long','长袖外套',['aloha-long-jacket']],
+ outerwear:[['swim-ring','游泳圈',Object.keys(swimRingVariants)],['space','宽松卫衣',['space-shirt']],['blazer','西装外套',['charcoal-blazer']],['secondary','中学生外套',['secondary-jacket']],['student','双排扣外套',['student-jacket','white-chef-jacket']],['worker','工人外套',['worker-jacket','blue-worker-jacket']],['suit','西装上衣',['suit-jacket']],['short','短袖外套',['aloha-jacket']],['long','长袖外套',['aloha-long-jacket']],
   ['open-short','敞胸短袖外套',['aloha-open-jacket']],['open-long','敞胸长袖外套',['aloha-open-long-jacket']],
   ['vest','无袖开襟外套',['green-vest']]],
- shoes:[['slippers','拖鞋',['navy-slippers']],['sandals','凉鞋',['navy-sandals']],['colorblock-shoes','拼色鞋子',['colorblock-shoes']],['short-sock-shoes','短袜鞋',['student-shoes']],['long-sock-shoes','长袜鞋',['student-long-socks-shoes']],['work-boots','宽筒长靴',['worker-boots','gray-worker-boots','black-worker-boots','blue-worker-boots','brown-worker-boots']],['sneakers','系带休闲鞋',['gray-sneakers']],['shoes','鞋子',['plain','black-dress-shoes','brown-shoes','orange-shoes']],['boots','长靴',['brown-boots','dark-boots','batfish-boots']]],
+ shoes:[['slippers','拖鞋',['navy-slippers']],['sandals','凉鞋',['navy-sandals']],['colorblock-shoes','拼色鞋子',['colorblock-shoes']],['short-sock-shoes','短袜鞋',['student-shoes']],['long-sock-shoes','长袜鞋',['student-long-socks-shoes','tricolor-long-socks-shoes','striped-long-socks-shoes']],['work-boots','宽筒长靴',['worker-boots','gray-worker-boots','black-worker-boots','blue-worker-boots','brown-worker-boots']],['sneakers','系带休闲鞋',['gray-sneakers']],['shoes','鞋子',['plain','black-dress-shoes','brown-shoes','orange-shoes','gray-plain-shoes']],['boots','长靴',['brown-boots','dark-boots','batfish-boots']]],
  gloves:[['gloves','手套',['plain','space-gloves']],['guards','护腕手套',['batfish-gloves']]],
  cape:[['gourd','葫芦',['gourd']],['paired-swords','佩剑',['paired-swords']],['angel-wings','天使翅膀',Object.keys(angelWingVariants)],['dual-swords','双刀',['dual-swords']],['greatsword','大剑',['greatsword']],['shell','龟壳',['kappa-shell']],['cape','披风',['crimson-cape','charcoal-cape','azure-cape','solid-red-cape','solid-blue-cape','solid-black-cape']]],
 };
@@ -426,12 +428,12 @@ function legFabricPaths(shape,side,legs=100) {
   });
 }
 
-const isSpaceSweatpants=()=>['space-trousers','black-gray-sweatpants'].includes(selectedDecorations.pants);
-const sweatpantsAccent=()=>selectedDecorations.pants==='black-gray-sweatpants'?'#909090':'#10C9E9';
+const isSpaceSweatpants=()=>['space-trousers','black-gray-sweatpants','walker-sweatpants','white-sweatpants'].includes(selectedDecorations.pants);
+const sweatpantsAccent=()=>selectedDecorations.pants==='white-sweatpants'?'#FFFFFF':selectedDecorations.pants==='walker-sweatpants'?'#5B270B':selectedDecorations.pants==='black-gray-sweatpants'?'#909090':'#10C9E9';
 const denimJeansIds=[...Object.keys(denimVariants),...Object.keys(workwearVariants)];
 function widePantsPaint() {
   if(selectedDecorations.pants==='white-loose-wide-trousers')return '#FAFAF7';
-  if(isSpaceSweatpants())return selectedDecorations.pants==='black-gray-sweatpants'?'#373737':'#FF8215';
+  if(isSpaceSweatpants())return selectedDecorations.pants==='white-sweatpants'?'#FFFFFF':selectedDecorations.pants==='walker-sweatpants'?'#F85137':selectedDecorations.pants==='black-gray-sweatpants'?'#373737':'#FF8215';
   if(selectedDecorations.pants==='dark-gray-slight-wide-trousers')return '#2B2D2D';
   if(selectedDecorations.pants==='black-slight-wide-trousers')return '#101011';
   if(workerPantsColors[selectedDecorations.pants])return workerPantsColors[selectedDecorations.pants];
@@ -452,7 +454,7 @@ const milkFrogBellySource='M47 78C36 78 34 96 35.5 108C36.4 117 40 119 47 119C54
 // colour, whenever the chainsaw is off.
 // Hats that sit over the horn and leave nothing of it showing.
 const hornCovered = (helmet = selectedDecorations.helmet) =>
-  helmet==='large-party-hat' || !!capVariants[helmet] || helmet==='pink-ribbon-hair' || !!spikyHairVariants[helmet] || helmet==='space-helmet' || !!topknotVariants[helmet] || !!longBraidVariants[helmet] || helmet==='secondary-hat' || helmet==='student-hat' || !!workerHelmetColors[helmet] || helmet === 'kappa-hair' || helmet === 'crown' || helmet === 'batfish-cowl' || helmet === 'chainsaw';
+  helmet==='chef-hat' || helmet==='yellow-bow-hair' || helmet==='large-party-hat' || !!capVariants[helmet] || helmet==='pink-ribbon-hair' || !!spikyHairVariants[helmet] || helmet==='space-helmet' || !!topknotVariants[helmet] || !!longBraidVariants[helmet] || helmet==='secondary-hat' || helmet==='student-hat' || !!workerHelmetColors[helmet] || helmet === 'kappa-hair' || helmet === 'crown' || helmet === 'batfish-cowl' || helmet === 'chainsaw';
 // Hats that are the horn, repainted: the party hat and the shark hood.
 const hornWorn = (helmet = selectedDecorations.helmet) =>
   helmet === 'party-hat' || helmet === 'shark-hood';
@@ -477,6 +479,8 @@ function hornHidden(helmet = selectedDecorations.helmet) {
 let skinTraits;
 function skinTrait(name) {
   skinTraits ||= {
+    monkey:{color:'#E38047',monkeyFace:true},
+    gyaru:{color:'#B96723',eye:'white',eyeWhite:gyaruEyeSource,pupil:{rx:0,ry:0},gyaruFace:true},
     sponge:{color:'#FEF455',sponge:true,spongeFace:true},
     ...Object.fromEntries(Object.entries(coloredSkinVariants).map(([id,v])=>[id,{color:v.color,gradient:v.gradient,hornColor:v.hornColor}])),
     scar:{color:'#C5C5C5',scar:true},
@@ -509,7 +513,7 @@ function skinTrait(name) {
 }
 // Hoods that are a head of their own rather than something worn on one.
 const FACE_TRAITS = ['eye', 'eyeWhite', 'pupil', 'lip', 'marks', 'mouthShut',
-  'spongeFace','antenna','lipstickDetails','kappaDetails','headContour','eyeRings'];
+  'monkeyFace','gyaruFace','spongeFace','antenna','lipstickDetails','kappaDetails','headContour','eyeRings'];
 const fullHood = (helmet = selectedDecorations.helmet) =>
   helmet === 'space-helmet' || helmet === 'batfish-cowl' || helmet === 'shark-hood';
 function skinColor(){ return skinTrait('color') || '#C5C5C5'; }
@@ -2265,6 +2269,7 @@ const alohaSleeveStyles={
  'space-shirt':{longHem:true,end:31,flare:7,color:'#FF8215',space:true},
   'secondary-jacket':{longHem:true,end:31,flare:1,color:'#101011',student:true},
   'student-jacket':{longHem:true,end:31,flare:1,color:'#102f68',student:true},
+  'white-chef-jacket':{longHem:true,end:31,flare:1,color:'#FFFFFF',student:true},
   'worker-jacket':{longHem:true,end:27,flare:4,color:'#f66b19',worker:true},
   'blue-worker-jacket':{longHem:true,end:27,flare:4,color:'#1d3b68',worker:true},
   'charcoal-blazer':{longHem:true,end:31,flare:1,color:'#2B2D2D',blazer:true},
@@ -2359,20 +2364,41 @@ const secondaryBodySource=secondaryNeckSource+`L67.5459 ${RIGHT_ARMPIT_Y}L68.5 1
 const studentBodySource=`M26.1046 56.4524L32 59L47 63L62 59L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}C67.8 83 68.5 103 68.5 116C57 117.5 36 117.5 25.5 116C25.5 101 26.5 82 27.478 ${LEFT_ARMPIT_Y}Z`;
 const studentCollarLeft='M32 59L47 63L44.5 70L32 65.5Z';
 const studentCollars=[studentCollarLeft,transformPath(studentCollarLeft,(x,y)=>({x:94-x,y}))];
-function studentOuterMarkup(warp,secondary=false){
+const chefXCollarSource=transformPath("M47.0103 57.9404C46.2103 57.1404 33.0103 52.607 26.5103 50.4404C32.0103 55.9404 44.5103 59.9404 43.5103 59.9404C40.4689 59.9404 37.0103 64.4404 38.0103 64.4404C38.8103 64.4404 45.1769 62.6071 47.0103 61.4404C51.8436 62.7738 61.0103 64.9404 59.0103 62.9404C56.5103 60.4404 48.5103 60.9404 51.0103 59.9404C53.5103 58.9404 69.5103 48.9404 68.5103 47.9404C67.5103 46.9404 48.0103 58.9404 47.0103 57.9404Z",(x,y)=>({x:x-.4829,y:y+5.5444+1.8*smooth((x-54)/14)*(1-smooth((y-53)/7))}));
+function studentOuterMarkup(warp,secondary=false,chef=selectedDecorations.outerwear==='white-chef-jacket'){
  const tag=(d,fill,stroke='none',width=1)=>`<path d="${workerGarmentPath(d,warp)}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round"/>`;
- return tag(secondary?secondaryBodySource:studentBodySource,secondary?'#101011':'#102f68')
+ return tag(secondary?secondaryBodySource:studentBodySource,secondary?'#101011':chef?'#FFFFFF':'#102f68')
  +tag(secondary?secondaryBodyEdgesSource:`M27.478 ${LEFT_ARMPIT_Y}C26.5 82 25.5 101 25.5 116C36 117.5 57 117.5 68.5 116C68.5 103 67.8 83 67.5459 ${RIGHT_ARMPIT_Y}`,'none','black')
- +(secondary?'':studentCollars.map(d=>tag(d,'#fffdf4','black',.7)).join(''))
- +tag(secondary?secondaryNeckSource:'M26.1046 56.4524L32 59L47 63L62 59L67.7274 55.0466','none','black')
- +(secondary?[65.4849,74.4849,83.4849,92.4849].map(y=>tag(circleSource(46.0273,y,2),'#FCDD43')).join(''):[42,52].flatMap(x=>[84,92].map(y=>tag(circleSource(x,y,1.65),'#ffdb43'))).join(''));
+ +(secondary?'':chef?tag(chefXCollarSource,'#D9D9D9','black',1):studentCollars.map(d=>tag(d,'#fffdf4','black',.7)).join(''))
+ +(chef?'':tag(secondary?secondaryNeckSource:'M26.1046 56.4524L32 59L47 63L62 59L67.7274 55.0466','none','black'))
+ +(secondary?[65.4849,74.4849,83.4849,92.4849].map(y=>tag(circleSource(46.0273,y,2),'#FCDD43')).join(''):(chef?[42,52]:[42,52]).flatMap(x=>(chef?[79.5,88.5,97.5,106.5]:[84,92]).map(y=>tag(circleSource(x,y,1.65),chef?'black':'#ffdb43'))).join(''));
 }
-const studentSockStyles={'student-shoes':{start:24},'student-long-socks-shoes':{start:20}};
+const studentSockStyles={'student-shoes':{start:24},'student-long-socks-shoes':{start:20},'tricolor-long-socks-shoes':{start:20,pattern:'tricolor'},'striped-long-socks-shoes':{start:20,pattern:'striped'}};
 function studentSockStart(shoes=selectedDecorations.shoes){return studentSockStyles[shoes]?.start||24;}
 function studentSockVisible(index,pants=selectedDecorations.pants,shoes=selectedDecorations.shoes){
  return !!studentSockStyles[shoes]&&index>=studentSockStart(shoes)&&!widePantFlares[pants]&&!['plain','batfish-trousers','jumpsuit','navy-jumpsuit'].includes(pants)&&!workwearVariants[pants];
 }
 function exposedLegPaint(index){return studentSockVisible(index)?'#fffdf8':skinColor();}
+// Bands use the live calf cross sections, so they turn and bend with each leg.
+function sockStripeMarkup(shape,shoes=selectedDecorations.shoes){
+ const pattern=studentSockStyles[shoes]?.pattern;if(!pattern)return '';
+ const cross=t=>{
+  const i=Math.min(31,Math.floor(t)),f=t-i,a=shape.centerline[i],b=shape.centerline[i+1];
+  const l=Math.hypot(b.x-a.x,b.y-a.y)||1,ux=(b.x-a.x)/l,uy=(b.y-a.y)/l;
+  const mouth=i>=26?Math.max(0,Math.hypot(shape.bootOuter.x-shape.bootInner.x,shape.bootOuter.y-shape.bootInner.y)-shape.hose[i].width)*smooth((i-26)/4):0;
+  const radius=(shape.hose[i].width+mouth)/2;
+  const x=lerp(a.x,b.x,f),y=lerp(a.y,b.y,f);
+  return [{x:x-uy*radius,y:y+ux*radius},{x:x+uy*radius,y:y-ux*radius}];
+ };
+ const band=(start,end,color)=>{
+  const left=[],right=[];
+  for(let t=start;t<end;t=Math.min(end,t+.25)){const [a,b]=cross(t);left.push(a);right.push(b);}
+  const [a,b]=cross(end);left.push(a);right.push(b);
+  return `<path d="${left.concat(right.reverse()).map((p,i)=>`${i?'L':'M'}${clean(p.x)} ${clean(p.y)}`).join('')}Z" fill="${color}"/>`;
+ };
+ const bands=pattern==='tricolor'?[[20,20.8,'#000000'],[21.6,22.4,'#1726E8'],[23.2,24,'#F50812']]:Array.from({length:6},(_,i)=>[20+i*2,21+i*2,'#000000']);
+ return bands.map(args=>band(...args)).join('');
+}
 const workerHemY=123;
 const workerBodySource=`M26.1046 56.4524L31.5 58.5L47 64L62.5 58.5L67.7274 55.0466L67.5459 ${RIGHT_ARMPIT_Y}C68 88 69 108 69.5 ${workerHemY}C58 124 36 124 24.5 ${workerHemY}C25 108 26 88 27.478 ${LEFT_ARMPIT_Y}Z`;
 const workerTopEdgeSource='M26.1046 56.4524L31.5 58.5L47 64L62.5 58.5L67.7274 55.0466';
@@ -2533,9 +2559,81 @@ const largePartyHatSpecs=[
  ...[[71.5,34.5],[77.8,39.2],[87.7,38.8],[74,46.3]].map(([x,y])=>({source:circleSource(x,y,2.5),fill:'#FFE344',stroke:'none',role:'headRigid'})),
  {source:circleSource(104,36.5,5.4),fill:'#FFE344',stroke:'black',role:'headRigid'},
 ];
+const spongeEllipse=(cx,cy,rx,ry,angle=0)=>transformPath(circleSource(0,0,1),(x,y)=>({x:cx+x*rx*Math.cos(angle)-y*ry*Math.sin(angle),y:cy+x*rx*Math.sin(angle)+y*ry*Math.cos(angle)}));
+let monkeyFacePaths=[],walkerCircletPaths=[],walkerScarfPaths=[];
+const walkerSpecs={"face":[{"source":"M38.9605 28.6443C37.3489 30.7395 33.2926 33.6727 26.9105 28.6443L23.7339 24.5966L37.4873 -4.82642L59.6953 4.64313L59.6953 13.7746C63.5633 18.1261 69.9455 28.7461 59.6953 36.0952C50.1958 42.9062 40.9751 33.9628 38.9605 28.6443Z","fill":"#F4F4F4","stroke":"none","role":"head"},{"source":"M58.0591 28.8662C50.5596 34.2432 43.8898 26.6686 42.2919 22.9841C40.6939 19.2996 40.527 13.0809 40.5269 -3.43945L58.0591 4.0363L58.0591 11.2452C61.1127 14.6804 66.1511 23.0644 58.0591 28.8662Z","fill":"#FF3131","stroke":"none","role":"head"}],"circlet":[{"source":"M75.0353 4.36343C73.1651 9.63421 61.0934 15.2449 61.0934 1.30298C57.5228 5.27019 56.7436 14.2928 63.3036 15.4149C73.1669 17.102 75.432 8.78402 75.0353 4.36343Z","fill":"#FCDD43","stroke":"black","role":"headRigid"},{"source":"M67.7423 45.4237C66.4395 45.1893 63.1651 25.0111 61.6814 14.8041C62.1616 13.609 64.8913 13.7439 64.8913 14.9951C64.8913 15.5846 70.137 43.2755 70.5201 43.959C70.9032 44.6425 69.3707 45.7167 67.7423 45.4237Z","fill":"#FCDD43","stroke":"black","role":"headRigid"}],"scarf":[{"source":"M13.0684 48.279C13.0684 48.279 17.084 42.9249 23.3305 42.4787C29.577 42.0325 34.2084 45.5866 34.2084 45.5866C34.2084 45.5866 29.577 50.0638 23.3305 50.0638C17.084 50.0637 13.0684 48.279 13.0684 48.279Z","fill":"#2F63E4","stroke":"none","role":"head"},{"source":"M35.8236 46.0481L34.2084 45.5866M34.2084 45.5866C34.2084 45.5866 29.577 42.0325 23.3305 42.4787C17.084 42.9249 13.0684 48.279 13.0684 48.279C13.0684 48.279 17.084 50.0637 23.3305 50.0638C29.577 50.0638 34.2084 45.5866 34.2084 45.5866Z","fill":"none","stroke":"black","role":"head"},{"source":"M27.1601 66.19C27.1601 66.19 24.2906 60.1436 26.8035 54.4075C29.3163 48.6713 34.6178 46.2268 34.6178 46.2268C34.6178 46.2268 36.4244 52.4098 33.5167 57.9383C30.6089 63.4668 27.1601 66.19 27.1601 66.19Z","fill":"#2F63E4","stroke":"none","role":"head"},{"source":"M35.7781 45.012L34.6178 46.2268M34.6178 46.2268C34.6178 46.2268 29.3163 48.6713 26.8035 54.4075C24.2906 60.1436 27.1601 66.19 27.1601 66.19C27.1601 66.19 30.6089 63.4668 33.5167 57.9383C36.4244 52.4098 34.6178 46.2268 34.6178 46.2268Z","fill":"none","stroke":"black","role":"head"},{"source":"M68.3634 38.286L34.9005 45.7244L82.4268 50.3907C82.4268 50.3907 82.1571 48.0766 74.9503 42.5582C67.7435 37.0397 68.3634 38.286 68.3634 38.286Z","fill":"#2F63E4","stroke":"black","role":"head"},{"source":"M38.9004 45.4399C38.9004 46.5445 37.5572 47.4399 35.9004 47.4399C34.2435 47.4399 32.9004 46.5445 32.9004 45.4399C32.9004 44.3354 34.2435 43.4399 35.9004 43.4399C37.5572 43.4399 38.9004 44.3354 38.9004 45.4399Z","fill":"#2F63E4","stroke":"black","role":"head"}],"shirt":[{"source":"M59.4574 45.8042C55.2812 46.0429 43.9821 46.7351 38.1592 46.1622L47.2869 60.0033L51.642 59.526L59.4574 45.8042Z","fill":"#F4F4F4","stroke":"black","role":"body"},{"source":"M33.2576 87.496C38.9068 73.054 50.5084 49.7571 57.9747 44.0009C60.1055 44.0008 64.6365 45.0702 64.2674 45.3936C58.9662 50.0385 47.3324 73.2719 39.2078 88.5979L33.2576 87.496Z","fill":"#020202","stroke":"none","role":"body"},{"source":"M51.4265 64.0251C44.7102 49.8977 42.5757 49.3517 39.3754 44.9322C34.718 44.1536 30.7939 44.9446 32.0008 46.0017C37.3031 50.6455 40.4541 56.0242 47.4686 68.6628L51.4265 64.0251Z","fill":"#020202","stroke":"none","role":"body"},{"source":"M26.1953 92.8647L68.0049 92.8647L68.0049 101.429L26.1953 101.429L26.1953 92.8647Z","fill":"#F4F4F4","stroke":"black","role":"body"}]};
+for(const specs of Object.values(walkerSpecs))for(const spec of specs)spec.source=transformPath(spec.source,(x,y)=>({x,y:y+8.5986}));
+// Lower the small blue scarf over the collar seam.
+for(const spec of walkerSpecs.scarf)spec.source=transformPath(spec.source,(x,y)=>({x,y:y+2}));
+const walkerBodySource='M26.1046 56.4524C38 57.3 54 56.8 67.7274 55.0466L67.2175 110.5L26.9348 110.5Z';
+walkerSpecs.shirt[0].source='M33 56.95C42 57.3 54 56.8 63 56L49.5 79L45.5 79Z';
+walkerSpecs.shirt[0].stroke='none';
+walkerSpecs.shirt[2].source='M31.5 55.5L37.5 55.7L51 78L46 83Z';
+walkerSpecs.shirt[1].source='M61.5 52.6L67 54.2L36.4 105.5L30.4 105.5Z';
+walkerSpecs.shirt[3].source='M26.9348 105.5L67.2175 105.5L67.2175 110.5L26.9348 110.5Z';
+function walkerShirtMarkup(warp){return walkerSpecs.shirt.map(s=>`<path d="${torsoGarmentPath(s.source,warp)}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="1" stroke-linejoin="round"/>`).join('');}
+let lotusHatPaths=[];
+const lotusHatSpecs=[{"source":"M78.2032 44.3823L67.7678 43.3968C68.5384 29.7458 63.2875 17.4565 58.2993 11.2414L65.9045 2.1493L77.1358 0.609213L74.0177 8.9504L85.4768 10.1975L78.2032 19.553L88.2863 26.2716L78.8808 33.1279L86.1309 40.3801L78.2032 44.3823Z","fill":"#C91819","stroke":"black","role":"headRigid"},{"source":"M75.9707 35.0906L69.9712 35.0906L70.2787 40.9361L76.6884 41.7565L82.8417 39.6542L75.9707 35.0906Z","fill":"#FD82A7","stroke":"none","role":"headRigid"},{"source":"M69.9712 35.0906L75.9707 35.0906L82.8417 39.6542L76.6884 41.7565L70.2787 40.9361L69.9712 35.0906Z","fill":"none","stroke":"black","role":"headRigid"},{"source":"M69.9712 35.0906L75.9707 35.0906L82.8417 39.6542L76.6884 41.7565L70.2787 40.9361L69.9712 35.0906Z","fill":"none","stroke":"#8E1137","role":"headRigid"},{"source":"M69.8325 29.5586C69.8325 28.9946 69.6504 27.0854 68.9214 23.9612L76.6015 22.7898L82.5894 26.3044L76.6015 30.3397L69.8325 29.5586Z","fill":"#FD82A7","stroke":"none","role":"headRigid"},{"source":"M68.9214 23.9612C69.6504 27.0854 69.8325 28.9946 69.8325 29.5586L76.6015 30.3397L82.5894 26.3044L76.6015 22.7898L68.9214 23.9612Z","fill":"none","stroke":"black","role":"headRigid"},{"source":"M68.9214 23.9612C69.6504 27.0854 69.8325 28.9946 69.8325 29.5586L76.6015 30.3397L82.5894 26.3044L76.6015 22.7898L68.9214 23.9612Z","fill":"none","stroke":"#8E1137","role":"headRigid"},{"source":"M67.6198 20.3163C67.2727 19.6221 65.537 16.6717 65.1204 16.0468L72.8268 12.376L80.1164 12.376L74.519 19.1449L67.6198 20.3163Z","fill":"#FD82A7","stroke":"none","role":"headRigid"},{"source":"M65.1204 16.0468C65.537 16.6717 67.2727 19.6221 67.6198 20.3163L74.519 19.1449L80.1164 12.376L72.8268 12.376L65.1204 16.0468Z","fill":"none","stroke":"black","role":"headRigid"},{"source":"M65.1204 16.0468C65.537 16.6717 67.2727 19.6221 67.6198 20.3163L74.519 19.1449L80.1164 12.376L72.8268 12.376L65.1204 16.0468Z","fill":"none","stroke":"#8E1137","role":"headRigid"},{"source":"M66.5783 5.86743L71.5251 4.30542L69.5726 8.60108L63.9978 13.1081L63.1516 11.8715L62.1323 10.6273L66.5783 5.86743Z","fill":"#FD82A7","stroke":"none","role":"headRigid"},{"source":"M71.5251 4.30542L66.5783 5.86743L62.1323 10.6273L63.1516 11.8715L63.9978 13.1081L69.5726 8.60108L71.5251 4.30542Z","fill":"none","stroke":"black","role":"headRigid"},{"source":"M71.5251 4.30542L66.5783 5.86743L62.1323 10.6273L63.1516 11.8715L63.9978 13.1081L69.5726 8.60108L71.5251 4.30542Z","fill":"none","stroke":"#8E1137","role":"headRigid"}].map(spec=>({...spec,source:transformPath(spec.source,(x,y)=>({x,y:y+9.3201}))}));
+const monkPanelSource='M61.5 52.6L68 55L67.2175 105.5L30.4 105.5Z';
+const monkBrickSource="M-14.7329 56.9077L5.7492 58.8571L5.1684 64.9602L-15.3138 63.0107ZM-15.8945 69.1138L4.5876 71.0632L4.0068 77.1663L-16.4754 75.2168ZM6.9106 46.6511L27.3928 48.6005L26.8119 54.7036L6.3298 52.7541ZM5.7490 58.8572L26.2312 60.8066L25.6503 66.9097L5.1682 64.9602ZM4.5874 71.0633L25.0695 73.0127L24.4887 79.1158L4.0065 77.1663ZM3.4258 83.2693L23.9079 85.2187L23.3271 91.3218L2.8449 89.3723ZM2.2642 95.4754L22.7463 97.4248L22.1654 103.5279L1.6833 101.5784ZM1.1020 107.6814L21.5842 109.6308L21.0033 115.7339L0.5212 113.7844ZM-3.9111 51.7793L16.5710 53.7287L15.9901 59.8318L-4.4920 57.8823ZM-5.0728 63.9854L15.4094 65.9348L14.8285 72.0379L-5.6536 70.0884ZM-6.2344 76.1917L14.2478 78.1411L13.6669 84.2442L-6.8152 82.2947ZM-7.3965 88.3977L13.0857 90.3471L12.5048 96.4502L-7.9773 94.5007ZM-8.5581 100.6038L11.9240 102.5532L11.3432 108.6563L-9.1390 106.7068ZM27.3931 48.6006L47.8752 50.5500L47.2944 56.6531L26.8122 54.7036ZM26.2314 60.8064L46.7135 62.7558L46.1327 68.8589L25.6505 66.9094ZM25.0693 73.0127L45.5514 74.9621L44.9706 81.0652L24.4884 79.1157ZM23.9077 85.2188L44.3898 87.1682L43.8090 93.2713L23.3268 91.3218ZM22.7461 97.4248L43.2282 99.3742L42.6474 105.4773L22.1652 103.5278ZM16.5713 53.7288L37.0534 55.6782L36.4726 61.7813L15.9904 59.8318ZM15.4092 65.9348L35.8913 67.8842L35.3105 73.9873L14.8283 72.0378ZM14.2476 78.1409L34.7297 80.0903L34.1489 86.1934L13.6667 84.2439ZM13.0859 90.3472L33.5680 92.2966L32.9872 98.3997L12.5050 96.4502ZM11.9243 102.5532L32.4064 104.5026L31.8256 110.6057L11.3434 108.6562ZM47.8750 50.5501L68.3571 52.4995L67.7763 58.6026L47.2941 56.6531ZM46.7134 62.7559L67.1955 64.7053L66.6147 70.8084L46.1325 68.8589ZM45.5518 74.9619L66.0339 76.9113L65.4531 83.0144L44.9709 81.0649ZM44.3901 87.1682L64.8722 89.1176L64.2914 95.2207L43.8092 93.2712ZM43.2285 99.3743L63.7106 101.3237L63.1298 107.4268L42.6476 105.4773ZM37.0532 55.6782L57.5353 57.6276L56.9545 63.7307L36.4723 61.7812ZM35.8916 67.8843L56.3737 69.8337L55.7929 75.9368L35.3107 73.9873ZM34.7300 80.0904L55.2121 82.0398L54.6313 88.1429L34.1491 86.1934ZM33.5679 92.2964L54.0500 94.2458L53.4692 100.3489L32.9870 98.3994ZM32.4062 104.5027L52.8883 106.4521L52.3075 112.5552L31.8253 110.6057ZM68.3574 52.4995L88.8395 54.4489L88.2587 60.5520L67.7765 58.6025ZM67.1958 64.7053L87.6779 66.6547L87.0971 72.7578L66.6149 70.8083ZM66.0337 76.9114L86.5158 78.8608L85.9350 84.9639L65.4528 83.0144ZM64.8721 89.1177L85.3542 91.0671L84.7734 97.1702L64.2912 95.2207ZM63.7104 101.3238L84.1925 103.2732L83.6117 109.3763L63.1295 107.4268ZM57.5356 57.6275L78.0177 59.5769L77.4369 65.6800L56.9547 63.7305ZM56.3735 69.8338L76.8556 71.7832L76.2748 77.8863L55.7926 75.9368ZM55.2119 82.0398L75.6940 83.9892L75.1132 90.0923L54.6310 88.1428ZM54.0503 94.2459L74.5324 96.1953L73.9516 102.2984L53.4694 100.3489ZM52.8887 106.4522L73.3708 108.4016L72.7900 114.5047L52.3078 112.5552ZM88.8394 54.4490L109.3215 56.3984L108.7407 62.5015L88.2585 60.5520ZM87.6777 66.6548L108.1598 68.6042L107.5790 74.7073L87.0968 72.7578ZM86.5161 78.8609L106.9982 80.8103L106.4174 86.9134L85.9352 84.9639ZM85.3545 91.0669L105.8366 93.0163L105.2558 99.1194L84.7736 97.1699ZM84.1924 103.2732L104.6745 105.2226L104.0937 111.3257L83.6115 109.3762ZM79.1792 47.3711L99.6613 49.3205L99.0805 55.4236L78.5983 53.4741ZM78.0176 59.5769L98.4997 61.5263L97.9189 67.6294L77.4367 65.6799ZM76.8560 71.7832L97.3381 73.7326L96.7573 79.8357L76.2751 77.8862ZM75.6943 83.9893L96.1764 85.9387L95.5956 92.0418L75.1134 90.0923ZM74.5322 96.1953L95.0143 98.1447L94.4335 104.2478L73.9513 102.2983Z";
+const monkTrimSpecs=[{"source":"M59.0999 44.8643C54.9238 45.1029 43.6247 45.7951 37.8018 45.2223L46.9295 59.0634L51.2846 58.5861L59.0999 44.8643Z","fill":"#F4F4F4","stroke":"black"},{"source":"M51.0691 63.0851C44.3528 48.9577 42.2183 48.4117 39.018 43.9922C34.3606 43.2136 30.4364 44.0046 31.6434 45.0617C36.9456 49.7056 40.0967 55.0843 47.1111 67.7229L51.0691 63.0851Z","fill":"#FFD400","stroke":"black"},{"source":"M28.1555 97.1869C33.8046 82.7448 50.1512 48.8172 57.6175 43.061C59.7483 43.0609 64.2793 44.1303 63.9102 44.4537C58.609 49.0986 42.5122 81.8608 34.3875 97.1869L28.1555 97.1869Z","fill":"#FFD400","stroke":"black"}].map(spec=>({...spec,source:transformPath(spec.source,(x,y)=>({x,y:y+10.5386}))}));
+function monkRobeMarkup(warp){
+ const path=d=>torsoGarmentPath(d,warp),tag=(d,fill,stroke='none',width=1)=>`<path d="${path(d)}" fill="${fill}" stroke="${stroke}" stroke-width="${width}" stroke-linejoin="round"/>`;
+ const defs=`<defs><clipPath id="monk-robe-panel"><path d="${path(monkPanelSource)}"/></clipPath><clipPath id="monk-robe-body"><path d="${looseTopPath(walkerBodySource,warp)}"/></clipPath></defs>`;
+ // White insert, short sash, then long sash: the long sash covers the join.
+ return defs+`<g clip-path="url(#monk-robe-body)"><g clip-path="url(#monk-robe-panel)">`+tag(monkPanelSource,'#C91819')+tag(monkBrickSource,'none','#FD82A7',.801806)+'</g></g>'+monkTrimSpecs.map((s,i)=>tag(i===0?walkerSpecs.shirt[0].source:s.source,s.fill,i===0?'none':s.stroke)).join('')+tag(walkerSpecs.shirt[3].source,'#FFD400','black',.65);
+}
+function monkSleeveGrid(shape){
+ const point=(t,across)=>{
+  t=Math.max(0,Math.min(30.9,t));const i=Math.min(30,Math.floor(t)),f=t-i,a=shape.centerline[i],b=shape.centerline[i+1],l=Math.hypot(b.x-a.x,b.y-a.y)||1;
+  const ux=(b.x-a.x)/l,uy=(b.y-a.y)/l;
+  const radius=(shape.hose[i].width+teeSleeveWidth(i,teeStyles['monk-robe']))/2-.5;
+  const offset=across*radius,tilt=offset*.095;
+  return {x:lerp(a.x,b.x,f)-uy*offset+ux*tilt,y:lerp(a.y,b.y,f)+ux*offset+uy*tilt};
+ };
+ const segment=(a,b)=>`M${clean(a.x)} ${clean(a.y)}L${clean(b.x)} ${clean(b.y)}`;
+ let d='';for(let row=0,t=2;t<28;t+=4.8,row++){
+  d+=segment(point(t,-1),point(t,1));
+  for(const across of row%2?[-.65,.65]:[0])d+=segment(point(t,across),point(Math.min(t+4.8,28.5),across));
+ }
+ return d;
+}
+let chefHatPaths=[];
+const chefHatSpecs=[{"source":"M67.8116 39.9188C67.8891 36.0603 67.3132 26.4555 64.3896 18.9042C72.8906 15.7008 90.3537 9.01688 92.1976 7.90819C94.5025 6.52233 100.045 9.26315 96.1423 14.2962C101.911 13.2436 104.811 19.1237 98.7259 21.7984C107.045 23.5377 103.564 29.9931 99.2346 30.9192C104.316 31.4163 104.301 37.2671 100.27 38.7667C98.9146 39.2711 78.153 39.9017 67.8116 39.9188Z","fill":"white","stroke":"none","role":"headRigid"},{"source":"M80.4556 31.5305C81.882 31.5307 90.4802 30.5005 94.6011 29.9854","fill":"none","stroke":"black","role":"headRigid"},{"source":"M79.3848 25.6653C82.9984 24.5244 90.3998 22.8921 93.6489 22.2185","fill":"none","stroke":"black","role":"headRigid"},{"source":"M70.7031 16.7961C73.7687 22.9343 75.4968 30.4002 74.8303 36.7983","fill":"none","stroke":"black","role":"headRigid"},{"source":"M77.127 19.6426C78.8388 18.6918 88.3008 15.4427 92.8179 13.937","fill":"none","stroke":"black","role":"headRigid"},{"source":"M64.3896 18.9042C67.3132 26.4555 67.8891 36.0603 67.8116 39.9188C78.153 39.9017 98.9146 39.2711 100.27 38.7667C104.301 37.2671 104.316 31.4163 99.2346 30.9192C103.564 29.9931 107.045 23.5377 98.7259 21.7984C104.811 19.1237 101.911 13.2436 96.1423 14.2962C100.045 9.26315 94.5025 6.52233 92.1976 7.90819C90.3537 9.01688 72.8906 15.7008 64.3896 18.9042Z","fill":"none","stroke":"black","role":"headRigid"}].map(s=>({...s,source:transformPath(s.source,(x,y)=>({x,y:y+10.5386}))}));
+let gyaruHairPaths=[],gyaruHairOverlay;
+const gyaruOutfitReference=source=>transformPath(source,(x,y)=>({x:x-.5801,y:y+3.12136}));
+const gyaruOutfitSpecs={"hair":[{"source":"M26.5049 29.2975C25.1652 31.9536 23.8188 36.1187 23.819 37.7623C23.8192 39.8785 17.995 24.5577 31.0574 11.6091C41.5072 1.25024 54.1677 3.30873 59.1916 5.63283C61.7036 3.64075 68.3353 -0.0446104 74.766 1.15064C82.8043 2.64471 92.8523 10.6131 78.7851 36.5102C77.9478 37.6723 77.3784 40.6936 81.7995 43.4825C87.3259 46.9687 91.3451 52.9449 78.7851 59.9172C78.8632 63.0839 80.6193 68.1964 87.0193 61.7964C86.0193 67.4631 82.1193 75.7964 74.5193 63.7964C74.1044 63.1413 73.322 61.7658 77.1461 54.1658L72.7197 60.0904C72.7197 60.0904 73.5544 57.6006 73.8093 56.1747C74.0641 54.7488 75.9193 50.4172 69.5193 46.4172L66.0193 40.4943C64.127 45.2008 60.7129 54.5392 61.3671 56.2089C61.4185 56.2811 61.4693 56.3506 61.5193 56.4172C61.4547 56.3742 61.4043 56.304 61.3671 56.2089C59.3598 53.3946 56.3275 46.4961 59.4475 42.9861L55.5193 46.4172C57.3527 39.7506 61.1193 25.6172 55.5193 22.4172C51.535 15.3284 37.7068 8.28059 26.5049 29.2975Z","circle":null,"fill":"#FCDD43","stroke":"none","strokeWidth":1.0,"role":"headRigid"},{"source":"M61.3671 56.2089C60.7129 54.5392 64.127 45.2008 66.0193 40.4943L69.5193 46.4172C75.9193 50.4172 74.0641 54.7488 73.8093 56.1747C73.5544 57.6006 72.7197 60.0904 72.7197 60.0904L77.1461 54.1658C73.322 61.7658 74.1044 63.1413 74.5193 63.7964C82.1193 75.7964 86.0193 67.4631 87.0193 61.7964C80.6193 68.1964 78.8632 63.0839 78.7851 59.9172C91.3451 52.9449 87.3259 46.9687 81.7995 43.4825C77.3784 40.6936 77.9478 37.6723 78.7851 36.5102C92.8523 10.6131 82.8043 2.64471 74.766 1.15064C68.3353 -0.0446104 61.7036 3.64075 59.1916 5.63283C54.1677 3.30873 41.5072 1.25024 31.0574 11.6091C17.995 24.5577 23.8192 39.8785 23.819 37.7623C23.8188 36.1187 25.1652 31.9536 26.5049 29.2975C37.7068 8.28059 51.535 15.3284 55.5193 22.4172C61.1193 25.6172 57.3527 39.7506 55.5193 46.4172L59.4475 42.9861M61.3671 56.2089C61.4043 56.304 61.4547 56.3742 61.5193 56.4172C61.4693 56.3506 61.4185 56.2811 61.3671 56.2089ZM60.5193 17.4172C70.0193 29.2016 63.4475 38.4861 59.4475 42.9861C56.3275 46.4961 59.3598 53.3946 61.3671 56.2089","circle":null,"fill":"none","stroke":"black","strokeWidth":1.0,"role":"headRigid"},{"source":"M60.1423 10.7223L64.3523 13.1749L61.3735 18.2881L57.1635 15.8355L60.1423 10.7223Z","circle":null,"fill":"#FF75C3","stroke":"black","strokeWidth":1.0,"role":"headRigid"},{"source":"M76.4641 14.5085L64.5254 13.2114L61.3932 18.5878L68.41 28.3335L76.4641 14.5085Z","circle":null,"fill":"#FF75C3","stroke":"black","strokeWidth":1.0,"role":"headRigid"},{"source":"M53.1341 0.917301L60.1509 10.663L57.0187 16.0395L45.08 14.7424L53.1341 0.917301Z","circle":null,"fill":"#FF75C3","stroke":"black","strokeWidth":1.0,"role":"headRigid"}],"top":[{"source":"M37.3511 63.8925C37.6444 62.9586 38.966 62.9586 39.2592 63.8925L40.7545 68.6538C40.8779 69.0465 41.2293 69.3236 41.64 69.3518L46.1072 69.6586C46.962 69.7173 47.3519 70.7536 46.7479 71.3612L42.9814 75.1504C42.743 75.3902 42.6419 75.7343 42.7128 76.0649L43.8915 81.5651C44.0883 82.4831 43.0257 83.1417 42.291 82.5571L38.9279 79.8807C38.5634 79.5906 38.047 79.5906 37.6825 79.8807L34.3193 82.5571C33.5847 83.1417 32.5221 82.4831 32.7188 81.5651L33.8976 76.0649C33.9684 75.7343 33.8674 75.3902 33.629 75.1504L29.8624 71.3612C29.2584 70.7536 29.6484 69.7173 30.5031 69.6586L34.9703 69.3518C35.381 69.3236 35.7325 69.0465 35.8559 68.6538L37.3511 63.8925Z","circle":null,"fill":"#FFA5F0","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":"M56.3511 63.8925C56.6444 62.9586 57.966 62.9586 58.2592 63.8925L59.7545 68.6538C59.8779 69.0465 60.2293 69.3236 60.64 69.3518L65.1072 69.6586C65.962 69.7173 66.3519 70.7536 65.7479 71.3612L61.9814 75.1504C61.743 75.3902 61.6419 75.7343 61.7128 76.0649L62.8915 81.5651C63.0883 82.4831 62.0257 83.1417 61.291 82.5571L57.9279 79.8807C57.5634 79.5906 57.047 79.5906 56.6825 79.8807L53.3193 82.5571C52.5847 83.1417 51.5221 82.4831 51.7188 81.5651L52.8976 76.0649C52.9684 75.7343 52.8674 75.3902 52.629 75.1504L48.8624 71.3612C48.2584 70.7536 48.6484 69.7173 49.5031 69.6586L53.9703 69.3518C54.381 69.3236 54.7325 69.0465 54.8559 68.6538L56.3511 63.8925Z","circle":null,"fill":"#FFA5F0","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":"M25.2993 52.7766L36.0731 69.5299","circle":null,"fill":"none","stroke":"#FFA5F0","strokeWidth":1.0,"role":"body"},{"source":"M70.4368 52.7766L59.6857 69.1949","circle":null,"fill":"none","stroke":"#FFA5F0","strokeWidth":1.0,"role":"body"},{"source":"M38.3324 77.216L28.3324 102.216","circle":null,"fill":"none","stroke":"#FFA5F0","strokeWidth":1.0,"role":"body"},{"source":"M57.4039 77.216L67.4039 102.216","circle":null,"fill":"none","stroke":"#FFA5F0","strokeWidth":1.0,"role":"body"},{"source":"M38.8682 70.7715L57.8682 70.7715","circle":null,"fill":"none","stroke":"#FFA5F0","strokeWidth":1.0,"role":"body"}],"boxers":[{"source":"M46.3467 113.073L47.86796823564 113.032420327626L47.836017715673 114.856311229616L46.314749480033 114.89689090198999Z","circle":null,"fill":"white","stroke":"black","strokeWidth":1.0,"role":"body"},{"source":"M51.1647 111.418L47.8435 112.939L47.8116 114.763L51.0826 116.108L51.1647 111.418Z","circle":null,"fill":"white","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":"M47.8435 112.939L47.6523 112.486L47.3495 112.624L47.3437 112.952L47.8435 112.939ZM51.1647 111.418L51.6646 111.405L51.6779 110.642L50.9735 110.965L51.1647 111.418ZM51.0826 116.108L50.8753 116.572L51.569 116.857L51.5824 116.095L51.0826 116.108ZM47.8116 114.763L47.3118 114.776L47.306 115.104L47.6043 115.227L47.8116 114.763ZM47.8435 112.939L48.0348 113.392L51.356 111.871L51.1647 111.418L50.9735 110.965L47.6523 112.486L47.8435 112.939ZM51.1647 111.418L50.6649 111.431L50.5828 116.121L51.0826 116.108L51.5824 116.095L51.6646 111.405L51.1647 111.418ZM51.0826 116.108L51.2899 115.644L48.0189 114.299L47.8116 114.763L47.6043 115.227L50.8753 116.572L51.0826 116.108ZM47.8116 114.763L48.3114 114.749L48.3434 112.926L47.8435 112.939L47.3437 112.952L47.3118 114.776L47.8116 114.763Z","circle":null,"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":"M43.0228 111.675L46.2937 113.02L46.2618 114.844L42.9406 116.365L43.0228 111.675Z","circle":null,"fill":"white","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":"M46.2937 113.02L46.501 112.556L46.7993 112.679L46.7936 113.007L46.2937 113.02ZM43.0228 111.675L42.5229 111.688L42.5363 110.926L43.2301 111.211L43.0228 111.675ZM42.9406 116.365L43.1318 116.818L42.4274 117.141L42.4408 116.378L42.9406 116.365ZM46.2618 114.844L46.7616 114.831L46.7559 115.159L46.453 115.297L46.2618 114.844ZM46.2937 113.02L46.0865 113.484L42.8155 112.139L43.0228 111.675L43.2301 111.211L46.501 112.556L46.2937 113.02ZM43.0228 111.675L43.5226 111.662L43.4404 116.352L42.9406 116.365L42.4408 116.378L42.5229 111.688L43.0228 111.675ZM42.9406 116.365L42.7494 115.912L46.0706 114.391L46.2618 114.844L46.453 115.297L43.1318 116.818L42.9406 116.365ZM46.2618 114.844L45.762 114.857L45.7939 113.034L46.2937 113.02L46.7936 113.007L46.7616 114.831L46.2618 114.844Z","circle":null,"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[32.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[29.0527,116.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[32.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[29.0527,120.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[32.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[29.0527,127.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[29.0527,124.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[35.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[38.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[41.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[44.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[47.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[50.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[53.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[56.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[59.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[62.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[65.0527,117.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[35.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[38.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[41.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[44.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[47.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[50.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[53.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[56.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[59.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[62.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[65.0527,121.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[35.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[35.0527,128.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[32.0527,128.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[38.0527,128.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[47.0527,128.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[41.0527,128.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[44.0527,128.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[50.0527,128.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[53.0527,128.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[56.0527,128.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[38.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[41.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[44.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[47.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[50.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[53.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[56.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[59.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[62.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"},{"source":null,"circle":[65.0527,125.417,0.5],"fill":"black","stroke":"none","strokeWidth":1.0,"role":"body"}]};
+for(const [kind,specs] of Object.entries(gyaruOutfitSpecs))for(const spec of specs){
+ spec.source=gyaruOutfitReference(spec.circle?circleSource(...spec.circle):spec.source);
+ if(kind==='boxers'&&!spec.circle)spec.source=transformPath(spec.source,(x,y)=>({x,y:y-6.6}));
+}
+// Attach both upper straps to the shoulder edge rather than below it.
+gyaruOutfitSpecs.top[2].source='M26.1046 54.95L35.493 72.6513';
+gyaruOutfitSpecs.top[3].source='M67.7274 53.55L59.1056 72.3163';
+// Fill the entire actual boxer silhouette with a slightly wider-spaced grid.
+// Keep the bow above the dots; the shared cloth clip trims every edge dot.
+gyaruOutfitSpecs.boxers=gyaruOutfitSpecs.boxers.filter(spec=>!spec.circle);
+const gyaruPolkaDots=[];
+for(let row=0,y=112.5;y<=134;y+=4.3,row++)for(let x=28.8+(row%2)*1.9;x<=67;x+=3.8){
+ gyaruPolkaDots.push({source:circleSource(x,y,.5),circle:[x,y,.5],fill:'black',stroke:'none',strokeWidth:1,role:'body'});
+}
+gyaruOutfitSpecs.boxers.unshift(...gyaruPolkaDots);
+function gyaruOutfitMarkup(kind,warp){
+ const boxer=kind==='boxers',clip='gyaru-polka-cloth';
+ const defs=boxer?`<defs><clipPath id="${clip}"><path d="${garmentPath(pantsSource,warp)}"/></clipPath></defs>`:'';
+ return defs+gyaruOutfitSpecs[kind].map(s=>`<path d="${(boxer?garmentPath:torsoGarmentPath)(s.source,warp)}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="${s.strokeWidth}" stroke-linejoin="round"${boxer&&s.circle?` clip-path="url(#${clip})"`:''}/>`).join('');
+}
+let gyaruFacePaths=[];
+const gyaruReferencePath=source=>transformPath(source,(x,y)=>({x,y:y+10.5386}));
+const gyaruEyeSource=gyaruReferencePath("M45.4666 18.6836C44.9613 22.5276 44.1021 30.2705 44.7086 30.4902C45.315 30.7098 50.1834 31.4969 52.5417 31.863C54.9001 29.3919 59.3642 23.6808 58.3534 20.6056C57.09 16.7616 45.7079 16.7616 45.4666 18.6836Z");
+const gyaruFaceSpecs=[{"ellipse":[40.0,31.5,3.5,4.0],"matrix":[1.0,0.0,0.0,1.0,0.0,0.0],"fill":"#96FF6F","stroke":"none","role":"head"},{"source":"M46.7505 31.2209L46.7505 33.8954","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M45 30.6865L45 33.0935","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M44.7086 30.4902C44.1021 30.2705 44.9613 22.5276 45.4666 18.6836C45.7079 16.7616 57.09 16.7616 58.3534 20.6056C59.3642 23.6808 54.9001 29.3919 52.5417 31.863C50.1834 31.4969 45.315 30.7098 44.7086 30.4902Z","fill":"white","stroke":"black","strokeWidth":3.0,"role":"head"},{"source":"M45.6258 23.6237C45.0195 27.1088 46.0686 30.2407 47.9689 30.619C49.8693 30.9974 51.9014 28.4789 52.5077 24.9938C53.114 21.5088 52.0649 18.3769 50.1646 17.9985C48.2642 17.6202 46.2321 20.1387 45.6258 23.6237Z","fill":"black","stroke":"black","strokeWidth":4,"role":"head"},{"source":"M45.6258 23.6237C45.0195 27.1088 46.0686 30.2407 47.9689 30.619C49.8693 30.9974 51.9014 28.4789 52.5077 24.9938C53.114 21.5088 52.0649 18.3769 50.1646 17.9985C48.2642 17.6202 46.2321 20.1387 45.6258 23.6237Z","fill":"#0089FA","stroke":"none","role":"head"},{"ellipse":[2.00484,2.93563,2.00484,2.93563],"matrix":[-0.980716,-0.195439,-0.171555,0.985175,51.606,21.842],"fill":"black","stroke":"none","role":"head"},{"ellipse":[0.5,0.534884,0.5,0.534884],"matrix":[-1.0,0.0,0.0,1.0,49.1055,23.1978],"fill":"white","stroke":"none","role":"head"},{"ellipse":[1.0,1.33721,1.0,1.33721],"matrix":[-1.0,0.0,0.0,1.0,49.6055,19.9885],"fill":"white","stroke":"none","role":"head"},{"source":"M48.5005 31.4885L49.0005 34.9653","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M50.7505 32.0233L51.0005 35.5M52.7505 31.7559L54.7505 34.1628","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M54.001 30.4185L56.001 32.8254","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M55.501 29.0815L57.501 31.2211","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M55.75 27.7441L58.5 29.0813","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M57.001 26.1396L59.751 27.2094","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M58.001 24.5347L60.501 25.6044","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M58.5005 22.9302L61.2505 22.9302","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M58.7505 21.5935L62.5005 19.1865","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M58.751 20.2556L62.001 15.4417","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M57.251 19.1858L59.751 14.3718","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M55.75 17.849L57.75 13.8374","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M53.501 17.3137L55.251 13.0347","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M51.501 17.0465L52.751 12.5","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M49.751 17.3137L50.751 13.0347","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M48.25 17.0467L48.75 13.8374","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"},{"source":"M46.7505 17.8491L46.7505 14.9072","fill":"none","stroke":"black","strokeWidth":1.0,"role":"head"}].map(spec=>{
+ let source=spec.source;
+ if(spec.ellipse){const [cx,cy,rx,ry]=spec.ellipse,[a,b,c,d,e,f]=spec.matrix;source=transformPath(spongeEllipse(cx,cy,rx,ry),(x,y)=>({x:a*x+c*y+e,y:b*x+d*y+f}));}
+ return {...spec,source:gyaruReferencePath(source)};
+});
 let spongeHeadPaths=[],spongeBodyNode;
 const spongeReferencePath=source=>transformPath(source,(x,y)=>({x:25.5113+x/.386236,y:10.5203+y/.386236}));
-const spongeEllipse=(cx,cy,rx,ry,angle=0)=>transformPath(circleSource(0,0,1),(x,y)=>({x:cx+x*rx*Math.cos(angle)-y*ry*Math.sin(angle),y:cy+x*rx*Math.sin(angle)+y*ry*Math.cos(angle)}));
+
 const spongeHeadSpecs=[
  {source:spongeReferencePath("M5.27485 0.200195L7.16722 0.866804L6.99458 1.92059L5.03784 1.55499L5.27485 0.200195Z"),fill:'white',stroke:'black',strokeWidth:1,role:'head',behind:true},
  {source:spongeReferencePath("M4.76664 2.46892L6.77098 2.55858L6.9111 3.61719L4.93237 3.83427L4.76664 2.46892Z"),fill:'white',stroke:'black',strokeWidth:1,role:'head',behind:true},
@@ -3162,6 +3260,7 @@ const scoopTeeSidesSource=`M27.478 ${LEFT_ARMPIT_Y}C27.4 85 27.5 102 28 116M67.5
 const scoopTeeSource=scoopTeeNeckSource+`L67.5459 ${RIGHT_ARMPIT_Y}C66.8 85 66.2 102 66 114.5C64 112 60 108.5 54.5 108.5C47 108.5 37 115 28 116C27.5 102 27.4 85 27.478 ${LEFT_ARMPIT_Y}Z`;
 const roundLongSleeveStyle={sleeveEnd:31,flare:3};
 const teeStyles = {
+  'walker-shirt':{color:'#FFD35B',sleeveEnd:31,flare:4,bodySource:walkerBodySource,sidesSource:'M26.9348 72.4L26.9348 110.5 M67.8733 70.75L67.2175 110.5',neckSource:'M26.1046 56.4524C38 57.3 54 56.8 67.7274 55.0466',hemSource:'M26.9348 110.5L67.2175 110.5'},
   'gray-scoop-tee':{color:'#7B7575',sleeveEnd:20,flare:3,bodySource:scoopTeeSource,sidesSource:scoopTeeSidesSource,neckSource:scoopTeeNeckSource,hemSource:scoopTeeHemSource},
   'black-turtleneck-tee':{color:'#101010',sleeveEnd:23,flare:2.5},
   'loose-tee':{color:decorationColors.looseTee,sleeveEnd:20,flare:5,loose:true,hemOverPants:true},
@@ -3173,6 +3272,7 @@ const teeStyles = {
   'red-cropped-tee-2':{color:'#DE0C0C',sleeveEnd:17,flare:3},
   'black-cropped-tee':{color:'#25272B',sleeveEnd:17,flare:3},
 };
+teeStyles['monk-robe']={...teeStyles['walker-shirt'],color:'#F4F4F4',neckSource:'M26.1046 56.4524L67.7274 55.0466'};
 // Keep the sleeve full through the forearm, then ease into the wrist.
 function teeSleeveWidth(index,style){
   if(!style)return 0;
@@ -3322,7 +3422,7 @@ function wearingJumpsuit() {
   return selectedDecorations.pants==='jumpsuit'
     ||selectedDecorations.pants==='navy-jumpsuit'||!!workwearVariants[selectedDecorations.pants];
 }
-const widePantFlares = {'black-gray-sweatpants':9.25,'white-loose-wide-trousers':10.5,'space-trousers':9.25,'dark-gray-slight-wide-trousers':3.5,'black-slight-wide-trousers':3.5,'worker-trousers':5.5,'blue-worker-trousers':5.5,...Object.fromEntries([...Object.keys(denimVariants),...Object.keys(workwearVariants)].map(id=>[id,5.5])),'jobs-gradient-jeans':3.5,'denim-jumpsuit':5.5,'large-ripped-denim-jeans':5.5,'washed-denim-jeans':5.5,'ripped-denim-jeans':5.5,'denim-jeans':5.5,'ivory-trousers':8,'royal-trousers':3,'suit-trousers':3.5,'wide-pants':5.5,'loose-wide-pants':10.5};
+const widePantFlares = {'white-sweatpants':9.25,'walker-sweatpants':9.25,'black-gray-sweatpants':9.25,'white-loose-wide-trousers':10.5,'space-trousers':9.25,'dark-gray-slight-wide-trousers':3.5,'black-slight-wide-trousers':3.5,'worker-trousers':5.5,'blue-worker-trousers':5.5,...Object.fromEntries([...Object.keys(denimVariants),...Object.keys(workwearVariants)].map(id=>[id,5.5])),'jobs-gradient-jeans':3.5,'denim-jumpsuit':5.5,'large-ripped-denim-jeans':5.5,'washed-denim-jeans':5.5,'ripped-denim-jeans':5.5,'denim-jeans':5.5,'ivory-trousers':8,'royal-trousers':3,'suit-trousers':3.5,'wide-pants':5.5,'loose-wide-pants':10.5};
 // Same knee-length cut as the fitted shorts, widening toward its open hem.
 // How much each flared knee cut widens towards its hem.
 const kneeShortFlares={'green-ultra-shorts':3,'student-shorts':3,'slight-wide-shorts':3,'extra-wide-shorts':8};
@@ -3898,9 +3998,10 @@ function updateGarmentOrder() {
     if(pants)mosaicOverlay.appendChild(pants);
   }
   const upper=innerTopKeys();
+  if(['walker-shirt','monk-robe'].includes(selectedDecorations.shirt)){upper.splice(upper.indexOf('collaredDetails'),1);upper.push('collaredDetails');}
   const lower=['jumpsuit','jumpsuitSides','jumpsuitCrotch','jumpsuitChestOutline',
     'pants','pantsSides','pantsCrotch','shorts','shortsSides','shortsCrotch',
-    'pantsWaist','jeansDetails','mosaicPants','seaweedPants','redThong','briefs','skirt','jumpsuitNeckLeft','jumpsuitNeckRight',
+    'pantsWaist','jeansDetails','gyaruBoxerDetails','mosaicPants','seaweedPants','redThong','briefs','skirt','jumpsuitNeckLeft','jumpsuitNeckRight',
     'jumpsuitShoulderLeft','jumpsuitShoulderRight'];
   for(const key of (shirtHemOverPants()?[...lower,...upper]:[...upper,...lower])) {
     const node=garmentPaths[key];
@@ -4000,6 +4101,7 @@ function updatePartOrder() {
     svg.appendChild(partLayers[activeDrag.pose.part]);
   // Long hair stays ahead of every visible part, including raised hands and held legs.
   if(longHairOverlay)svg.appendChild(longHairOverlay);
+  if(gyaruHairOverlay)svg.appendChild(gyaruHairOverlay);
   if(mosaicOverlay)svg.appendChild(mosaicOverlay);
   // Invisible handles follow the same order as the visible parts.
   if(dragLayer) {
@@ -5136,6 +5238,9 @@ function update() {
   }
   if(scarNode)scarNode.style.display=skinTrait('scar')?'':'none';
   if(spongeBodyNode)spongeBodyNode.style.display=skinTrait('sponge')?'':'none';
+  monkeyFacePaths.forEach(node=>{node.style.display=skinTrait('monkeyFace')?'':'none';});
+  walkerScarfPaths.forEach(node=>{node.style.display=selectedDecorations.neck==='small-blue-scarf'?'':'none';});
+  gyaruFacePaths.forEach(node=>{node.style.display=skinTrait('gyaruFace')?'':'none';});
   spongeHeadPaths.forEach(node=>{node.style.display=skinTrait('spongeFace')?'':'none';});
   largePartyHatPaths.forEach(node=>{node.style.display=selectedDecorations.helmet==='large-party-hat'?'':'none';});
   paintHeadVariants(capPaths,capVariants);
@@ -5150,8 +5255,8 @@ function update() {
   teardropPaths.forEach(node=>{node.setAttribute('d',teardropPath(warp));node.style.display=selectedDecorations.helmet==='teardrop-earrings'?'':'none';});
   if(muscleLinesNode)muscleLinesNode.style.display=!!muscleSkinVariants[selectedDecorations.skin]?'':'none';
   pochitaCordPaths.forEach(node=>{node.style.display=pochita&&POCHITA_TAIL_VISIBLE?'':'none';});
-  paths.filter(path=>path.index===1||path.index===11).forEach(({node})=>{
-    node.style.display=hornHidden()?'none':'';
+  paths.filter(path=>path.index===1||path.index===11).forEach(({node,index})=>{
+    node.style.display=hornHidden()||index===11&&selectedDecorations.helmet==='lotus-hat'?'none':'';
   });
   if(kappaMouthClipPath&&headFillNode)kappaMouthClipPath.setAttribute('d',headFillNode.getAttribute('d'));
   kappaSkinPaths.forEach((node,i)=>{node.style.display=(kappaSkinSpecs[i].role==='body'?selectedDecorations.skin==='kappa':skinTrait('kappaDetails'))?'':'none';});
@@ -5229,13 +5334,14 @@ function update() {
   legParts.forEach(({segments,bootFill,bootOutline,sneakerDetails,shoeClip,
       shoeCuff,shortHem,bootTop,wideHem,shortsClip,skinClip,ultraShortsClip,exposedThighClip,wideClip,ankleClip,
       calfEdges,calfOverlay,fabricLayers,fabricMasks,jeansSeams,jeansTextures,jeansHoleMasks,jeansSkin,jeansGradients,crease,
-      side,group,rootBlack,thighBlack,shinBlack,thighSkin,shinSkin,sockTopClip,sockBottomClip,sockTop,spongeLegMarks})=>{
+      side,group,rootBlack,thighBlack,shinBlack,thighSkin,shinSkin,sockTopClip,sockBottomClip,sockTop,sockPattern,spongeLegMarks})=>{
     const shape=legShapes[side];
     // Every sock segment is cut at the same line, not just the first: the
     // stroke is far wider than the gap between samples, so the round caps
     // of the next two segments used to pile up above it as a dome.
     sockBottomClip.ownerClip?.setAttribute('clip-path',`url(#${side}-${isSpaceSweatpants()&&widePants?'wide':'ankle'}-hem-clip)`);
     const sockStart=isSpaceSweatpants()?28:studentSockStart();
+    sockPattern.innerHTML=studentSockVisible(sockStart)?sockStripeMarkup(shape):'';
     sockTopClip.setAttribute('points',limbClipPoints(shape,sockStart,false));
     sockBottomClip.setAttribute('points',limbClipPoints(shape,sockStart,true));
     const jobsMesh=selectedDecorations.pants==='jobs-gradient-jeans'?jobsClothMesh(shape,side,config.legs,warp):null;
@@ -5304,9 +5410,9 @@ function update() {
     // continue across the visible skin as a second diagonal.
     const layers=splitCloth
       ?[thighBlack,thighSkin,fabricLayers[0].group,shortHem,
-        shinBlack,shinSkin,fabricLayers[1].group,calfEdges,sockTop]
+        shinBlack,shinSkin,fabricLayers[1].group,calfEdges,sockPattern,sockTop]
       :[thighBlack,shinBlack,thighSkin,shinSkin,shortHem,
-        ...fabricLayers.map(layer=>layer.group),calfEdges,sockTop];
+        ...fabricLayers.map(layer=>layer.group),calfEdges,sockPattern,sockTop];
     layers.forEach(layer=>group.insertBefore(layer,crease));
     group.insertBefore(bootFill,shoeAnchor);
     group.insertBefore(bootOutline,shoeAnchor);
@@ -5453,7 +5559,7 @@ function update() {
     group.insertBefore(sneakerDetails,['colorblock-shoes','navy-sandals'].includes(selectedDecorations.shoes)?bootOutline:shoeAnchor);
     bootFill.setAttribute('d',shoe.fill);
     bootFill.setAttribute('fill',selectedDecorations.shoes==='navy-slippers'?skinColor():selectedDecorations.shoes==='orange-shoes'?'#FF8215':wearingTallBoots?bootColor
-      :selectedDecorations.shoes==='navy-sandals'?'#29496C':selectedDecorations.shoes==='colorblock-shoes'?'#2F465D':selectedDecorations.shoes==='brown-shoes'?'#623813':studentSockStyles[selectedDecorations.shoes]?'#111214':sneakers?'#bfbfbf':selectedDecorations.shoes==='black-dress-shoes'?decorationColors.dressShoes
+      :selectedDecorations.shoes==='navy-sandals'?'#29496C':selectedDecorations.shoes==='colorblock-shoes'?'#2F465D':selectedDecorations.shoes==='gray-plain-shoes'?'#BFBFBF':selectedDecorations.shoes==='brown-shoes'?'#623813':studentSockStyles[selectedDecorations.shoes]?'#111214':sneakers?'#bfbfbf':selectedDecorations.shoes==='black-dress-shoes'?decorationColors.dressShoes
       :selectedDecorations.shoes?decorationColors.shoes:skinColor());
     bootOutline.setAttribute('d',shoe.outline);
     shoeClip.setAttribute('d',shoe.fill);
@@ -5557,7 +5663,8 @@ function update() {
   garmentPaths.spaceDetails.innerHTML='';
   garmentPaths.seaweedPants.innerHTML=selectedDecorations.pants==='seaweed-pants'?seaweedPantsMarkup(warp):'';
   garmentPaths.mosaicPants.innerHTML=selectedDecorations.pants==='mosaic-pants'?mosaicTopMarkup(warp,'pants'):'';
-  garmentPaths.collaredDetails.innerHTML=selectedDecorations.shirt==='shell-top'?shellTopMarkup(warp):selectedDecorations.shirt==='mosaic-top'?mosaicTopMarkup(warp):selectedDecorations.shirt==='angel-vest'?angelVestMarkup(warp):selectedDecorations.shirt==='white-tie-shirt'?collaredShirtMarkup(warp):'';
+  garmentPaths.gyaruBoxerDetails.innerHTML=selectedDecorations.pants==='pink-polka-boxers'?gyaruOutfitMarkup('boxers',warp):'';
+  garmentPaths.collaredDetails.innerHTML=selectedDecorations.shirt==='monk-robe'?monkRobeMarkup(warp):selectedDecorations.shirt==='walker-shirt'?walkerShirtMarkup(warp):selectedDecorations.shirt==='pink-heart-bra'?gyaruOutfitMarkup('top',warp):selectedDecorations.shirt==='shell-top'?shellTopMarkup(warp):selectedDecorations.shirt==='mosaic-top'?mosaicTopMarkup(warp):selectedDecorations.shirt==='angel-vest'?angelVestMarkup(warp):selectedDecorations.shirt==='white-tie-shirt'?collaredShirtMarkup(warp):'';
   garmentPaths.shirt.style.display=longSleeve?'':'none';
   garmentPaths.shirtSides.setAttribute('d',ivoryTunic?torsoGarmentPath(ivorySidesSource,warp):garmentPath(shirtSidesSource,warp));
   garmentPaths.shirtSides.style.display=longSleeve?'':'none';
@@ -5785,14 +5892,16 @@ function update() {
       front.setAttribute('stroke-width',shape.hose[i].width+sleeveFlare);
       const sleeveColor=roundLongSleeve&&i>=sleeveEnd?skinColor():longSleeve
         ? selectedDecorations.shirt==='white-tie-shirt'?'#D9D9D9':batArmor?decorationColors.batArmor:ivoryTunic?(i>=28?decorationColors.crown:decorationColors.royalWhite):suitJacket?decorationColors.suitNavy:decorationColors.shirt
-        : shortSleeve?teeStyle.color:skinColor();
+        : shortSleeve?selectedDecorations.shirt==='monk-robe'?(i>=29?'#FFD400':side==='right'?'#C91819':'#F4F4F4'):selectedDecorations.shirt==='walker-shirt'&&i>=24?(i>=29?'#F4F4F4':'black'):teeStyle.color:skinColor();
       front.setAttribute('stroke',sleeveColor);
+      if(['walker-shirt','monk-robe'].includes(selectedDecorations.shirt)&&i>=23)front.setAttribute('stroke-linecap','butt');
     });
     sleevePanel.setAttribute('d',cinched?cinchedSleeveEdges(shape,true):ivoryTunic?ivorySleeveEdges(shape,true):'');
     sleevePanel.setAttribute('fill',cinched?teeStyle.color:decorationColors.royalWhite);
     sleevePanel.style.display=ivoryTunic||cinched?'':'none';
     sleeveEdges.setAttribute('d',cinched?cinchedSleeveEdges(shape):ivoryTunic?ivorySleeveEdges(shape):'');
     sleeveEdges.style.display=ivoryTunic||cinched?'':'none';
+    if(selectedDecorations.shirt==='monk-robe'&&side==='right'){sleeveEdges.setAttribute('d',monkSleeveGrid(shape));sleeveEdges.setAttribute('stroke','#FD82A7');sleeveEdges.setAttribute('stroke-width','.6');sleeveEdges.style.display='';}else{sleeveEdges.setAttribute('stroke','black');sleeveEdges.setAttribute('stroke-width','1');}
     cuff.style.display=(!aloha||sleeveEnd>outerSleeveStyle.end)&&(longSleeve||isTee)?'':'none';
     cuff.setAttribute('d',cinched?cinchedSleeveEdges(shape,'cuff'):cuffPath(shape,sleeveEnd,ivoryTunic?ivorySleeveWidth(28):flare)+(ivoryTunic?cuffPath(shape,31):''));
     crease.setAttribute('d',shape.crease);
@@ -6101,6 +6210,10 @@ function setHatSelection(value) {
   chainsawPaths.forEach(node=>{node.style.display=value==='chainsaw'?'':'none';});
   jobsGlassesPaths.forEach(node=>{node.style.display=value==='round-glasses'?'':'none';});
   if(longHairOverlay){longHairOverlay.style.display=longBraidVariants[value]?'':'none';for(const node of longHairOverlay.children)node.setAttribute('fill',longBraidVariants[value]?.color||longBraidVariants['long-braid-hair'].color);}
+  lotusHatPaths.forEach(node=>{node.style.display=value==='lotus-hat'?'':'none';});
+  walkerCircletPaths.forEach(node=>{node.style.display=value==='golden-circlet'?'':'none';});
+  chefHatPaths.forEach(node=>{node.style.display=value==='chef-hat'?'':'none';});
+  gyaruHairPaths.forEach(node=>{node.style.display=value==='yellow-bow-hair'?'':'none';});
   pinkRibbonPaths.forEach(node=>{node.style.display=value==='pink-ribbon-hair'?'':'none';});
   angelHaloPaths.forEach(node=>{node.style.display=value==='angel-halo'?'':'none';});
   spaceHelmetPaths.forEach(node=>{node.style.display=value==='space-helmet'?'':'none';});
@@ -6116,8 +6229,8 @@ function setHatSelection(value) {
   crownPaths.forEach(node=>{ node.style.display=crowned?'':'none'; });
   // The crown takes the horn's place on that side of the head, so the horn
   // comes off with it on. Its fill is path 1 and its outline path 11.
-  paths.filter(path=>path.index===1||path.index===11).forEach(({node})=>{
-    node.style.display=hornHidden(value)?'none':'';
+  paths.filter(path=>path.index===1||path.index===11).forEach(({node,index})=>{
+    node.style.display=hornHidden(value)||index===11&&value==='lotus-hat'?'none':'';
   });
   if(alienAntennaPath)alienAntennaPath.style.display=antennaShown(value)?'':'none';
   if (activeDecorationCategory === 'helmet') renderDecorationOptions();
@@ -6534,6 +6647,16 @@ fetch('./svg/参考.svg')
     spongeHeadPaths=kappaNodes(spongeHeadSpecs,false);
     const spongeEye=paths.find(p=>p.index===8)?.node;
     spongeHeadPaths.forEach((node,i)=>partLayers.head.insertBefore(node,spongeHeadSpecs[i].behind?headFill:spongeEye));
+    monkeyFacePaths=kappaNodes(walkerSpecs.face,false);
+    headFill.id='monkey-head-surface';
+    const monkeyClip=document.createElementNS(SVG_NS,'clipPath');monkeyClip.id='monkey-face-clip';
+    const monkeyUse=document.createElementNS(SVG_NS,'use');monkeyUse.setAttribute('href','#monkey-head-surface');monkeyClip.appendChild(monkeyUse);svg.appendChild(monkeyClip);
+    const monkeyInkAnchor=headFill.nextSibling;
+    monkeyFacePaths.forEach(node=>{node.setAttribute('clip-path','url(#monkey-face-clip)');partLayers.head.insertBefore(node,monkeyInkAnchor);});
+    walkerCircletPaths=kappaNodes(walkerSpecs.circlet,false);
+    walkerScarfPaths=kappaNodes(walkerSpecs.scarf,false);
+    walkerScarfPaths.forEach(node=>neckOverlay.appendChild(node));
+    gyaruFacePaths=kappaNodes(gyaruFaceSpecs,false);
     hypnoticEyePaths=kappaNodes(hypnoticEyeSpecs,false);
     kappaSkinPaths=kappaNodes(kappaSkinSpecs,false);
     // Mouth coloration belongs inside the live head silhouette, including during speech.
@@ -6553,6 +6676,16 @@ fetch('./svg/参考.svg')
       if(lipstickFaceSpecs[i].lip){node.setAttribute('clip-path','url(#kappa-mouth-clip)');if(sharedHeadOutline)partLayers.head.insertBefore(node,sharedHeadOutline);}
       else if(eyeWhiteNode)partLayers.head.insertBefore(node,eyeWhiteNode);
     });
+    lotusHatPaths=kappaNodes(lotusHatSpecs,true);
+    lotusHatPaths.forEach(node=>partLayers.head.insertBefore(node,headFill));
+    chefHatPaths=kappaNodes(chefHatSpecs,true);
+    chefHatPaths.forEach(node=>partLayers.head.insertBefore(node,headFill));
+    gyaruHairPaths=kappaNodes(gyaruOutfitSpecs.hair,true);
+    gyaruHairOverlay=document.createElementNS(SVG_NS,'g');
+    gyaruHairOverlay.setAttribute('pointer-events','none');
+    gyaruHairOverlay.setAttribute('data-gyaru-hair','');
+    gyaruHairPaths.forEach(node=>gyaruHairOverlay.appendChild(node));
+    svg.appendChild(gyaruHairOverlay);
     pinkRibbonPaths=kappaNodes(pinkRibbonSpecs,true);
     pinkRibbonPaths.forEach(node=>partLayers.head.insertBefore(node,headFill));
     kappaHairPaths=kappaNodes(kappaHairSpecs,true);
@@ -6727,6 +6860,8 @@ fetch('./svg/参考.svg')
     garmentPaths.seaweedPants.setAttribute('pointer-events','none');outfitOverlay.appendChild(garmentPaths.seaweedPants);
     garmentPaths.mosaicPants=document.createElementNS(SVG_NS,'g');
     garmentPaths.mosaicPants.setAttribute('pointer-events','none');outfitOverlay.appendChild(garmentPaths.mosaicPants);
+    garmentPaths.gyaruBoxerDetails=document.createElementNS(SVG_NS,'g');
+    outfitOverlay.appendChild(garmentPaths.gyaruBoxerDetails);
     garmentPaths.collaredDetails=document.createElementNS(SVG_NS,'g');
     outfitOverlay.appendChild(garmentPaths.collaredDetails);
     garmentPaths.alohaBody=document.createElementNS(SVG_NS,'g');
@@ -7020,6 +7155,9 @@ fetch('./svg/参考.svg')
       sockTop.setAttribute('fill','none');
       sockTop.setAttribute('stroke','black');
       sockTop.setAttribute('stroke-width','1');
+      const sockPattern=document.createElementNS(SVG_NS,'g');
+      sockPattern.setAttribute('clip-path',`url(#${side}-sock-bottom-hem-clip)`);
+      sockPattern.setAttribute('data-sock-pattern',side);
       const bootTop=document.createElementNS(SVG_NS,'path');
       bootTop.setAttribute('fill','none');
       bootTop.setAttribute('stroke','black');
@@ -7034,7 +7172,7 @@ fetch('./svg/参考.svg')
       crease.setAttribute('stroke-width','1');
       crease.setAttribute('stroke-linecap','round');
       group.append(rootBlack,thighBlack,shinBlack,thighSkin,shinSkin,
-        shortHem,sockTop,calfEdges,crease,bootFill,bootOutline,shoeCuff,bootTop,wideHem);
+        shortHem,sockPattern,sockTop,calfEdges,crease,bootFill,bootOutline,shoeCuff,bootTop,wideHem);
       const sneakerDetails=document.createElementNS(SVG_NS,'g');
       sneakerDetails.setAttribute('pointer-events','none');group.appendChild(sneakerDetails);
       const calfOverlay=document.createElementNS(SVG_NS,'g');
@@ -7047,7 +7185,7 @@ fetch('./svg/参考.svg')
         copy.setAttribute('data-calf-shoe','');
         calfOverlay.appendChild(copy);
       }
-      for(const [index,node] of [shinBlack,shinSkin,fabricLayers[1].group,calfEdges,sockTop,shoeCuff,bootTop,wideHem].entries()) {
+      for(const [index,node] of [shinBlack,shinSkin,fabricLayers[1].group,calfEdges,sockPattern,sockTop,shoeCuff,bootTop,wideHem].entries()) {
         node.id=`${side}-calf-render-${index}`;
         const copy=document.createElementNS(SVG_NS,'use');
         copy.setAttribute('href',`#${node.id}`);
@@ -7063,7 +7201,7 @@ fetch('./svg/参考.svg')
       legParts.push({spongeLegMarks,segments,bootFill,bootOutline,sneakerDetails,shoeClip,
         shoeCuff,shortHem,bootTop,wideHem,shortsClip,skinClip,ultraShortsClip,exposedThighClip,wideClip,ankleClip,
         calfEdges,calfOverlay,fabricLayers,fabricMasks,jeansSeams,jeansTextures,jeansHoleMasks,jeansSkin,jeansGradients,crease,
-        side,group,rootBlack,thighBlack,shinBlack,thighSkin,shinSkin,sockTopClip,sockBottomClip,sockTop});
+        side,group,rootBlack,thighBlack,shinBlack,thighSkin,shinSkin,sockTopClip,sockBottomClip,sockTop,sockPattern});
     });
     const sourceArms = paths.filter(path => path.role === 'arms');
     sourceArms.forEach(({ node }) => node.remove());
