@@ -5,6 +5,7 @@ vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../script.j
 const r=vm.runInContext(`(()=>{
  const children=[];
  neckOverlay={name:'neck',insertBefore(node,before){const i=children.indexOf(node);if(i>=0)children.splice(i,1);const j=children.indexOf(before);children.splice(j<0?children.length:j,0,node);}};
+ neckAccessoryLayer={name:'neck-accessories'};children.push(neckAccessoryLayer);
  const scarf={name:'scarf'};
  scarfPaths=[{node:scarf}];children.push(scarf);
  garmentPaths={greenVestLeft:{name:'vestLeft'},greenVestRight:{name:'vestRight'},alohaBody:{name:'outer'}};
@@ -31,3 +32,5 @@ assert.ok(r.neckOrder.indexOf('outer')>r.neckOrder.indexOf('collarEdge'),'Outerw
 assert.ok(r.neckOrder.indexOf('spaceCollar')>r.neckOrder.indexOf('outer'),'Space outer collar covers inner garment necklines');
 for(const p of r.poses){assert.equal(p.resting.includes('spaceCollar'),false,'Space collar remains inside the neck layer, never re-promoted above accessories');assert.ok(p.resting.indexOf('neck')>p.resting.indexOf('head'),'High collar remains above the head/neck seam');assert.ok(p.raised.indexOf('rightHand')>p.raised.indexOf('neck'),'A raised hand still covers every neck accessory');}
 console.log(`${r.poses.length} shirt/outerwear/neck combinations: every collar, including the space collar, stays below neck accessories; raised hands retain their foreground order.`);
+
+for(const garment of ['outer','spaceCollar','vestLeft','vestRight'])assert.ok(r.neckOrder.indexOf(garment)<r.neckOrder.indexOf('neck-accessories'),'All outerwear panels remain below the shared independent-neck-accessory layer');
