@@ -15,7 +15,7 @@ const result=vm.runInContext(`(()=>{
  return {selection,paints,geometry,hood};
 })()`,c);
 assert.equal(result.selection.skin,'monkey');assert.equal(result.selection.neck,'small-blue-scarf');
-assert.equal(result.selection.shirt,'walker-shirt');assert.equal(result.selection.pants,'walker-sweatpants');
+assert.equal(result.selection.outerwear,'walker-shirt');assert.equal(result.selection.pants,'walker-sweatpants');
 assert.equal(result.selection.shoes,'black-worker-boots');assert.equal(result.selection.helmet,'golden-circlet');
 assert.deepEqual({...result.paints},{skin:'#E38047',pants:'#F85137',accent:'#5B270B',space:true});
 assert.ok(result.hood);for(const d of result.geometry)assert.ok(d&&!/NaN|undefined|Infinity/.test(d));
@@ -23,3 +23,20 @@ console.log('Walker suit: six independent pieces, monkey hood hiding, shared spa
 
 assert.equal(vm.runInContext("teeStyles['walker-shirt'].sleeveEnd",c),31);
 assert.ok(!fs.readFileSync("script.js","utf8").includes("walkerPantsBeltMarkup"),"Walker trousers only recolor the existing silhouette and waistband");
+
+const layering=vm.runInContext(`(()=>{
+ applyDecorationSelection('shirt','yellow-tee');
+ const states=[];
+ for(const coat of ['walker-shirt','monk-robe','ninja-shirt']){
+  applyDecorationSelection('outerwear',coat);
+  states.push([selectedDecorations.shirt,visibleTop()]);
+ }
+ applyDecorationSelection('outerwear',null);
+ return [...states,[selectedDecorations.shirt,visibleTop()]];
+})()`,c);
+assert.deepEqual(JSON.parse(JSON.stringify(layering)),[
+ ['yellow-tee','walker-shirt'],
+ ['yellow-tee','monk-robe'],
+ ['yellow-tee','ninja-shirt'],
+ ['yellow-tee','yellow-tee'],
+]);

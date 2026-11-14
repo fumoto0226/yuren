@@ -14,7 +14,7 @@ const result=vm.runInContext(`(()=>{
  }
  return {pieces,palette,geometry};
 })()`,c);
-for(const [slot,id] of Object.entries({helmet:'ninja-hood',shirt:'ninja-shirt',pants:'ninja-sweatpants',shoes:'ninja-worker-boots',cape:'dual-swords'}))assert.equal(result.pieces[slot],id);
+for(const [slot,id] of Object.entries({helmet:'ninja-hood',outerwear:'ninja-shirt',pants:'ninja-sweatpants',shoes:'ninja-worker-boots',cape:'dual-swords'}))assert.equal(result.pieces[slot],id);
 assert.deepEqual({...result.palette},{cloth:'#006089',accent:'#020202',hood:true,shaft:'#9BA9B2',shoe:'#020202'});
 for(const d of result.geometry)assert.ok(d&&!/NaN|undefined|Infinity/.test(d));
 console.log('Ninja suit: independent pieces, blue/black trousers, separate gray-blue shafts and black shoes; finite hood and shared wrist/calf lattice over 9 size/squat poses.');

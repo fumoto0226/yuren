@@ -58,3 +58,16 @@ for(const id of ['duck-swim-ring','pink-striped-swim-ring']){
  const markup=vm.runInContext(`swimRingMarkup((x,y)=>({x,y}),'${id}',true)`,c);
  assert.match(markup,/M\s*-1000 94\.6316\s*L\s*1000 94\.6316/,'Ring front spans loose shirt sides, instead of being clipped to the original torso width');
 }
+
+for(const id of ['duck-swim-ring','pink-striped-swim-ring']){
+ const shells=vm.runInContext(`(()=>{
+  const result=[];
+  for(const size of [70,100,140]){
+   const warp=buildWarp({body:size,width:size,arms:100,legs:100,head:100});
+   result.push([false,true].map(front=>swimRingMarkup(warp,'${id}',front).match(/<clipPath[^>]+-shell"><path d="([^"]+)"/)[1]));
+  }
+  return result;
+ })()`,c);
+ for(const [back,front] of shells)assert.equal(front,back,'Front and back must share the exact ring contour to avoid doubled side seams');
+}
+console.log('Both swim-ring layers share identical shell contours across three body sizes.');

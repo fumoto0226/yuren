@@ -555,7 +555,7 @@ const walkerShirt=art.tee.arms.map((arm,index)=>{
   return `<path d="${d}" fill="none" stroke="${color}" stroke-width="${width+walkerSleeveWidths[i]+(ink?2:0)}" stroke-linecap="${!ink&&i>=23||i>=29?'butt':'round'}"/>`;
  }).join('')).join('');
  return `<defs><clipPath id="${id}"><polygon points="${clip}"/></clipPath></defs><g clip-path="url(#${id})">${strokes}</g>`+line(vm.runInContext('cuffPath(thumbArm,31,4)',context));
-}).join('')+`<path d="${art.walker.body}" fill="#FFD35B"/>`+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].sidesSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+art.walker.details+line(vm.runInContext("garmentPath(teeStyles['walker-shirt'].neckSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].hemSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context));
+}).join('')+`<path d="${art.walker.body}" fill="#FFD35B"/>`+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].sidesSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+art.walker.details+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].neckSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].hemSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context));
 const ninjaShirt=art.tee.arms.map((arm,index)=>{
  const ctx=Object.assign(context,{thumbArm:arm});
  return clippedTube(arm,limbCuff(arm,22,walkerSleeveWidths[22]),'#005D87','ninja-upper-'+index,0,true,walkerSleeveWidths)
@@ -563,7 +563,7 @@ const ninjaShirt=art.tee.arms.map((arm,index)=>{
   +`<path d="${vm.runInContext('ninjaBindingPath(thumbArm,22,30.8,ninjaWristExtra)',ctx)}" fill="none" stroke="#88959E" stroke-width="1"/>`
   +line(vm.runInContext('ninjaArmBindingOutline(thumbArm)',ctx))
   +line(vm.runInContext('cuffPath(thumbArm,31,ninjaWristExtra(30))',ctx));
-}).join('')+`<path d="${art.walker.body}" fill="#005D87"/>`+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].sidesSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+art.ninja.details+line(vm.runInContext("garmentPath(teeStyles['walker-shirt'].neckSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].hemSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context));
+}).join('')+`<path d="${art.walker.body}" fill="#005D87"/>`+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].sidesSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+art.ninja.details+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].neckSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].hemSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context));
 const monkRobe=art.tee.arms.map((arm,index)=>{
  const id='monk-sleeve-'+index;
  const clip=vm.runInContext('limbClipPoints(thumbArm,31,false)',Object.assign(context,{thumbArm:arm}));
@@ -572,7 +572,7 @@ const monkRobe=art.tee.arms.map((arm,index)=>{
   return `<path d="${d}" fill="none" stroke="${color}" stroke-width="${width+walkerSleeveWidths[i]+(ink?2:0)}" stroke-linecap="${!ink&&i>=23||i>=29?'butt':'round'}"/>`;
  }).join('')).join('');
  return `<defs><clipPath id="${id}"><polygon points="${clip}"/></clipPath></defs><g clip-path="url(#${id})">${strokes}${index===1?`<path d="${vm.runInContext('monkSleeveGrid(thumbArm)',context)}" fill="none" stroke="#FD82A7" stroke-width=".6"/>`:''}</g>`+line(vm.runInContext('cuffPath(thumbArm,31,4)',context));
-}).join('')+`<path d="${art.walker.body}" fill="#F4F4F4"/>`+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].sidesSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+art.monk.details+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].hemSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+line(vm.runInContext("garmentPath(teeStyles['monk-robe'].neckSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context));
+}).join('')+`<path d="${art.walker.body}" fill="#F4F4F4"/>`+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].sidesSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+art.monk.details+line(vm.runInContext("looseTopPath(teeStyles['walker-shirt'].hemSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context))+line(vm.runInContext("looseTopPath(teeStyles['monk-robe'].neckSource,buildWarp({body:100,width:100,arms:100,legs:100,head:100}))",context));
 const walkerSuitPants=art.space.legs.map((leg,i)=>{
  const widths=vm.runInContext('Array.from({length:32},(_,i)=>wideLegExtraWidth(i,9.25))',context);
  return clippedTube(leg,limbCuff(leg,19,widths[19]),'#F85137','walker-suit-thigh-'+i,0,true,widths)
