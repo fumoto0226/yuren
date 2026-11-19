@@ -81,7 +81,7 @@ const layered=vm.runInContext(`(()=>{
  return worn&&selectedDecorations.shirt==='loose-tee'&&selectedDecorations.outerwear===null;
 })()`,context);
 assert.ok(layered,'Suit jacket occupies outerwear and preserves its inner shirt on selection/removal');
-for(const id of ['ivory-suit','navy-suit','batfish-suit'])assert.equal(presets.find(p=>p.id===id).applied.skin,'flesh',id+' includes the unnumbered flesh skin');
+for(const id of ['navy-suit','batfish-suit'])assert.equal(presets.find(p=>p.id===id).applied.skin,'flesh',id+' includes the unnumbered flesh skin');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 assert.equal([...html.matchAll(/data-category="([^"]+)"/g)][0][1],'suit','Suit tab is first');
 assert.equal(vm.runInContext('decorationCounts().categories.suit',context),presets.length-3,'Suit badge excludes the three disabled outfits');
@@ -110,6 +110,7 @@ assert.equal(workPresets.boots.color,'#59371F');assert.ok(workPresets.boots.tuck
 assert.equal(workPresets.tee.color,'#DE0C0C');assert.equal(workPresets.tee.sleeveEnd,17);
 console.log('Farmer, fisher and working-fish presets apply exact components and skin colors; wide trousers contain only the two worker colors.');
 
-const godPreview=fs.readFileSync(path.join(__dirname,'../svg/fish-god-suit.svg'),'utf8');
-const glassOutline=[...godPreview.matchAll(/<path\b[^>]*>/g)].map(m=>m[0]).find(tag=>tag.includes('M45.6943 0.5'));
-assert.ok(glassOutline&&glassOutline.includes('fill="none"'),'Oxygen helmet outline must stay unfilled over the gradient face');
+assert.equal(vm.runInContext("decorationCatalog.suit.some(item=>item.id==='fish-god-suit')",context),false);
+
+const gold=presets.find(p=>p.id==='ivory-suit').applied;
+assert.equal(gold.skin,'yellow-color-skin');assert.equal(gold.helmet,'gold-crown');assert.equal(gold.cape,'crimson-cape');

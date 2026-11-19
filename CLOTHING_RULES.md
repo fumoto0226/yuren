@@ -950,3 +950,17 @@
 - 袖口与护腕手套等部件重叠时，按交接处的实际收口宽度决定层序：**谁收口窄，谁在下面；较宽的一层盖住较窄的一层**。不能一律让衣袖盖手套，也不能只凭所属分类或同款其他配色决定。
 - 忍者上衣的手腕束带比护腕手套窄，与`batfish-gloves`同时穿戴时，护腕手套必须盖住束带的填色、网纹、黑边及袖口线。`teeStyles['ninja-shirt'].gauntletOverSleeve`声明这一版型关系，由`updateGloveSleeveOrder`整体调整`innerSleeve`；普通行者/袈裟配色不继承此标记。
 - 新增或修改收束袖口时须核对护腕的相对宽度，并配置对应层序；切回宽袖、其他手套或脱下手套后要恢复原顺序。保留外套袖层与整条手臂的前后遮挡规则，避免只盖填色却留下穿出的网纹或黑边。检查左右手、弯臂及反复切换穿戴，运行`node tests/sleeve-glove-layering.cjs`。
+
+- 阔腿长裤extra-wide款式及ivory-trousers退出目录，白金国王套装改穿现有white-loose-wide-trousers白色超阔长裤。白金上衣主白色与裤子统一为#FAFAF7，套装及单品缩略图同步。
+- 游泳圈新增red-white-swim-ring红白条纹与sheer-pink-swim-ring粉色半透明。条纹颜色由variant.stripe控制，半透明款仅填色使用fill-opacity .48且无条纹，勾线为不透明鲜粉色#F025A5，中间开口线两侧延长并向上弯起。透明前后片用互补区域裁切，避免重叠叠色，缩略图与运行时共用swimRingMarkup。
+
+- 浪客套装ronin-suit由三角草帽triangle-straw-hat、深红小围脖small-red-scarf、深蓝行者外套ronin-shirt、黑红宽松卫裤black-red-sweatpants、束带宽筒长靴ninja-worker-boots及现有佩剑paired-swords组成。所有部件可独立选择，不指定皮肤。草帽取Group 106.svg草帽轮廓及草编线，x减.1426/y加.9946对齐，按headRigid跟随头部。围脖复用小蓝围脖几何，深红#9E1B21。外套主色#244490、内衬#2D2D2D，复用行者外套版型。卫裤主体#141414、腰头/裤脚#9E1B21，复用宽松卫裤版型。束带宽筒长靴仅删除显示名中的“忍者”，保留ID与原套装引用。
+
+- 新增drink-cup饮料杯外套，按Group 684.svg对齐本站y加3.8916，复用杯身、红色曲线条纹、棕色臂孔和红吸管路径。杯口后沿整理为椭圆，前片杯口覆盖头部下沿，杯身纹样裁在同源杯身轮廓内。作为无袖外套保留手臂原有几何和前后遮挡，后片借用swimRingBack、前片借用swimRingFront，两者由drinkCupMarkup统一变形。外套与皮肤独立选择，缩略图同源生成。
+- 彩色皮肤新增olive-color-skin“黄绿色皮肤”，使用参考色#A1B00B，与已有green-color-skin绿色皮肤并存。
+
+- 饮料杯外套肩膀始终完整显示，左右armInFront保持开启且移除肩根填色/黑线遮罩。臂孔按Group 678.svg重建，红色底椭圆、偏移深棕椭圆和内描边共同裁在同一外椭圆内，左右镜像。杯口前后片共用drinkCupOpeningSource端点及弧形边界，头部露出处沿曲线裁切，避免直线遮罩和前后断口。
+
+- 饮料杯外套与所有颈部单品互斥，由applyDecorationSelection双向处理，后选者替换先选者并清除对应基础款状态；取消颈部单品不触发脱杯。杯子保留内搭选择及手臂袖子，衣身、领口、腰带和胸前装饰节点统一加cup-hidden-shirt隐藏类；脱杯移除该类，恢复各上衣原有显示状态。tests/drink-cup-selection.cjs检查互斥与套装组合。
+
+- 金色国王套装沿用ivory-suit内部ID，替换原白金国王显示名。按Mask group.svg，纯色黄色皮肤yellow-color-skin为#FFED29；新增gold-crown金色皇冠及solid-gold-cape纯色金披风，均#FFD500。套装组合这三件与原白色ivory-tunic上衣、white-loose-wide-trousers白色超阔裤、dark-boots深棕长靴。原皇冠和其他披风继续独立保留，新皇冠共用crownSources及隐藏三角鳍规则。

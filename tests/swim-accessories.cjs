@@ -50,9 +50,9 @@ assert.ok(r.goggleLayers.head.indexOf('strap')<r.goggleLayers.head.indexOf('tria
 assert.ok(r.goggleLayers.head.indexOf('strap')<r.goggleLayers.head.indexOf('triangle-line'));
 assert.deepEqual(Array.from(r.goggleLayers.front),['lens','highlight','rim']);
 for(const {root} of r.layers)assert.ok(root.indexOf('outfit')<root.indexOf('goggles-front'));
-assert.equal(r.selection.cape,'gourd');assert.equal(r.selection.outerwear,'pink-striped-swim-ring');
+assert.equal(r.selection.cape,'gourd');assert.equal(r.selection.outerwear,'sheer-pink-swim-ring');
 for(const id of ['red-baseball-cap','blue-baseball-cap','green-baseball-cap','black-baseball-cap','yellow-baseball-cap','white-baseball-cap','blue-diving-goggles','pink-diving-goggles','duck-swim-ring','pink-striped-swim-ring'])assert.ok(fs.existsSync('svg/'+id+'.svg'));
-console.log('Swim accessories: 6 caps, 2 goggles, 2 independent outerwear rings; finite geometry across 18 size/drag cases and rear/front layering in four limb/sleeveless cases.');
+console.log('Swim accessories: 6 caps, 2 goggles, 4 independent outerwear rings; finite geometry across 18 size/drag cases and rear/front layering in four limb/sleeveless cases.');
 
 for(const id of ['duck-swim-ring','pink-striped-swim-ring']){
  const markup=vm.runInContext(`swimRingMarkup((x,y)=>({x,y}),'${id}',true)`,c);

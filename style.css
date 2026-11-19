@@ -27,7 +27,7 @@ main::before { content: ""; position: absolute; z-index: -1; inset: 64.4% 0 0; b
 .style-expand:hover, .style-expand[aria-expanded="true"] { background: var(--blue); }
 .style-color-count { position: absolute; top: 5px; right: 5px; pointer-events: none; color: #427da6; font-size: 10px; }
 .decoration-suit-dots { position: absolute; top: 8px; left: 7px; display: flex; flex-direction: column; gap: 3px; }
-.decoration-suit-dots i { width: 5px; height: 5px; border-radius: 50%; background: #86ceff; }
+.decoration-suit-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--category-color, var(--blue)); }
 .decoration-group-label { grid-column: 1 / -1; padding-top: 8px; color: #647b8c; font-size: 12px; }
 .decoration-disabled-label { display: flex; align-items: center; gap: 8px; }
 .decoration-disabled-label::before, .decoration-disabled-label::after { content: ""; height: 1px; background: #c4d8e5; flex: 1; }
@@ -106,9 +106,9 @@ main::before { content: ""; position: absolute; z-index: -1; inset: 64.4% 0 0; b
 @media (prefers-reduced-motion: reduce) { .decoration-variant-menu { animation: none; } }
 .variant-menu-heading { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 1px 3px 9px; font-size: 13px; }
 .variant-menu-heading button { border: 0; background: transparent; cursor: pointer; font-size: 21px; color: #777; }
-.variant-menu-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-content: start; gap: 7px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #bde1f9 transparent; }
-.variant-menu-options .decoration-option { border: 1px solid #ddd; border-radius: 5px; background: #fff; min-height: 100px; width: 100%; }
-.variant-menu-options .decoration-option[aria-pressed="true"] { border-color: #222; background: #eee; }
+.variant-menu-options { display: grid; grid-template-columns: repeat(4,var(--variant-card-width, 90px)); align-content: start; gap: 7px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #bde1f9 transparent; }
+.variant-menu-options .decoration-option { border: 1px solid transparent; border-radius: 0; background: var(--ice); min-height: var(--variant-card-height, 123px); height: var(--variant-card-height, 123px); width: var(--variant-card-width, 90px); }
+.variant-menu-options .decoration-option[aria-pressed="true"] { border-color: transparent; background: #dcefff; }
 @media(max-width:700px) { .decoration-style-card { flex: 0 0 96px; } .decoration-style-card > .decoration-option { width: 100%; } .decoration-group-label { flex: 0 0 60px; align-content: center; } }
 
 
@@ -157,3 +157,68 @@ main::before { content: ""; position: absolute; z-index: -1; inset: 64.4% 0 0; b
 
 .body-control { display: grid; gap: 4px; }
 .control-label { display: flex; align-items: center; justify-content: space-between; }
+
+/* The drink cup exposes only the sleeves of an inner shirt. */
+.cup-hidden-shirt { display: none !important; }
+
+.color-category-toolbar { position: absolute; left: calc(100% + 24px); top: -1px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.color-category-toolbar > button { display: flex; align-items: center; gap: 10px; border: 1.5px solid #111; background: #fff; padding: 7px 12px; font: inherit; }
+.color-category-preview { display: flex; gap: 4px; max-width: 120px; flex-wrap: wrap; }
+.color-category-preview i { width: 13px; height: 13px; border-radius: 3px; border: 1px solid #0002; }
+.color-category-panel, .color-category-picker { position: fixed; z-index: 1100; background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 16px; box-shadow: 0 8px 28px #0002; }
+.color-category-panel { top: 86px; left: calc(var(--rail) + 25px); width: min(380px, calc(100vw - 32px)); max-height: 70vh; overflow: auto; }
+.color-category-panel[hidden] { display: none; }
+.color-category-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.color-category-heading button { font-size: 24px; border: 0; background: none; color: #777; }
+.color-category-form, .color-category-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.color-category-form input[type=color], .color-category-row input[type=color] { width: 35px; height: 34px; padding: 2px; border: 1px solid #ddd; background: white; flex: 0 0 35px; }
+.color-category-form input:not([type=color]), .color-category-row input:not([type=color]) { min-width: 0; width: 100%; padding: 7px; border: 1px solid #ddd; border-radius: 4px; }
+.color-category-form button, .color-category-row button, .color-category-picker > button { padding: 7px 9px; border: 1px solid #ddd; border-radius: 4px; background: #fff; white-space: nowrap; }
+.color-category-form { border-top: 1px solid #eee; padding-top: 12px; margin-top: 16px; }
+.color-category-status { font-size: 12px; color: #666; }
+.card-category-swatch { position: absolute; left: 0; right: 0; bottom: 0; width: auto; height: 10px; border: 1px solid #7774; border-radius: 0; cursor: pointer; z-index: 2; }
+.card-category-swatch:focus-visible { outline: 2px solid #111; outline-offset: 3px; }
+.decoration-option:has(.card-category-swatch) { padding-bottom: 22px; }
+.decoration-style-card.has-color-category, .decoration-option.has-color-category { outline: 2px solid var(--category-color) !important; outline-offset: -2px; background: color-mix(in srgb, var(--category-color) 15%, white) !important; }
+.decoration-style-card.has-color-category > .decoration-option { background: transparent; }
+.color-category-picker { display: grid; gap: 5px; min-width: 170px; max-height: min(420px, 80vh); overflow: auto; padding: 10px; }
+.color-category-choice { display: flex; align-items: center; gap: 9px; text-align: left; }
+.color-category-choice i { width: 17px; height: 17px; border: 1px solid #ddd; border-radius: 3px; flex: 0 0 17px; }
+.color-category-choice[aria-pressed=true] { background: #edf5fb; border-color: #479ad7; }
+@media(max-width:700px) {
+ .color-category-toolbar { left: 0; top: calc(100% + 8px); }
+ .color-category-panel { left: 16px; top: 100px; }
+}
+.decoration-style-card.has-color-category > .decoration-option[aria-pressed="true"] { outline: none; background: transparent; }
+
+/* Compact color-category controls with a single horizontal preview row. */
+.color-category-preview { flex-wrap: nowrap; max-width: none; flex-shrink: 0; }
+.color-category-preview i { flex: 0 0 11px; width: 11px; height: 11px; }
+.color-category-toolbar > button { flex-shrink: 0; }
+.color-category-panel { width: min(300px, calc(100vw - 32px)); padding: 12px; font-size: 12px; }
+.color-category-heading { margin-bottom: 10px; }
+.color-category-heading button { font-size: 20px; }
+.color-category-form, .color-category-row { gap: 6px; margin: 6px 0; }
+.color-category-form input[type=color], .color-category-row input[type=color] { width: 28px; height: 28px; flex-basis: 28px; }
+.color-category-form input:not([type=color]), .color-category-row input:not([type=color]) { padding: 5px; font-size: 12px; }
+.color-category-form button, .color-category-row button, .color-category-picker > button { padding: 5px 7px; font-size: 12px; }
+.color-category-form { padding-top: 9px; margin-top: 12px; }
+.color-category-picker { min-width: 138px; padding: 7px; gap: 4px; font-size: 12px; }
+.color-category-choice { gap: 7px; }
+.color-category-choice i { width: 13px; height: 13px; flex-basis: 13px; }
+.color-category-delete-confirm { display: flex; gap: 4px; flex-shrink: 0; }
+.color-category-delete-confirm button { min-width: 26px; font-weight: 700; }
+.color-category-delete-confirm button:first-child { color: #b72b39; border-color: #dfaab0; }
+.color-category-transfer-actions { display: flex; gap: 5px; align-items: center; }
+.color-category-transfer-actions button { border: 1px solid #ddd; border-radius: 4px; background: #fff; font-size: 10px; padding: 5px; white-space: nowrap; }
+.color-category-heading > button { flex: 0 0 auto; }
+.color-category-import-preview { border-top: 1px solid #ddd; margin-top: 10px; padding-top: 7px; font-size: 11px; }
+.color-category-import-preview p { margin: 7px 0; line-height: 1.5; }
+.color-category-import-preview details { margin: 8px 0; }
+.color-category-import-preview ul { max-height: 130px; overflow: auto; padding-left: 18px; }
+.color-category-import-preview[hidden] { display: none; }
+.color-category-panel input:focus,
+.color-category-panel input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}

@@ -30,7 +30,6 @@ const art = vm.runInContext(`(() => {
     angel:{wingVariants:angelWingVariants,top:angelVestMarkup(warp),halo:angelHaloSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))}))},
     largePartyHat:largePartyHatSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),
     oxygenHelmet:{fill:HELMET_GLASS,opacity:HELMET_GLASS_OPACITY},
-    godRing:{back:swimRingMarkup(warp,'pink-striped-swim-ring',false,'god-ring'),front:swimRingMarkup(warp,'pink-striped-swim-ring',true,'god-ring')},
     swim:{caps:capVariants,goggles:divingGoggleVariants,rings:swimRingVariants,cap:capSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),goggle:divingGoggleSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),ring:Object.fromEntries(Object.keys(swimRingVariants).map(id=>[id,swimRingMarkup(warp,id,false,'thumb-'+id)+swimRingMarkup(warp,id,true,'thumb-'+id)]))},
     reference595:{bandVariants:eyeBandVariants,band:eyeBandSpecs.map(s=>({...s,source:transformPath(s.source,(x,y)=>warp(x,y,s.role))})),gourd:gourdParts.map(s=>({...s,source:backAccessoryPath(s,warp)})),slippers:legs.map((s,i)=>'<path d="'+s.bootFill+'" fill="#C5C5C5"/><path d="'+s.bootOutline+'" fill="none" stroke="black" stroke-width="1"/>'+slipperMarkup(s,i?'right':'left')).join('')},
     reference594:{scar:garmentPath(scarSource,warp),earrings:teardropPath(warp),swords:pairedSwordParts.map(spec=>({...spec,source:backAccessoryPath(spec,warp)})),waist:spaceWaistMarkup(warp)},
@@ -456,7 +455,7 @@ const ivoryTop=art.shirt.arms.map((arm,i)=>clippedTube({...arm,hose:arm.hose.sli
  +`<path d="${vm.runInContext('ivorySleeveEdges(thumbArm,true)',Object.assign(context,{thumbArm:arm}))}" fill="${art.colors.royalWhite}"/>`
  +line(vm.runInContext('ivorySleeveEdges(thumbArm)+cuffPath(thumbArm,28,ivorySleeveWidth(28))+cuffPath(thumbArm,31)',Object.assign(context,{thumbArm:arm})))).join('')
  +`<path d="${art.ivoryBody}" fill="${art.colors.royalWhite}"/>`+line(art.ivorySides)+line(art.shirt.top)+line(art.shirt.hem)+ivoryDetails('shirt');
-const ivoryPants=widePantsThumbnail('ivory-trousers',8,vm.runInContext('Array.from({length:32},(_,i)=>wideLegExtraWidth(i,8))',context),'2 108 98 80');
+const ivoryPants=widePantsThumbnail('white-loose-wide-trousers',10.5,vm.runInContext('Array.from({length:32},(_,i)=>wideLegExtraWidth(i,10.5))',context),'2 108 98 80');
 // The kings wear the tall boots in their near-black brown.
 const kingBootFeet=art.pants.legs.map(leg=>
   `<path d="${leg.bootFill}" fill="${art.colors.darkBoots}"/>`+line(leg.bootOutline)).join('');
@@ -701,9 +700,9 @@ const thumbnails = {
  'batfish-gloves':svg('-2 88 26 27',`<path d="${art.batGloves[0].fill}" fill="${art.colors.batBlack}"/>`+line(art.batGloves[0].outline)+`<path d="${art.gloves.fill}" fill="${art.colors.batBlack}"/>`+line(art.gloves.outline)),
  'batfish-suit':svg('-2 0 104 198',batCape+royalHeadContent+batCowl+originalPaths[8][0]+(original.match(/<ellipse\b[^>]*\/>/)?.[0]||'')+batPants+batBoots+batTop+batHands),
   'ivory-tunic':svg('-8 53 116 63',ivoryTop),
-  'ivory-trousers':ivoryPants,
+
   'crimson-cape':svg('2 50 92 137',backDetails('crimson-cape')),
-  'ivory-suit':svg('-8 8 116 190',backDetails('crimson-cape')+royalCrownContent+royalHeadContent+kingBootFeet+ivoryPants.replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'')+ivoryTop),
+  'ivory-suit':svg('-8 8 116 190',backDetails('crimson-cape')+royalCrownContent.replaceAll(art.colors.crown,'#FFD500')+royalHeadContent.replace(sharkFlesh,'#FFED29')+kingBootFeet+ivoryPants.replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'')+ivoryTop),
   'royal-trousers':royalPantsIcon,
   'suit-jacket':svg('-2 53 104 63',suitJacketContent),
   'suit-trousers':svg('8 108 86 80',suitPantsContent),
@@ -857,10 +856,6 @@ const fisherVest=art.greenVest.map(d=>`<path d="${d}" fill="#278b20" stroke="bla
 const brownFisherBoots=art.worker.extraBoots['brown-worker-boots'];
 // Reuse the existing tucked trouser silhouette where wide boot shafts cover the hems.
 const fisherTrousers=blueWorkerTucked.replaceAll('#1d3b68','#f66b19');
-const oxygenBack=frogPaths[0].replace(/fill(?:-opacity)?="[^"]*"/g,'').replace('<path ',`<path fill="${art.oxygenHelmet.fill}" fill-opacity="${art.oxygenHelmet.opacity}" `);
-const oxygenFront=frogPaths.slice(12,15).map(tag=>/\bfill=/.test(tag)?tag:tag.replace('<path ','<path fill="none" ')).join('')+line('M26.1046 56.4524L67.7274 55.0466');
-const rainbowGodSkin=skinBody('url(#rainbow-skin)',false,false,false,'url(#rainbow-skin-horn)');
-thumbnails['fish-god-suit']=svg('-5 -4 115 203','<defs>'+art.rainbowSkinDefs+'</defs>'+art.godRing.back+oxygenBack+rainbowGodSkin+art.godRing.front+oxygenFront);
 thumbnails['farmer-suit']=svg('-4 9 108 189',skinBody('#C5C5C5')+stripSvg(jumpsuitThumbnail(art.colors.jumpsuit,'farmer-jumpsuit'))+redFarmerScarf);
 thumbnails['fisher-suit']=svg('-9 5 119 193',skinBody('#438FF1',true)+fisherTrousers+brownFisherBoots+fisherVest+fisherHat);
 thumbnails['working-fish-suit']=svg('-4 9 108 189',skinBody('#37B2EC')+stripSvg(teeThumbnail('#DE0C0C',17,3,'working-fish-tee'))+stripSvg(jumpsuitThumbnail(art.colors.navyJumpsuit,'working-fish-jumpsuit')));
@@ -868,8 +863,31 @@ for(const id of Object.keys(capePalettes)){
   thumbnails[id]=svg(id==='gourd'?'-1 23 118 129':id==='paired-swords'?'-12 92 126 59':art.angel.wingVariants[id]?'-23 46 141 51':id==='dual-swords'?'-6 18 106 101':id==='greatsword'?'-28 0 134 180':id==='kappa-shell'?'25 48 57 81':'2 50 92 137',backDetails(id));
 }
 
+
+thumbnails['drink-cup']=svg('-2 -2 104 129',vm.runInContext("(()=>{const w=buildWarp({body:100,width:100,arms:100,legs:100,head:100});return drinkCupMarkup(w,false,'cup-thumb')+drinkCupMarkup(w,true,'cup-thumb');})()",context));
+const juiceCup=vm.runInContext("(()=>{const w=buildWarp({body:100,width:100,arms:100,legs:100,head:100});return {back:drinkCupMarkup(w,false,'juice-thumb'),front:drinkCupMarkup(w,true,'juice-thumb')};})()",context);
+const juiceArms=art.tee.arms.map(arm=>tube(arm,'#A1B00B')).join('')+spaceHands.replaceAll('#F96C20','#A1B00B');
+thumbnails['orange-juice-suit']=svg('-3 -2 110 200',juiceCup.back+skinBody('#A1B00B')+thumbnails['white-boxers'].replace(/^<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'')+juiceCup.front+juiceArms);
+thumbnails['gold-crown']=thumbnails.crown.replaceAll(art.colors.crown,'#FFD500');
+delete thumbnails.crown;
+const roninHat=vm.runInContext(`strawHatSpecs.map(spec=>({...spec,source:transformPath(spec.source,(x,y)=>buildWarp({body:100,width:100,arms:100,legs:100,head:100})(x,y,spec.role))}))`,context).map(kappaTag).join('');
+const roninScarf=art.walker.scarf.map(spec=>kappaTag({...spec,fill:spec.fill==='none'?'none':'#9E1B21'})).join('');
+const roninDetails=vm.runInContext("walkerShirtMarkup(buildWarp({body:100,width:100,arms:100,legs:100,head:100}),'#020202')",context);
+const roninShirt=walkerShirt.replace(art.walker.details,roninDetails).replaceAll('#FFD35B','#244490').replaceAll('#F4F4F4','#2D2D2D');
+const roninPants=ninjaSuitPants.replaceAll('#006089','#141414').replace(art.space.waist.replaceAll('#10C9E9','#020202'),art.space.waist.replaceAll('#10C9E9','#9E1B21'));
+const warriorBoots=art.space.legs.map(leg=>`<path d="${leg.bootFill}" fill="${art.colors.batBlack}"/>`+line(leg.bootOutline)).join('');
+const warriorHair=art.narutoItems.hair.map(spec=>kappaTag({...spec,fill:spec.fill==='none'?'none':art.narutoItems.hairVariants['black-spiky-hair'].color})).join('');
+Object.assign(thumbnails,{
+ 'warrior-suit':svg('-30 -2 140 202',backDetails('greatsword')+skinBody('#dda579',true,true)+line(art.muscleLines)+warriorBoots+spacePants.replaceAll('#FF8215','#373737').replaceAll('#10C9E9','#909090')+warriorHair),
+ 'triangle-straw-hat':svg('43 -2 44 68',roninHat),
+ 'small-red-scarf':svg('10 43 76 35',roninScarf),
+ 'ronin-shirt':svg('-3 49 107 67',roninShirt),
+ 'black-red-sweatpants':svg('0 107 104 84',spacePants.replaceAll('#FF8215','#141414').replaceAll('#10C9E9','#9E1B21')),
+ 'ronin-suit':svg('-9 -2 138 200',backDetails('paired-swords')+skinBody('#dda579',true,true)+line(art.muscleLines)+roninPants+roninShirt+roninScarf+roninHat),
+});
+
 for (const [name, content] of Object.entries(thumbnails)) {
-  const filename=art.coloredSkinVariants[name]||art.swim.caps[name]||art.swim.goggles[name]||art.swim.rings[name]||art.reference595.bandVariants[name]||art.angel.wingVariants[name]||art.worker.extraBoots[name]||art.muscleVariants[name]||art.narutoItems.longVariants[name]||art.narutoItems.topknotVariants[name]||art.narutoItems.hairVariants[name]||art.denimVariants[name]||art.workwearVariants[name]||art.boxerVariants[name]||art.briefVariants[name]||art.thongVariants[name]||shortFlares[name]?name:['ninja-hood','ninja-shirt','ninja-sweatpants','ninja-worker-boots','ninja-suit','prayer-beads','lotus-hat','monk-robe','monk-suit','white-sweatpants','monkey-skin','golden-circlet','small-blue-scarf','walker-shirt','walker-sweatpants','walker-suit','gray-plain-shoes','chef-hat','white-chef-jacket','chef-suit','yellow-bow-hair','pink-heart-bra','gyaru-suit','gyaru-skin','tricolor-long-socks-shoes','striped-long-socks-shoes','sponge-skin','fish-god-suit','farmer-suit','fisher-suit','working-fish-suit','red-cropped-tee-2','large-party-hat','blue-eye-band','gourd','navy-slippers','scar','teardrop-earrings','paired-swords','black-gray-sweatpants','beach-suit','shell-top','seaweed-pants','lipstick-fish','pink-ribbon-hair','mosaic-top','mosaic-pants','streaker-suit','angel-suit','angel-halo','angel-wings','angel-vest','white-loose-wide-trousers','flesh-8','flesh-7','muscle-skin','yellow-spiky-hair','navy-sandals','space-helmet','space-shirt','space-trousers','orange-shoes','space-gloves','astronaut-suit','flesh-6','topknot-hair','charcoal-blazer','colorblock-shoes','topknot-suit','hypnotic','white-tie-shirt','dark-gray-slight-wide-trousers','makima-suit','long-braid-hair','flesh-5','secondary-hat','secondary-jacket','black-slight-wide-trousers','brown-shoes','secondary-suit','student-long-socks-shoes','flesh-4','student-hat','student-jacket','student-shorts','student-shoes','student-suit','little-yellow-fish','white-worker-helmet','blue-worker-jacket','blue-worker-trousers','gray-worker-boots','blue-worker-suit','flesh-3','worker-helmet','worker-jacket','worker-trousers','worker-boots','worker-suit','kappa','kappa-hair','kappa-suit','flesh-2','round-glasses','black-turtleneck-tee','gray-sneakers','jobs-suit','cigarette','large-ripped-denim-jeans','denim-jumpsuit','washed-denim-jeans','ripped-denim-jeans','denim-jeans','cinched-long-sleeve','aloha-open-jacket','aloha-open-long-jacket','aloha-long-jacket','aloha-jacket','default-skin','alien-skin','clown-skin','party-hat','clown-suit','flesh-skin','shark-hood','shark-suit','pochita','chainsaw','pochita-suit','batfish-cowl','batfish-armor','batfish-trousers','batfish-boots','batfish-gloves','batfish-suit',...Object.keys(capePalettes),'ivory-tunic','ivory-trousers','crimson-cape','ivory-suit','royal-trousers','suit-jacket','suit-trousers','black-dress-shoes','navy-suit','blue-vest','green-vest','yellow-hat','crown','yellow-tee',
+  const filename=['gold-crown','orange-juice-suit','warrior-suit','drink-cup','triangle-straw-hat','small-red-scarf','ronin-shirt','black-red-sweatpants','ronin-suit'].includes(name)||art.coloredSkinVariants[name]||art.swim.caps[name]||art.swim.goggles[name]||art.swim.rings[name]||art.reference595.bandVariants[name]||art.angel.wingVariants[name]||art.worker.extraBoots[name]||art.muscleVariants[name]||art.narutoItems.longVariants[name]||art.narutoItems.topknotVariants[name]||art.narutoItems.hairVariants[name]||art.denimVariants[name]||art.workwearVariants[name]||art.boxerVariants[name]||art.briefVariants[name]||art.thongVariants[name]||shortFlares[name]?name:['ninja-hood','ninja-shirt','ninja-sweatpants','ninja-worker-boots','ninja-suit','prayer-beads','lotus-hat','monk-robe','monk-suit','white-sweatpants','monkey-skin','golden-circlet','small-blue-scarf','walker-shirt','walker-sweatpants','walker-suit','gray-plain-shoes','chef-hat','white-chef-jacket','chef-suit','yellow-bow-hair','pink-heart-bra','gyaru-suit','gyaru-skin','tricolor-long-socks-shoes','striped-long-socks-shoes','sponge-skin','farmer-suit','fisher-suit','working-fish-suit','red-cropped-tee-2','large-party-hat','blue-eye-band','gourd','navy-slippers','scar','teardrop-earrings','paired-swords','black-gray-sweatpants','beach-suit','shell-top','seaweed-pants','lipstick-fish','pink-ribbon-hair','mosaic-top','mosaic-pants','streaker-suit','angel-suit','angel-halo','angel-wings','angel-vest','white-loose-wide-trousers','flesh-8','flesh-7','muscle-skin','yellow-spiky-hair','navy-sandals','space-helmet','space-shirt','space-trousers','orange-shoes','space-gloves','astronaut-suit','flesh-6','topknot-hair','charcoal-blazer','colorblock-shoes','topknot-suit','hypnotic','white-tie-shirt','dark-gray-slight-wide-trousers','makima-suit','long-braid-hair','flesh-5','secondary-hat','secondary-jacket','black-slight-wide-trousers','brown-shoes','secondary-suit','student-long-socks-shoes','flesh-4','student-hat','student-jacket','student-shorts','student-shoes','student-suit','little-yellow-fish','white-worker-helmet','blue-worker-jacket','blue-worker-trousers','gray-worker-boots','blue-worker-suit','flesh-3','worker-helmet','worker-jacket','worker-trousers','worker-boots','worker-suit','kappa','kappa-hair','kappa-suit','flesh-2','round-glasses','black-turtleneck-tee','gray-sneakers','jobs-suit','cigarette','large-ripped-denim-jeans','denim-jumpsuit','washed-denim-jeans','ripped-denim-jeans','denim-jeans','cinched-long-sleeve','aloha-open-jacket','aloha-open-long-jacket','aloha-long-jacket','aloha-jacket','default-skin','alien-skin','clown-skin','party-hat','clown-suit','flesh-skin','shark-hood','shark-suit','pochita','chainsaw','pochita-suit','batfish-cowl','batfish-armor','batfish-trousers','batfish-boots','batfish-gloves','batfish-suit',...Object.keys(capePalettes),'ivory-tunic','ivory-trousers','crimson-cape','ivory-suit','royal-trousers','suit-jacket','suit-trousers','black-dress-shoes','navy-suit','blue-vest','green-vest','yellow-hat','crown','yellow-tee',
     'patched-tee','gray-scoop-tee','black-cropped-tee','coral-tee','loose-tee','loose-long-sleeve','red-triangle','red-shorts','red-briefs',
     'pink-shorts','orange-shorts','black-shorts','skirt','milk-frog',
     'red-thong','wide-pants',
